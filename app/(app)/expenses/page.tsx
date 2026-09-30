@@ -1,3 +1,4 @@
+import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { requireUserContext } from "@/lib/data/context";
 import { dollarsToCents, formatCents, localMonthString } from "@/lib/calculations";
@@ -9,7 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 export default async function ExpensesPage() {
   const [ctx, { intl, m }] = await Promise.all([requireUserContext(), getI18n()]);
-  if (!ctx) return null;
+  if (!ctx) redirect("/login");
 
   const supabase = await createClient();
   // expense_date is a calendar date, so "this month" is a yyyy-mm prefix

@@ -1,7 +1,9 @@
+import { redirect } from "next/navigation";
 import { Download } from "lucide-react";
 
 import { createClient } from "@/lib/supabase/server";
 import { requireUserContext } from "@/lib/data/context";
+import { getOrCreateUserSettings } from "@/lib/data/settings";
 import { getI18n } from "@/lib/i18n/server";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -12,15 +14,16 @@ import { DeleteAccountDialog } from "@/components/settings/delete-account-dialog
 
 export default async function SettingsPage() {
   const [ctx, { m }] = await Promise.all([requireUserContext(), getI18n()]);
-  if (!ctx) return null;
+  if (!ctx) redirect("/login");
 
   const supabase = await createClient();
-  const [{ data: profile }, { data: settings }] = await Promise.all([
+  const [{ data: profile }, settings] = await Promise.all([
     supabase.from("profiles").select("*").eq("id", ctx.userId).maybeSingle(),
-    supabase.from("user_settings").select("*").eq("user_id", ctx.userId).maybeSingle(),
+    getOrCreateUserSettings(supabase, ctx.userId),
   ]);
 
-  if (!profile || !settings) return null;
+  // Never a blank page: let the (app) error boundary explain and offer a retry.
+  if (!profile || !settings) throw new Error("Could not load account settings.");
 
   return (
     <div className="max-w-2xl space-y-6">

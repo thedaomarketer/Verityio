@@ -1,3 +1,4 @@
+import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { requireUserContext } from "@/lib/data/context";
 import {
@@ -46,7 +47,7 @@ export default async function ReportsPage({
   searchParams: Promise<{ start?: string; end?: string }>;
 }) {
   const [params, ctx, { locale, intl, m }] = await Promise.all([searchParams, requireUserContext(), getI18n()]);
-  if (!ctx) return null;
+  if (!ctx) redirect("/login");
 
   const fmtHours = (minutes: number) => formatMinutesAsHours(minutes, locale);
   const fmtCents = (cents: number) => formatCents(cents, ctx.currency, intl);

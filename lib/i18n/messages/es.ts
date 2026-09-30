@@ -126,7 +126,7 @@ export const es: Messages = {
     recentActivity: "Actividad reciente",
     nothingRecorded: "Aún no hay nada registrado.",
     completedShift: "Turno completado",
-    nextPayday: "Próximo pago: {date} · {job}",
+    nextPayday: "Próximo pago",
   },
 
   time: {
@@ -440,6 +440,8 @@ export const es: Messages = {
     send: "Enviar",
     couldntRespond: "El asistente no pudo responder.",
     connectionError: "El asistente no pudo responder. Revisa tu conexión e inténtalo de nuevo.",
+    notConfigured:
+      "El asistente IA aún no está activado en este espacio. Tus horas, ganancias e informes funcionan sin él.",
   },
 
   help: {

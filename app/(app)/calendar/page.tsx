@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
 import { createClient } from "@/lib/supabase/server";
@@ -16,7 +17,7 @@ export default async function CalendarPage({
   searchParams: Promise<{ month?: string }>;
 }) {
   const [params, ctx, { intl, m }] = await Promise.all([searchParams, requireUserContext(), getI18n()]);
-  if (!ctx) return null;
+  if (!ctx) redirect("/login");
 
   // `month` is a local "yyyy-mm"; its bounds are midnight on the 1st in the
   // user's zone -- never `new Date("yyyy-mm-01")`, which the server reads as UTC.

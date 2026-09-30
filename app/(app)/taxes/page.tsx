@@ -1,5 +1,7 @@
+import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { requireUserContext } from "@/lib/data/context";
+import { getOrCreateUserSettings } from "@/lib/data/settings";
 import { getI18n } from "@/lib/i18n/server";
 import { getAnnualIncomeEstimate, getPayPeriodStatements, getUpcomingPaydays } from "@/lib/data/tax";
 import type { JurisdictionSelection } from "@/lib/calculations/tax";
@@ -11,21 +13,17 @@ import { TaxBreakdownCard } from "@/components/taxes/tax-breakdown-card";
 
 export default async function TaxesPage() {
   const [ctx, { m }] = await Promise.all([requireUserContext(), getI18n()]);
-  if (!ctx) return null;
+  if (!ctx) redirect("/login");
 
   const supabase = await createClient();
-  const [{ data: settings }, incomeEstimate, paydays, statements] = await Promise.all([
-    supabase
-      .from("user_settings")
-      .select("tax_country, tax_region, tax_city")
-      .eq("user_id", ctx.userId)
-      .maybeSingle(),
+  const [settings, incomeEstimate, paydays, statements] = await Promise.all([
+    getOrCreateUserSettings(supabase, ctx.userId),
     getAnnualIncomeEstimate(ctx.userId),
     getUpcomingPaydays(ctx.userId, ctx.timezone),
     getPayPeriodStatements(ctx.userId, ctx.timezone),
   ]);
 
-  if (!settings) return null;
+  if (!settings) throw new Error("Could not load tax settings.");
 
   const jurisdiction: JurisdictionSelection | null =
     settings.tax_country && settings.tax_region

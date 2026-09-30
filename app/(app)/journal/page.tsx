@@ -1,3 +1,4 @@
+import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { requireUserContext } from "@/lib/data/context";
 import { getI18n } from "@/lib/i18n/server";
@@ -6,7 +7,7 @@ import { JournalTimeline } from "@/components/journal/journal-timeline";
 
 export default async function JournalPage() {
   const [ctx, { m }] = await Promise.all([requireUserContext(), getI18n()]);
-  if (!ctx) return null;
+  if (!ctx) redirect("/login");
 
   const supabase = await createClient();
   const [{ data: entries }, { data: jobs }] = await Promise.all([

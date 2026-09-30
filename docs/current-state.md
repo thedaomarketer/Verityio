@@ -134,7 +134,7 @@ Verified directly against the live Supabase project (`WorkLedger`,
 default settings row, the one-active-shift constraint rejects a duplicate
 clock-in, and RLS correctly hides one user's jobs/shifts/breaks from another
 user while still exposing their own. `npm run lint`, `npm run typecheck`,
-`npm test` (141/141), and `npm run build` all pass. The charts and quick-create
+`npm test` (144/144), and `npm run build` all pass. The charts and quick-create
 menu were also verified visually (desktop + mobile viewports, hover/focus
 tooltips) -- and the French/Spanish UI, time zone picker, and time zone
 prompt at phone width -- via a temporary unauthenticated preview route +
@@ -167,6 +167,9 @@ exercise the authenticated app directly.
 - **AI Assistant**: non-streaming (shows a "Thinking..." indicator, not
   token-by-token output), no conversation switcher (only the most recent
   conversation is resumed), and no rate limiting on the chat endpoint yet.
+- **AI Assistant in production**: needs `ANTHROPIC_API_KEY` in the Vercel
+  project; until it's set, `/assistant` shows a "not switched on yet"
+  notice instead of a chat that can only fail.
 - **Translations**: French and Spanish were written in-house, not by a
   professional translator; province/state/city names in tax lines stay in
   English. Supabase's own auth error messages (e.g. on signup) and emails

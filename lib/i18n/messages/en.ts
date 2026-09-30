@@ -131,7 +131,7 @@ export const en = {
     recentActivity: "Recent activity",
     nothingRecorded: "Nothing recorded yet.",
     completedShift: "Completed a shift",
-    nextPayday: "Next payday: {date} · {job}",
+    nextPayday: "Next payday",
   },
 
   time: {
@@ -439,6 +439,8 @@ export const en = {
     send: "Send",
     couldntRespond: "The assistant couldn't respond.",
     connectionError: "The assistant couldn't respond. Check your connection and try again.",
+    notConfigured:
+      "The AI assistant isn't switched on for this workspace yet. Your hours, earnings, and reports all work without it.",
   },
 
   help: {

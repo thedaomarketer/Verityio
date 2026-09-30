@@ -1,4 +1,4 @@
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 
 import { createClient } from "@/lib/supabase/server";
 import { requireUserContext } from "@/lib/data/context";
@@ -23,7 +23,7 @@ export default async function JobDetailPage({
 }) {
   const { id } = await params;
   const [ctx, { locale, intl, m }] = await Promise.all([requireUserContext(), getI18n()]);
-  if (!ctx) return null;
+  if (!ctx) redirect("/login");
 
   const supabase = await createClient();
   const { data: job } = await supabase

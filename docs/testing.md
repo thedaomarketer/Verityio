@@ -68,6 +68,9 @@ zone and language, and payday countdown labels.
 
 `tests/unit/safe-redirect.test.ts` — the open-redirect guard.
 
+`tests/unit/supabase-env.test.ts` — the admin key falls back to
+`SUPABASE_SECRET_KEY` when `SUPABASE_SERVICE_ROLE_KEY` is blank.
+
 Run: `npm test` (or `npm run test:watch`).
 
 ## Database-level verification

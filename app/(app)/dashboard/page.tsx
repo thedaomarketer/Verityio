@@ -1,3 +1,5 @@
+import { redirect } from "next/navigation";
+
 import { getDashboardData } from "@/lib/data/dashboard";
 import { formatCents } from "@/lib/calculations";
 import { formatMinutesAsHours } from "@/lib/format";
@@ -12,7 +14,7 @@ import { NextPaydayCard } from "@/components/dashboard/next-payday-card";
 
 export default async function DashboardPage() {
   const [data, { locale, intl, m }] = await Promise.all([getDashboardData(), getI18n()]);
-  if (!data) return null;
+  if (!data) redirect("/login");
   const fmtHrs = (minutes: number) => formatMinutesAsHours(minutes, locale);
 
   const today = new Date();

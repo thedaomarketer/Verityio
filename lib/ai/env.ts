@@ -10,3 +10,8 @@ export function getAnthropicApiKey(): string {
   }
   return value;
 }
+
+/** Whether the assistant can run at all (the page shows a setup notice instead of a chat that can only fail). */
+export function isAssistantConfigured(): boolean {
+  return Boolean(process.env.ANTHROPIC_API_KEY?.trim());
+}

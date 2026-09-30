@@ -144,16 +144,18 @@ export async function updatePreferencesAction(
   } = await supabase.auth.getUser();
   if (!user) return { error: m.errors.mustSignIn };
 
-  const { error } = await supabase
-    .from("user_settings")
-    .update({
+  // Upsert, not update: an update on a missing row "succeeds" while saving nothing.
+  const { error } = await supabase.from("user_settings").upsert(
+    {
+      user_id: user.id,
       week_starts_on: parsed.data.weekStartsOn,
       default_break_minutes: parsed.data.defaultBreakMinutes,
       overtime_enabled: parsed.data.overtimeEnabled,
       overtime_threshold_minutes: Math.round(parsed.data.overtimeThresholdHours * 60),
       notifications_enabled: parsed.data.notificationsEnabled,
-    })
-    .eq("user_id", user.id);
+    },
+    { onConflict: "user_id" }
+  );
 
   if (error) {
     return { error: m.errors.preferencesSaveFailed };
@@ -185,14 +187,15 @@ export async function updateTaxSettingsAction(
   } = await supabase.auth.getUser();
   if (!user) return { error: m.errors.mustSignIn };
 
-  const { error } = await supabase
-    .from("user_settings")
-    .update({
+  const { error } = await supabase.from("user_settings").upsert(
+    {
+      user_id: user.id,
       tax_country: parsed.data.taxCountry || null,
       tax_region: parsed.data.taxRegion || null,
       tax_city: parsed.data.taxCity || null,
-    })
-    .eq("user_id", user.id);
+    },
+    { onConflict: "user_id" }
+  );
 
   if (error) {
     return { error: m.errors.taxSaveFailed };
@@ -213,10 +216,13 @@ export async function deleteAccountAction(): Promise<ActionResult> {
 
   await logAudit({ userId: user.id, entityType: "account", entityId: user.id, action: "deleted" });
 
-  const admin = createAdminClient();
-  const { error } = await admin.auth.admin.deleteUser(user.id);
-
-  if (error) {
+  try {
+    const admin = createAdminClient();
+    const { error } = await admin.auth.admin.deleteUser(user.id);
+    if (error) throw error;
+  } catch (error) {
+    // Including a missing admin key: report it rather than crash the page.
+    console.error("Account deletion failed", error);
     return { error: m.errors.accountDeleteFailed };
   }
 

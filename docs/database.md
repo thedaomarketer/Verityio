@@ -60,7 +60,15 @@ Both were added in migration `00000000000018_locale_and_signup_timezone.sql`.
 `user_settings` row for every new signup. Since migration 18 it also seeds
 `timezone` and `locale` from the signup metadata the browser sends --
 validated inside the function (unknown zone -> `UTC`, unknown language ->
-`en`), because signup metadata is client-controlled. `EXECUTE` on this function is
+`en`), because signup metadata is client-controlled.
+
+Migration 18 accidentally dropped the `user_settings` insert, so accounts
+created between migrations 18 and 19 had no settings row (Settings and
+Pay & Taxes rendered blank for them). Migration 19 restores the insert and
+backfills the missing rows. As a second line of defense, pages read settings
+through `lib/data/settings.ts#getOrCreateUserSettings`, and the settings
+actions `upsert` rather than `update` (an update on a missing row reports
+success while saving nothing). `EXECUTE` on this function is
 revoked from `anon`/`authenticated`/`public` — it must only ever run as the
 trigger, never be callable directly as an RPC (this was flagged by the
 Supabase security linter and fixed; see migration `00000000000015`).

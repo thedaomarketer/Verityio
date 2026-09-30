@@ -26,7 +26,11 @@ the primary action from succeeding (see `lib/audit/log.ts`).
 - `NEXT_PUBLIC_SUPABASE_URL` / `NEXT_PUBLIC_SUPABASE_ANON_KEY`: safe to
   expose to the browser (that's what "publishable" means for Supabase).
 - `SUPABASE_SERVICE_ROLE_KEY`: server-only, never prefixed `NEXT_PUBLIC_`,
-  never imported outside `lib/supabase/admin.ts`. `.gitignore` excludes all
+  never imported outside `lib/supabase/admin.ts`. If it's unset or blank,
+  the `SUPABASE_SECRET_KEY` that the Vercel Supabase integration provisions
+  is used instead (`lib/supabase/env.ts`) -- production had the former
+  defined but empty, which silently broke audit logging and account
+  deletion. `.gitignore` excludes all
   `.env*` files except `.env.example`, which contains no real values.
 
 ## Database function hardening

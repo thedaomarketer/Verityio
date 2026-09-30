@@ -1,3 +1,4 @@
+import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { requireUserContext } from "@/lib/data/context";
 import { getI18n } from "@/lib/i18n/server";
@@ -10,7 +11,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 export default async function TimePage() {
   const [ctx, { m }] = await Promise.all([requireUserContext(), getI18n()]);
-  if (!ctx) return null;
+  if (!ctx) redirect("/login");
 
   const supabase = await createClient();
   const [{ data: jobs }, activeShift, recentShifts] = await Promise.all([
