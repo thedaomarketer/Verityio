@@ -2,6 +2,8 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { requireUserContext } from "@/lib/data/context";
 import { getOrCreateUserSettings } from "@/lib/data/settings";
+import { getHolidayLookup } from "@/lib/data/holidays";
+import { localDateString } from "@/lib/calculations";
 import { getI18n } from "@/lib/i18n/server";
 import { getAnnualIncomeEstimate, getPayPeriodStatements, getUpcomingPaydays } from "@/lib/data/tax";
 import type { JurisdictionSelection } from "@/lib/calculations/tax";
@@ -25,6 +27,9 @@ export default async function TaxesPage() {
 
   if (!settings) throw new Error("Could not load tax settings.");
 
+  const paydayYears = paydays.map((p) => Number(localDateString(p.nextPayday, ctx.timezone).slice(0, 4)));
+  const paydayHolidays = paydayYears.length > 0 ? await getHolidayLookup(supabase, ctx.userId, paydayYears) : new Map();
+
   const jurisdiction: JurisdictionSelection | null =
     settings.tax_country && settings.tax_region
       ? { country: settings.tax_country, region: settings.tax_region, city: settings.tax_city ?? undefined }
@@ -37,7 +42,7 @@ export default async function TaxesPage() {
         <p className="text-sm text-muted-foreground">{m.taxes.subtitle}</p>
       </div>
 
-      <PaydayCard paydays={paydays} timezone={ctx.timezone} />
+      <PaydayCard paydays={paydays} timezone={ctx.timezone} holidays={paydayHolidays} />
 
       <PayStatementCard statements={statements} jurisdiction={jurisdiction} timezone={ctx.timezone} currency={ctx.currency} />
 

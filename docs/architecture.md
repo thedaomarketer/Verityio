@@ -106,6 +106,35 @@ names (`lib/timezone.ts#modernTimeZoneId`) so search matches what people
 expect. Zones are validated in Zod (`isValidTimeZone`) and again by a
 database check constraint (see `docs/database.md`).
 
+## Public holidays
+
+`lib/holidays/nager.ts` fetches Nager.Date server-side (Zod-validated, 4s
+timeout, cached a week in Next's data cache, failing soft to `[]`).
+`lib/calculations/holidays.ts` (pure, tested) filters a country's list to the
+user's region -- country-wide holidays plus those whose `counties` include
+e.g. `CA-ON` -- and drops observances. Holidays are calendar dates, so
+they're matched against a shift's *local* date in the user's zone.
+
+## Push notifications
+
+- **Opt-in** (`components/settings/push-card.tsx`): asks for browser
+  permission inside the click (Safari requires a gesture), then loads
+  OneSignal's Web SDK on demand (`lib/push/onesignal-client.ts`) -- never on
+  ordinary pages. OneSignal's worker lives at
+  `/push/onesignal/OneSignalSDKWorker.js` with that scope, so it doesn't
+  compete with the app's own `/sw.js` for the root scope.
+- **Linking**: the device's OneSignal subscription id is saved to
+  `push_subscriptions` by a server action after `auth.getUser()`; the server
+  sends to those ids (`include_subscription_ids`), never to a client-asserted
+  OneSignal external id. An httpOnly `wl-push-id` cookie remembers which
+  subscription is this browser's, so sign-out unlinks it.
+- **Scheduling**: `lib/calculations/reminders.ts` (pure, tested) decides
+  what's due; `lib/push/reminders.ts` runs it for every opted-in user,
+  claiming each reminder in `notification_deliveries` before sending (so
+  overlapping runs can't double-send) and releasing the claim if the send
+  fails. Supabase pg_cron + pg_net trigger it every 15 minutes (migration
+  22) because Vercel's free plan only allows daily crons.
+
 ## Data flow
 
 - **Reads**: Server Components call `lib/data/*.ts` helpers directly

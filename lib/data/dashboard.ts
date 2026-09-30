@@ -4,13 +4,16 @@ import { createClient } from "@/lib/supabase/server";
 import { requireUserContext } from "./context";
 import { getActiveShift, getCompletedShiftsInRange, getUpcomingShifts } from "./shifts";
 import { getUpcomingPaydays } from "./tax";
+import { getHolidayRegion, getRegionHolidays } from "./holidays";
 import {
   dollarsToCents,
   getLocalDayBounds,
   getLocalMonthBounds,
   getWorkweekBounds,
+  localDateString,
   summarizeShiftsByJob,
   sumJobSummaries,
+  upcomingHolidays,
 } from "@/lib/calculations";
 
 export async function getDashboardData() {
@@ -24,8 +27,19 @@ export async function getDashboardData() {
   const week = getWorkweekBounds(now, ctx.timezone, ctx.weekStartsOn);
   const month = getLocalMonthBounds(now, ctx.timezone);
 
-  const [{ data: profile }, { data: jobs }, activeShift, monthShifts, upcomingShifts, { data: journalEntries }, paydays] =
-    await Promise.all([
+  const today = localDateString(now, ctx.timezone);
+  const holidayRegion = await getHolidayRegion(supabase, ctx.userId);
+
+  const [
+    { data: profile },
+    { data: jobs },
+    activeShift,
+    monthShifts,
+    upcomingShifts,
+    { data: journalEntries },
+    paydays,
+    regionHolidays,
+  ] = await Promise.all([
       supabase.from("profiles").select("full_name").eq("id", ctx.userId).maybeSingle(),
       supabase.from("jobs").select("*").eq("user_id", ctx.userId).eq("is_active", true),
       getActiveShift(ctx.userId),
@@ -39,6 +53,10 @@ export async function getDashboardData() {
         .order("event_at", { ascending: false })
         .limit(5),
       getUpcomingPaydays(ctx.userId, ctx.timezone),
+      // This year and next, so a window crossing New Year still works.
+      holidayRegion
+        ? getRegionHolidays(holidayRegion, [Number(today.slice(0, 4)), Number(today.slice(0, 4)) + 1])
+        : Promise.resolve([]),
     ]);
 
   const jobRates = Object.fromEntries(
@@ -86,5 +104,6 @@ export async function getDashboardData() {
     journalEntries: journalEntries ?? [],
     recentCompletedShifts: monthShifts.filter((s) => s.status === "completed").slice(0, 5),
     nextPayday: paydays[0] ?? null,
+    upcomingHolidays: upcomingHolidays(regionHolidays, today, 30).slice(0, 2),
   };
 }

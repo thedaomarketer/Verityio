@@ -23,6 +23,7 @@ export type EntryType =
 export type ShiftStatus = "scheduled" | "active" | "completed" | "cancelled" | "missed";
 export type ExpenseCategory = "meals" | "transport" | "supplies" | "equipment" | "lodging" | "other";
 export type ScheduleStatus = "scheduled" | "confirmed" | "cancelled" | "time_off";
+export type NotificationKind = "long_shift" | "long_break" | "payday" | "test";
 export type AttachmentEntityType = "shift" | "journal_entry" | "expense" | "mileage_entry" | "job";
 export type AuditAction =
   | "created"
@@ -283,6 +284,38 @@ export interface Database {
           user_id: string;
         };
         Update: Partial<Database["public"]["Tables"]["user_settings"]["Row"]>;
+        Relationships: [];
+      };
+      push_subscriptions: {
+        Row: {
+          id: string;
+          user_id: string;
+          onesignal_id: string;
+          user_agent: string | null;
+          created_at: string;
+          last_seen_at: string;
+        };
+        Insert: Partial<Database["public"]["Tables"]["push_subscriptions"]["Row"]> & {
+          user_id: string;
+          onesignal_id: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["push_subscriptions"]["Row"]>;
+        Relationships: [];
+      };
+      notification_deliveries: {
+        Row: {
+          id: string;
+          user_id: string;
+          kind: NotificationKind;
+          dedupe_key: string;
+          sent_at: string;
+        };
+        Insert: Partial<Database["public"]["Tables"]["notification_deliveries"]["Row"]> & {
+          user_id: string;
+          kind: NotificationKind;
+          dedupe_key: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["notification_deliveries"]["Row"]>;
         Relationships: [];
       };
       ai_conversations: {

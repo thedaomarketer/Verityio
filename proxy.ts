@@ -14,9 +14,10 @@ export const config = {
      * - _next/image (image optimization files)
      * - favicon.ico (favicon file)
      * - image files
-     * - manifest.webmanifest / sw.js (PWA files the browser fetches
-     *   unauthenticated, and which must never redirect to /login)
+     * - manifest.webmanifest / sw.js / push/ (PWA and OneSignal service
+     *   worker files the browser fetches unauthenticated, and which must
+     *   never redirect to /login)
      */
-    "/((?!_next/static|_next/image|favicon.ico|manifest.webmanifest|sw.js|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
+    "/((?!_next/static|_next/image|favicon.ico|manifest.webmanifest|sw.js|push/|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
   ],
 };

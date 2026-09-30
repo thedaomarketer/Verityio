@@ -73,6 +73,21 @@ revoked from `anon`/`authenticated`/`public` — it must only ever run as the
 trigger, never be callable directly as an RPC (this was flagged by the
 Supabase security linter and fixed; see migration `00000000000015`).
 
+## Push notifications
+
+- `push_subscriptions`: one row per device (OneSignal subscription id,
+  unique) linked to the account that turned notifications on from it. RLS
+  scopes all four operations to the owner; linking itself goes through a
+  server action with the admin client, because a shared device's id may
+  need to move between accounts (migration 20; a SECURITY DEFINER RPC tried
+  first was dropped in migration 21 after the security linter flagged it).
+- `notification_deliveries`: one row per reminder sent, `unique (user_id,
+  dedupe_key)`, written only by the server; users can read their own.
+- Migration 22 enables `pg_cron` and `pg_net` and schedules
+  `workledger-reminders` every 15 minutes. Its URL and secret come from
+  Vault (`workledger_app_url`, `workledger_cron_secret`), created outside
+  migrations so no secret is committed.
+
 ## Storage
 
 A private `attachments` bucket (`public = false`). Objects are expected

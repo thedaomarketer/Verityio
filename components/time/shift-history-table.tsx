@@ -1,4 +1,6 @@
-import { calculateShiftDuration } from "@/lib/calculations";
+import { calculateShiftDuration, holidayDisplayName, localDateString } from "@/lib/calculations";
+import { getHolidayLookup } from "@/lib/data/holidays";
+import { createClient } from "@/lib/supabase/server";
 import { formatDate, formatMinutesAsHours, formatTime } from "@/lib/format";
 import { getI18n } from "@/lib/i18n/server";
 import type { Messages } from "@/lib/i18n/messages/en";
@@ -34,12 +36,21 @@ export async function ShiftHistoryTable({
   shifts,
   jobs,
   timezone,
+  userId,
 }: {
+  /** Owner of the shifts, for looking up their region's public holidays. */
+  userId: string;
   shifts: ShiftHistoryRow[];
   jobs: { id: string; name: string }[];
   timezone: string;
 }) {
   const { locale, intl, m } = await getI18n();
+
+  // Flag shifts that started on a public holiday (local date, user's zone).
+  const localDates = shifts.filter((s) => s.actual_start).map((s) => localDateString(s.actual_start!, timezone));
+  const years = [...new Set(localDates.map((d) => Number(d.slice(0, 4))))];
+  const holidays = years.length > 0 ? await getHolidayLookup(await createClient(), userId, years) : new Map();
+
   if (shifts.length === 0) {
     return <p className="py-10 text-center text-sm text-muted-foreground">{m.time.noShifts}</p>;
   }
@@ -65,9 +76,18 @@ export async function ShiftHistoryTable({
             breaks: shift.breaks.map((b) => ({ startedAt: b.started_at, endedAt: b.ended_at, isPaid: b.is_paid })),
           });
 
+          const holiday = holidays.get(localDateString(shift.actual_start, timezone));
+
           return (
             <TableRow key={shift.id}>
-              <TableCell>{formatDate(shift.actual_start, timezone, intl)}</TableCell>
+              <TableCell>
+                <span className="whitespace-nowrap">{formatDate(shift.actual_start, timezone, intl)}</span>
+                {holiday && (
+                  <Badge variant="success" className="ml-1.5" title={holidayDisplayName(holiday, locale)}>
+                    {m.holidays.holiday}
+                  </Badge>
+                )}
+              </TableCell>
               <TableCell>
                 {shift.job && (
                   <span className="inline-flex items-center gap-1.5">

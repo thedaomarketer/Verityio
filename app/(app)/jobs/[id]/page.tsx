@@ -113,6 +113,7 @@ export default async function JobDetailPage({
             shifts={jobShifts.map((s) => ({ ...s, job: s.job }))}
             jobs={[{ id: job.id, name: job.name }]}
             timezone={ctx.timezone}
+            userId={ctx.userId}
           />
         </CardContent>
       </Card>

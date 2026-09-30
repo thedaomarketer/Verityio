@@ -1,10 +1,18 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, Flag } from "lucide-react";
 
 import { createClient } from "@/lib/supabase/server";
 import { requireUserContext } from "@/lib/data/context";
-import { addMonthsToMonthString, isMonthString, localDayStart, localMonthString } from "@/lib/calculations";
+import {
+  addDaysToDateString,
+  addMonthsToMonthString,
+  holidayDisplayName,
+  isMonthString,
+  localDayStart,
+  localMonthString,
+} from "@/lib/calculations";
+import { getHolidayRegion, getRegionHolidays } from "@/lib/data/holidays";
 import { getI18n } from "@/lib/i18n/server";
 import { formatDate, formatTime } from "@/lib/format";
 import { Card, CardContent } from "@/components/ui/card";
@@ -16,7 +24,7 @@ export default async function CalendarPage({
 }: {
   searchParams: Promise<{ month?: string }>;
 }) {
-  const [params, ctx, { intl, m }] = await Promise.all([searchParams, requireUserContext(), getI18n()]);
+  const [params, ctx, { locale, intl, m }] = await Promise.all([searchParams, requireUserContext(), getI18n()]);
   if (!ctx) redirect("/login");
 
   // `month` is a local "yyyy-mm"; its bounds are midnight on the 1st in the
@@ -47,7 +55,24 @@ export default async function CalendarPage({
       .order("start_at"),
   ]);
 
-  type Item = { id: string; at: string; label: string; sub: string; color: string; badge: string };
+  // Public holidays in this month for the user's province/state (Nager.Date).
+  const holidayRegion = await getHolidayRegion(supabase, ctx.userId);
+  const lastDay = addDaysToDateString(`${nextMonth}-01`, -1);
+  const monthHolidays = holidayRegion
+    ? (await getRegionHolidays(holidayRegion, [Number(month.slice(0, 4))])).filter(
+        (h) => h.date >= `${month}-01` && h.date <= lastDay
+      )
+    : [];
+
+  type Item = {
+    id: string;
+    at: string;
+    label: string;
+    sub: string;
+    color: string;
+    badge: string;
+    holiday?: boolean;
+  };
   const items: Item[] = [
     ...(shifts ?? []).map((s) => ({
       id: `shift-${s.id}`,
@@ -64,6 +89,16 @@ export default async function CalendarPage({
       sub: `${formatTime(s.start_at, ctx.timezone, intl)} – ${formatTime(s.end_at, ctx.timezone, intl)}`,
       color: s.job?.color ?? "#525252",
       badge: m.calendar.scheduled,
+    })),
+    // Anchored at local midnight so a holiday sorts first within its own day.
+    ...monthHolidays.map((h) => ({
+      id: `holiday-${h.date}-${h.name}`,
+      at: localDayStart(h.date, ctx.timezone).toISOString(),
+      label: holidayDisplayName(h, locale),
+      sub: "",
+      color: "var(--success)",
+      badge: m.holidays.holiday,
+      holiday: true,
     })),
   ].sort((a, b) => new Date(a.at).getTime() - new Date(b.at).getTime());
 
@@ -93,6 +128,14 @@ export default async function CalendarPage({
         </div>
       </div>
 
+      {!holidayRegion && (
+        <p className="text-sm text-muted-foreground">
+          <Link href="/taxes" className="text-primary hover:underline">
+            {m.holidays.setRegionHint}
+          </Link>
+        </p>
+      )}
+
       {byDate.size === 0 ? (
         <Card>
           <CardContent className="py-12 text-center text-sm text-muted-foreground">
@@ -108,10 +151,14 @@ export default async function CalendarPage({
                 <ul className="space-y-2">
                   {dayItems.map((item) => (
                     <li key={item.id} className="flex items-center gap-2 text-sm">
-                      <span className="size-2 rounded-full" style={{ backgroundColor: item.color }} />
+                      {item.holiday ? (
+                        <Flag className="size-3.5 shrink-0 text-success" aria-hidden="true" />
+                      ) : (
+                        <span className="size-2 shrink-0 rounded-full" style={{ backgroundColor: item.color }} />
+                      )}
                       <span className="font-medium">{item.label}</span>
                       <span className="text-muted-foreground">{item.sub}</span>
-                      <Badge variant="outline" className="ml-auto">
+                      <Badge variant={item.holiday ? "success" : "outline"} className="ml-auto">
                         {item.badge}
                       </Badge>
                     </li>

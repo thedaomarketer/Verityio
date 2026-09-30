@@ -579,6 +579,43 @@ export const es: Messages = {
     },
   },
 
+  holidays: {
+    holiday: "Feriado",
+    setRegionHint: "Elige tu provincia o estado en Pago e impuestos para ver aquí los días feriados.",
+    paydayOnHoliday: "Cae en {holiday}; el pago podría llegar un día antes o después.",
+  },
+
+  push: {
+    title: "Notificaciones push",
+    body: "Recibe un recordatorio si olvidas marcar la salida, si un descanso se alarga y el día de pago.",
+    enable: "Activar en este dispositivo",
+    enabling: "Activando...",
+    disable: "Desactivar en este dispositivo",
+    onForDevice: "Activadas en este dispositivo.",
+    offForDevice: "Desactivadas en este dispositivo.",
+    sendTest: "Enviar una prueba",
+    testSent: "Notificación de prueba enviada. Puede tardar unos segundos en llegar.",
+    enabled: "Las notificaciones están activadas en este dispositivo.",
+    disabled: "Las notificaciones están desactivadas en este dispositivo.",
+    denied: "Las notificaciones están bloqueadas para WorkLedger. Permítelas en la configuración del sitio de tu navegador y vuelve a intentarlo.",
+    unsupported: "Este navegador no puede recibir notificaciones push.",
+    iosHint: "En iPhone y iPad, primero agrega WorkLedger a tu pantalla de inicio (Compartir → Agregar a inicio) y luego activa las notificaciones desde la app instalada.",
+    notConfigured: "Las notificaciones push aún no están activadas en este espacio.",
+    remindersOff: "Los recordatorios están desactivados en Preferencias, así que no se enviará nada hasta que los vuelvas a activar.",
+  },
+
+  notifications: {
+    longShiftTitle: "¿Sigues trabajando?",
+    longShiftBody: "Llevas {duration} con la entrada marcada en {job}. Toca para marcar la salida si ya terminaste.",
+    longBreakTitle: "¿Sigues en descanso?",
+    longBreakBody: "Tu descanso lleva {duration}.",
+    paydayTitle: "Hoy es día de pago",
+    paydayBody: "Hoy es día de pago de {job}.",
+    paydayHolidayBody: "Hoy es día de pago de {job}. También es {holiday}, así que el pago podría llegar un día antes o después.",
+    testTitle: "Las notificaciones de WorkLedger están activadas",
+    testBody: "Aquí recibirás recordatorios de turnos largos, descansos largos y días de pago.",
+  },
+
   csv: {
     date: "Fecha",
     job: "Trabajo",
@@ -626,6 +663,11 @@ export const es: Messages = {
     conversationNotFound: "No se encontró la conversación.",
     conversationStartFailed: "No se pudo iniciar una nueva conversación.",
     assistantUnavailable: "El asistente no puede responder en este momento. Inténtalo de nuevo en un momento.",
+    pushSaveFailed: "No pudimos activar las notificaciones. Inténtalo de nuevo.",
+    pushNotConfigured: "Las notificaciones push aún no están activadas en este espacio.",
+    pushNoDevice: "Primero activa las notificaciones en este dispositivo.",
+    pushSendFailed: "No pudimos enviar la notificación. Inténtalo de nuevo.",
+    pushTooSoon: "Acabamos de enviar una prueba. Espera un minuto antes de enviar otra.",
   },
 
   validation: {

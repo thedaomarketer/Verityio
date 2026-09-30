@@ -53,7 +53,7 @@ export default async function TimePage() {
           <CardTitle className="text-base">{m.time.shiftHistory}</CardTitle>
         </CardHeader>
         <CardContent className="px-0 sm:px-6">
-          <ShiftHistoryTable shifts={recentShifts} jobs={jobOptions} timezone={ctx.timezone} />
+          <ShiftHistoryTable shifts={recentShifts} jobs={jobOptions} timezone={ctx.timezone} userId={ctx.userId} />
         </CardContent>
       </Card>
     </div>

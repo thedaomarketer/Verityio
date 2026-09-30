@@ -78,7 +78,7 @@ export default async function DashboardPage() {
           completedShifts={data.recentCompletedShifts}
           timezone={data.timezone}
         />
-        <UpcomingShifts shifts={data.upcomingShifts} timezone={data.timezone} />
+        <UpcomingShifts shifts={data.upcomingShifts} holidays={data.upcomingHolidays} timezone={data.timezone} />
       </div>
     </div>
   );

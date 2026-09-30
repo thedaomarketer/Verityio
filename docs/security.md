@@ -66,6 +66,19 @@ public), so `handle_new_user()` validates it itself and falls back to
 `UTC`/`en` rather than trusting it -- this was tested with a malformed zone
 against the live database.
 
+## Push notifications and the scheduler
+
+- A device only receives an account's reminders if that account linked it
+  from a signed-in session (server action + `auth.getUser()`); OneSignal
+  "external ids" are not used, since any browser can claim one without
+  OneSignal's identity verification. Sign-out unlinks the current device.
+- `/api/cron/notifications` is outside the auth proxy but requires
+  `Authorization: Bearer $CRON_SECRET` (constant-time comparison). The
+  secret lives in Vercel env and Supabase Vault only.
+- `ONESIGNAL_REST_API_KEY` is server-only; the App ID is public by design.
+- Notification text is deliberately minimal (job name, durations; no pay
+  amounts), since it can appear on a lock screen.
+
 ## Attachments
 
 The `attachments` Storage bucket is private (`public = false`). Files are

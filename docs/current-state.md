@@ -134,12 +134,27 @@ Verified directly against the live Supabase project (`WorkLedger`,
 default settings row, the one-active-shift constraint rejects a duplicate
 clock-in, and RLS correctly hides one user's jobs/shifts/breaks from another
 user while still exposing their own. `npm run lint`, `npm run typecheck`,
-`npm test` (144/144), and `npm run build` all pass. The charts and quick-create
+`npm test` (158/158), and `npm run build` all pass. The charts and quick-create
 menu were also verified visually (desktop + mobile viewports, hover/focus
 tooltips) -- and the French/Spanish UI, time zone picker, and time zone
 prompt at phone width -- via a temporary unauthenticated preview route +
 Playwright screenshots, since this sandbox can't reach the live Supabase project to
 exercise the authenticated app directly.
+
+- **Public holidays** (Nager.Date, free, no key): the user's province/state
+  (from Pay & Taxes) decides which holidays apply. They appear on the
+  Calendar, as a "Holiday" badge on shifts worked that day, in the
+  dashboard's Upcoming card (next 30 days), and as a note on paydays that
+  land on one. Lists are cached for a week; if the API is slow or down the
+  app simply shows no holidays.
+- **Push notifications** (OneSignal): Settings → Push notifications turns
+  them on per device. Every 15 minutes a Supabase pg_cron job calls
+  `/api/cron/notifications`, which sends, at most once each: "still clocked
+  in?" after 12h, "still on break?" after 1h, and "payday today" (after 8am
+  local, mentioning a public holiday if payday falls on one). Text is in the
+  user's language; the Preferences "Notifications" switch turns reminders
+  off. **Dormant until** `NEXT_PUBLIC_ONESIGNAL_APP_ID` and
+  `ONESIGNAL_REST_API_KEY` are set in Vercel -- the card says so until then.
 
 ## What's stubbed or missing
 

@@ -8,3 +8,5 @@ export * from "./period";
 export * from "./payday";
 export * from "./timeseries";
 export * from "./local-time";
+export * from "./holidays";
+export * from "./reminders";

@@ -571,6 +571,44 @@ export const en = {
     },
   },
 
+  holidays: {
+    holiday: "Holiday",
+    setRegionHint: "Set your province or state under Pay & Taxes to see public holidays here.",
+    paydayOnHoliday: "Falls on {holiday}; pay may arrive a day early or late.",
+  },
+
+  push: {
+    title: "Push notifications",
+    body: "Get a reminder if you forget to clock out, when a break runs long, and on payday.",
+    enable: "Turn on for this device",
+    enabling: "Turning on...",
+    disable: "Turn off for this device",
+    onForDevice: "On for this device.",
+    offForDevice: "Off for this device.",
+    sendTest: "Send a test",
+    testSent: "Test notification sent. It can take a few seconds to arrive.",
+    enabled: "Notifications are on for this device.",
+    disabled: "Notifications are off for this device.",
+    denied: "Notifications are blocked for WorkLedger. Allow them in your browser's site settings, then try again.",
+    unsupported: "This browser can't receive push notifications.",
+    iosHint: "On iPhone and iPad, add WorkLedger to your Home Screen first (Share → Add to Home Screen), then turn notifications on from the installed app.",
+    notConfigured: "Push notifications aren't switched on for this workspace yet.",
+    remindersOff: "Reminders are turned off under Preferences, so nothing will be sent until you turn them back on.",
+  },
+
+  /** Push notification text (sent by the server in the recipient's language). */
+  notifications: {
+    longShiftTitle: "Still clocked in?",
+    longShiftBody: "You've been clocked in at {job} for {duration}. Tap to clock out if you're done.",
+    longBreakTitle: "Still on break?",
+    longBreakBody: "Your break has been running for {duration}.",
+    paydayTitle: "Payday today",
+    paydayBody: "Today is payday for {job}.",
+    paydayHolidayBody: "Today is payday for {job}. It's also {holiday}, so your pay may arrive a day early or late.",
+    testTitle: "WorkLedger notifications are on",
+    testBody: "You'll get reminders here for long shifts, long breaks, and paydays.",
+  },
+
   csv: {
     date: "Date",
     job: "Job",
@@ -619,6 +657,11 @@ export const en = {
     conversationNotFound: "Conversation not found.",
     conversationStartFailed: "Couldn't start a new conversation.",
     assistantUnavailable: "The assistant couldn't respond right now. Please try again in a moment.",
+    pushSaveFailed: "We couldn't turn on notifications. Please try again.",
+    pushNotConfigured: "Push notifications aren't switched on for this workspace yet.",
+    pushNoDevice: "Turn on notifications for this device first.",
+    pushSendFailed: "We couldn't send the notification. Please try again.",
+    pushTooSoon: "A test was just sent. Wait a minute before sending another.",
   },
 
   /** Zod validation messages; schemas in lib/validation reference these keys. */

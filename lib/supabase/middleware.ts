@@ -4,7 +4,8 @@ import { NextResponse, type NextRequest } from "next/server";
 import type { Database } from "./database.types";
 import { getSupabaseAnonKey, getSupabaseUrl } from "./env";
 
-const PUBLIC_PATHS = ["/login", "/register", "/reset-password", "/update-password", "/auth", "/offline"];
+// /api/cron authenticates itself with CRON_SECRET (it's called by the scheduler, never a browser).
+const PUBLIC_PATHS = ["/login", "/register", "/reset-password", "/update-password", "/auth", "/offline", "/api/cron"];
 
 function isPublicPath(pathname: string): boolean {
   return PUBLIC_PATHS.some((path) => pathname === path || pathname.startsWith(`${path}/`));

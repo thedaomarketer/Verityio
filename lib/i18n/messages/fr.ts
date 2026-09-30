@@ -579,6 +579,43 @@ export const fr: Messages = {
     },
   },
 
+  holidays: {
+    holiday: "Férié",
+    setRegionHint: "Choisissez votre province ou État dans Paie et impôts pour voir les jours fériés ici.",
+    paydayOnHoliday: "Tombe le jour de {holiday}; la paie pourrait arriver un jour plus tôt ou plus tard.",
+  },
+
+  push: {
+    title: "Notifications push",
+    body: "Recevez un rappel si vous oubliez de pointer votre départ, si une pause s'éternise et le jour de paie.",
+    enable: "Activer sur cet appareil",
+    enabling: "Activation...",
+    disable: "Désactiver sur cet appareil",
+    onForDevice: "Activées sur cet appareil.",
+    offForDevice: "Désactivées sur cet appareil.",
+    sendTest: "Envoyer un test",
+    testSent: "Notification de test envoyée. Elle peut prendre quelques secondes à arriver.",
+    enabled: "Les notifications sont activées sur cet appareil.",
+    disabled: "Les notifications sont désactivées sur cet appareil.",
+    denied: "Les notifications sont bloquées pour WorkLedger. Autorisez-les dans les paramètres du site de votre navigateur, puis réessayez.",
+    unsupported: "Ce navigateur ne peut pas recevoir de notifications push.",
+    iosHint: "Sur iPhone et iPad, ajoutez d'abord WorkLedger à votre écran d'accueil (Partager → Sur l'écran d'accueil), puis activez les notifications depuis l'appli installée.",
+    notConfigured: "Les notifications push ne sont pas encore activées pour cet espace.",
+    remindersOff: "Les rappels sont désactivés dans les Préférences : rien ne sera envoyé tant que vous ne les réactivez pas.",
+  },
+
+  notifications: {
+    longShiftTitle: "Toujours au travail?",
+    longShiftBody: "Vous avez pointé votre arrivée chez {job} il y a {duration}. Touchez pour pointer votre départ si vous avez terminé.",
+    longBreakTitle: "Toujours en pause?",
+    longBreakBody: "Votre pause dure depuis {duration}.",
+    paydayTitle: "C'est jour de paie",
+    paydayBody: "C'est aujourd'hui la paie pour {job}.",
+    paydayHolidayBody: "C'est aujourd'hui la paie pour {job}. C'est aussi {holiday} : la paie pourrait arriver un jour plus tôt ou plus tard.",
+    testTitle: "Les notifications WorkLedger sont activées",
+    testBody: "Vous recevrez ici des rappels pour les longs quarts, les longues pauses et les jours de paie.",
+  },
+
   csv: {
     date: "Date",
     job: "Emploi",
@@ -627,6 +664,11 @@ export const fr: Messages = {
     conversationNotFound: "Conversation introuvable.",
     conversationStartFailed: "Impossible de commencer une nouvelle conversation.",
     assistantUnavailable: "L'assistant ne peut pas répondre pour le moment. Veuillez réessayer dans un instant.",
+    pushSaveFailed: "Impossible d'activer les notifications. Veuillez réessayer.",
+    pushNotConfigured: "Les notifications push ne sont pas encore activées pour cet espace.",
+    pushNoDevice: "Activez d'abord les notifications sur cet appareil.",
+    pushSendFailed: "Impossible d'envoyer la notification. Veuillez réessayer.",
+    pushTooSoon: "Un test vient d'être envoyé. Attendez une minute avant d'en envoyer un autre.",
   },
 
   validation: {

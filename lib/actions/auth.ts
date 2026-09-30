@@ -6,6 +6,7 @@ import { createClient } from "@/lib/supabase/server";
 import { getI18n, setLocaleCookie } from "@/lib/i18n/server";
 import { isLocale } from "@/lib/i18n/config";
 import { safeRedirectPath } from "@/lib/safe-redirect";
+import { clearPushDeviceId, getPushDeviceId } from "@/lib/push/device-cookie";
 import { validationMessage } from "@/lib/i18n/validation";
 import {
   requestPasswordResetSchema,
@@ -94,6 +95,15 @@ async function syncLocaleCookie(supabase: Awaited<ReturnType<typeof createClient
 
 export async function signOutAction(): Promise<void> {
   const supabase = await createClient();
+
+  // Stop this device receiving the account's reminders once signed out
+  // (it may be shared). RLS limits the delete to the caller's own rows.
+  const pushDeviceId = await getPushDeviceId();
+  if (pushDeviceId) {
+    await supabase.from("push_subscriptions").delete().eq("onesignal_id", pushDeviceId);
+    await clearPushDeviceId();
+  }
+
   await supabase.auth.signOut();
   redirect("/login");
 }

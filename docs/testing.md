@@ -68,6 +68,14 @@ zone and language, and payday countdown labels.
 
 `tests/unit/safe-redirect.test.ts` — the open-redirect guard.
 
+`tests/unit/calculations/holidays.test.ts` — region filtering (country-wide
+plus the province's own, observances dropped), date lookup, year ranges,
+upcoming windows across a month end, and localized names.
+
+`tests/unit/calculations/reminders.test.ts` — long-shift (12h) and
+long-break (1h) thresholds, payday reminders only on the local payday after
+8am, the local-date-vs-UTC case near midnight, and the holiday note.
+
 `tests/unit/supabase-env.test.ts` — the admin key falls back to
 `SUPABASE_SECRET_KEY` when `SUPABASE_SERVICE_ROLE_KEY` is blank.
 

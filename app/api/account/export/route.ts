@@ -11,7 +11,7 @@ export async function GET() {
   } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const [profile, jobs, shifts, breaks, journalEntries, expenses, mileageEntries, scheduleEntries, settings] =
+  const [profile, jobs, shifts, breaks, journalEntries, expenses, mileageEntries, scheduleEntries, settings, pushDevices] =
     await Promise.all([
       supabase.from("profiles").select("*").eq("id", user.id).maybeSingle(),
       supabase.from("jobs").select("*").eq("user_id", user.id),
@@ -22,6 +22,7 @@ export async function GET() {
       supabase.from("mileage_entries").select("*").eq("user_id", user.id),
       supabase.from("schedule_entries").select("*").eq("user_id", user.id),
       supabase.from("user_settings").select("*").eq("user_id", user.id).maybeSingle(),
+      supabase.from("push_subscriptions").select("created_at, last_seen_at, user_agent").eq("user_id", user.id),
     ]);
 
   const payload = {
@@ -35,6 +36,7 @@ export async function GET() {
     expenses: expenses.data ?? [],
     mileage_entries: mileageEntries.data ?? [],
     schedule_entries: scheduleEntries.data ?? [],
+    push_devices: pushDevices.data ?? [],
   };
 
   return new NextResponse(JSON.stringify(payload, null, 2), {
