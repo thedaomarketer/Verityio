@@ -26,6 +26,7 @@ import type { Locale } from "@/lib/i18n/config";
 import type { Messages } from "@/lib/i18n/messages/en";
 import { Button } from "@/components/ui/button";
 import { LanguageSwitcher } from "@/components/language-switcher";
+import { APP_NAME } from "@/lib/brand";
 
 export async function generateMetadata(): Promise<Metadata> {
   const { m } = await getI18n();
@@ -147,7 +148,7 @@ export default async function Home() {
         <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-4 sm:px-6">
           <Link href="/" className="flex items-center gap-2 text-[17px] font-semibold tracking-tight">
             <AppIcon className="size-7" />
-            WorkLedger
+            {APP_NAME}
           </Link>
           <nav className="flex items-center gap-1 sm:gap-2">
             <LanguageSwitcher className="max-sm:hidden" />
@@ -249,7 +250,7 @@ export default async function Home() {
 
       <footer className="border-t border-black/[0.06] pb-[env(safe-area-inset-bottom)]">
         <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-3 px-4 py-6 text-sm text-muted-foreground sm:flex-row sm:px-6">
-          <p>&copy; {new Date().getFullYear()} WorkLedger</p>
+          <p>&copy; {new Date().getFullYear()} {APP_NAME}</p>
           <div className="flex items-center gap-5">
             <LanguageSwitcher className="sm:hidden" />
             <Link href="/login" className="hover:text-foreground">

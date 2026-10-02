@@ -3,9 +3,9 @@ import type { Messages } from "./en";
 /** French (Canadian conventions). Keys and {placeholders} must match en.ts. */
 export const fr: Messages = {
   meta: {
-    title: "WorkLedger",
-    description: "Le registre complet de votre travail.",
-    landingTitle: "WorkLedger — Le registre complet de votre travail",
+    title: "Verity",
+    description: "Le registre fidèle de votre travail.",
+    landingTitle: "Verity — Le registre fidèle de votre travail",
     landingDescription:
       "Suivez vos quarts, pauses, gains, heures supplémentaires, dépenses et notes de travail au même endroit. Sachez ce que vous avez travaillé et ce qu'on vous doit.",
   },
@@ -87,7 +87,7 @@ export const fr: Messages = {
   },
 
   pwa: {
-    installPrompt: "Installez WorkLedger pour pointer à l'arrivée et au départ en un geste.",
+    installPrompt: "Installez Verity pour pointer à l'arrivée et au départ en un geste.",
     install: "Installer",
   },
 
@@ -103,13 +103,13 @@ export const fr: Messages = {
     body: "Impossible de charger cette page. Vos heures et vos données sont en sécurité : réessayez ou retournez au tableau de bord.",
     goToDashboard: "Aller au tableau de bord",
     tryAgain: "Réessayer",
-    globalTitle: "WorkLedger a rencontré un problème",
+    globalTitle: "Verity a rencontré un problème",
     globalBody: "Une erreur s'est produite lors du chargement de l'application. Vos données sont en sécurité : veuillez réessayer.",
   },
 
   offline: {
     title: "Vous êtes hors ligne",
-    body: "WorkLedger a besoin d'une connexion pour charger vos heures, emplois et gains en toute sécurité. Reconnectez-vous et réessayez : rien n'a été perdu.",
+    body: "Verity a besoin d'une connexion pour charger vos heures, emplois et gains en toute sécurité. Reconnectez-vous et réessayez : rien n'a été perdu.",
     tryAgain: "Réessayer",
   },
 
@@ -408,7 +408,7 @@ export const fr: Messages = {
     },
     data: {
       title: "Vos données",
-      body: "Téléchargez une copie de tout ce que WorkLedger a enregistré pour vous.",
+      body: "Téléchargez une copie de tout ce que Verity a enregistré pour vous.",
       export: "Exporter mes données",
     },
     danger: {
@@ -428,7 +428,7 @@ export const fr: Messages = {
     title: "Assistant IA",
     newChat: "Nouvelle conversation",
     intro:
-      "Posez vos questions sur vos heures, gains, quarts, dépenses ou horaire. Les réponses proviennent directement de vos données WorkLedger.",
+      "Posez vos questions sur vos heures, gains, quarts, dépenses ou horaire. Les réponses proviennent directement de vos données Verity.",
     suggestions: [
       "Combien d'heures ai-je travaillé cette semaine?",
       "Combien ai-je gagné le mois dernier?",
@@ -472,7 +472,7 @@ export const fr: Messages = {
 
   auth: {
     welcomeBack: "Bon retour",
-    signInSubtitle: "Connectez-vous à votre compte WorkLedger.",
+    signInSubtitle: "Connectez-vous à votre compte Verity.",
     checkEmail: "Consultez vos courriels pour confirmer votre compte, puis connectez-vous ci-dessous.",
     confirmationFailed:
       "Ce lien de confirmation est invalide ou a expiré. Essayez de vous connecter ou demandez un nouveau lien.",
@@ -484,7 +484,7 @@ export const fr: Messages = {
     noAccount: "Vous n'avez pas de compte?",
     signUp: "S'inscrire",
     createTitle: "Créer votre compte",
-    createSubtitle: "Commencez le registre complet de votre travail.",
+    createSubtitle: "Commencez le registre fidèle de votre travail.",
     fullName: "Nom complet",
     passwordHint: "Au moins 8 caractères.",
     createAccount: "Créer le compte",
@@ -511,7 +511,7 @@ export const fr: Messages = {
     heroLine2: "Chaque dollar.",
     heroLine3: "Au dossier.",
     heroBody:
-      "WorkLedger regroupe vos quarts, pauses, gains, dépenses et notes de travail au même endroit, pour que vous sachiez toujours ce que vous avez travaillé et ce qu'on vous doit.",
+      "Verity regroupe vos quarts, pauses, gains, dépenses et notes de travail au même endroit, pour que vous sachiez toujours ce que vous avez travaillé et ce qu'on vous doit.",
     createAccount: "Créer votre compte",
     haveAccount: "J'ai déjà un compte",
     featuresTitle: "Tout votre travail, dans une seule appli.",
@@ -548,12 +548,12 @@ export const fr: Messages = {
       },
       mobile: {
         title: "Dans votre langue, sur votre téléphone",
-        body: "Utilisez WorkLedger en français, en anglais ou en espagnol, dans votre fuseau horaire, installé sur votre écran d'accueil comme une appli.",
+        body: "Utilisez Verity en français, en anglais ou en espagnol, dans votre fuseau horaire, installé sur votre écran d'accueil comme une appli.",
       },
     },
     privacyTitle: "Vos dossiers vous appartiennent.",
     privacyBody:
-      "Les dossiers de travail peuvent être sensibles. WorkLedger est conçu pour que vous seul puissiez voir les vôtres, et vous êtes toujours libre de les emporter.",
+      "Les dossiers de travail peuvent être sensibles. Verity est conçu pour que vous seul puissiez voir les vôtres, et vous êtes toujours libre de les emporter.",
     privacy: {
       private: {
         title: "Privé par défaut",
@@ -597,9 +597,9 @@ export const fr: Messages = {
     testSent: "Notification de test envoyée. Elle peut prendre quelques secondes à arriver.",
     enabled: "Les notifications sont activées sur cet appareil.",
     disabled: "Les notifications sont désactivées sur cet appareil.",
-    denied: "Les notifications sont bloquées pour WorkLedger. Autorisez-les dans les paramètres du site de votre navigateur, puis réessayez.",
+    denied: "Les notifications sont bloquées pour Verity. Autorisez-les dans les paramètres du site de votre navigateur, puis réessayez.",
     unsupported: "Ce navigateur ne peut pas recevoir de notifications push.",
-    iosHint: "Sur iPhone et iPad, ajoutez d'abord WorkLedger à votre écran d'accueil (Partager → Sur l'écran d'accueil), puis activez les notifications depuis l'appli installée.",
+    iosHint: "Sur iPhone et iPad, ajoutez d'abord Verity à votre écran d'accueil (Partager → Sur l'écran d'accueil), puis activez les notifications depuis l'appli installée.",
     notConfigured: "Les notifications push ne sont pas encore activées pour cet espace.",
     remindersOff: "Les rappels sont désactivés dans les Préférences : rien ne sera envoyé tant que vous ne les réactivez pas.",
   },
@@ -612,7 +612,7 @@ export const fr: Messages = {
     paydayTitle: "C'est jour de paie",
     paydayBody: "C'est aujourd'hui la paie pour {job}.",
     paydayHolidayBody: "C'est aujourd'hui la paie pour {job}. C'est aussi {holiday} : la paie pourrait arriver un jour plus tôt ou plus tard.",
-    testTitle: "Les notifications WorkLedger sont activées",
+    testTitle: "Les notifications Verity sont activées",
     testBody: "Vous recevrez ici des rappels pour les longs quarts, les longues pauses et les jours de paie.",
   },
 

@@ -2,9 +2,9 @@
 
 ## Project
 
-You are building WorkLedger.
+You are building Verity.
 
-WorkLedger is a worker-focused work recording and productivity platform.
+Verity is a worker-focused work recording and productivity platform.
 
 Its core purpose is to help users accurately record:
 

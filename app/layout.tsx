@@ -6,6 +6,7 @@ import { Toaster } from "@/components/ui/sonner";
 import { RegisterServiceWorker } from "@/components/pwa/register-sw";
 import { getI18n } from "@/lib/i18n/server";
 import { I18nProvider } from "@/lib/i18n/client";
+import { APP_NAME } from "@/lib/brand";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -27,7 +28,7 @@ const baseMetadata: Metadata = {
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
-    title: "WorkLedger",
+    title: APP_NAME,
   },
   icons: {
     icon: [

@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 
+import { APP_SLUG } from "@/lib/brand";
 import { createClient } from "@/lib/supabase/server";
 
 // Full-account data export (Part 40 of the product spec): every table a
@@ -42,7 +43,7 @@ export async function GET() {
   return new NextResponse(JSON.stringify(payload, null, 2), {
     headers: {
       "Content-Type": "application/json",
-      "Content-Disposition": `attachment; filename="workledger-export.json"`,
+      "Content-Disposition": `attachment; filename="${APP_SLUG}-export.json"`,
     },
   });
 }

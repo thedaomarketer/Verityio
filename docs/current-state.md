@@ -67,7 +67,7 @@ for what's next.
   throughout the UI. Also surfaced as a compact "next payday" card on the
   dashboard. See `docs/tax.md`.
 - **Installable / offline-resilient app (PWA)**: `app/manifest.ts` +
-  `public/sw.js` make WorkLedger installable to a phone's home screen
+  `public/sw.js` make Verity installable to a phone's home screen
   (`components/pwa/install-prompt.tsx` prompts on supporting browsers) and
   keeps the static app shell available when the network drops, falling back
   to a friendly `/offline` page instead of a browser error. Dynamic/auth
@@ -129,7 +129,7 @@ for what's next.
   read in the user's saved zone on the server -- see "Time zones" in
   `docs/architecture.md`.
 
-Verified directly against the live Supabase project (`WorkLedger`,
+Verified directly against the live Supabase project (`Verity`,
 `hdeshlblsdsplpyayanz`) via SQL: the new-user trigger creates a profile and
 default settings row, the one-active-shift constraint rejects a duplicate
 clock-in, and RLS correctly hides one user's jobs/shifts/breaks from another
@@ -198,22 +198,37 @@ exercise the authenticated app directly.
 
 ## Live deployment
 
-- Production: **https://workledger-three.vercel.app**, deployed from the
-  `Personal-Main` branch via the `workledger` Vercel project (auto-linked
-  to the same Supabase project through Vercel's Supabase integration,
-  which also provisioned the real `SUPABASE_SERVICE_ROLE_KEY` there --
-  account deletion and audit logging work in production even though
-  `.env.local` only has a placeholder for that key locally).
-- Vercel's SSO/team-only deployment protection was disabled so the app is
-  publicly reachable; `NEXT_PUBLIC_SITE_URL` is set to the production URL
-  for correct password-reset/email-confirmation links.
-- `ANTHROPIC_API_KEY` is **not** yet set on Vercel -- add it in the
-  project's environment variables for the AI Assistant to work in
-  production (see `docs/ai.md`).
+- Production: **https://verity-work.vercel.app** (Vercel project
+  `workledger`). The earlier addresses `workledgerio.vercel.app` and
+  `workledger-three.vercel.app` redirect there (308, same path) from
+  `proxy.ts`; `verity.vercel.app` and similar were already taken by other
+  Vercel accounts.
+- `NEXT_PUBLIC_SITE_URL` is the production URL (used for email links and
+  push notification links). Supabase Auth's **Site URL** and **Redirect
+  URLs** must list the same address, or confirmation/reset emails link to
+  the wrong place -- that's a Supabase dashboard setting
+  (Authentication -> URL Configuration).
+- The admin client uses `SUPABASE_SECRET_KEY` from the Vercel Supabase
+  integration because `SUPABASE_SERVICE_ROLE_KEY` is blank there (see
+  `docs/security.md`).
+- `ANTHROPIC_API_KEY`, `NEXT_PUBLIC_ONESIGNAL_APP_ID` and
+  `ONESIGNAL_REST_API_KEY` are **not** yet set: the AI Assistant and push
+  notifications show "not switched on yet" until they are.
+
+## Name
+
+The product was renamed from WorkLedger to **Verity** ("The true record of
+your work."). The name lives in `lib/brand.ts` and the message
+dictionaries. Internal identifiers keep the old name on purpose -- the
+`wl-` cookies, `workledger:` localStorage keys, `workledger_*` Vault
+secrets, the `workledger-reminders` cron job, the Vercel project, the
+GitHub repository and the local folder -- because renaming them would reset
+users' saved preferences or require infrastructure moves for no visible
+benefit.
 
 ## Live Supabase project
 
-- Project: `WorkLedger` (ref `hdeshlblsdsplpyayanz`, `us-east-1`), created
+- Project: `Verity` (ref `hdeshlblsdsplpyayanz`, `us-east-1`), created
   under the same organization as the user's other projects, on the free
   tier.
 - To free up a project slot, `gloworganicatelier@gmail.com's Project` was

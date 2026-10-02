@@ -178,7 +178,7 @@ npx supabase gen types typescript --project-id <id> > lib/supabase/database.type
 ## PWA / offline resilience
 
 `app/manifest.ts` (Next's native App Router manifest convention) and
-`public/sw.js` make WorkLedger installable and give it a real app shell:
+`public/sw.js` make Verity installable and give it a real app shell:
 
 - The service worker caches only immutable, fingerprinted assets
   (`/_next/static/*`, `/icons/*`) cache-first, and precaches `/offline`.

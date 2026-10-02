@@ -3,6 +3,7 @@ import { ChevronLeft, ClipboardCheck } from "lucide-react";
 
 import { getI18n } from "@/lib/i18n/server";
 import { LanguageSwitcher } from "@/components/language-switcher";
+import { APP_NAME } from "@/lib/brand";
 
 export default async function AuthLayout({ children }: { children: React.ReactNode }) {
   const { m } = await getI18n();
@@ -27,7 +28,7 @@ export default async function AuthLayout({ children }: { children: React.ReactNo
           <span className="flex size-16 items-center justify-center rounded-[27%] bg-primary text-primary-foreground shadow-[0_8px_24px_rgb(0_113_227/0.35)]">
             <ClipboardCheck className="size-8" />
           </span>
-          <span className="text-lg font-semibold tracking-tight">WorkLedger</span>
+          <span className="text-lg font-semibold tracking-tight">{APP_NAME}</span>
         </Link>
         {children}
       </div>

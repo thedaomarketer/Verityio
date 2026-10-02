@@ -1,9 +1,10 @@
 import type { MetadataRoute } from "next";
+import { APP_NAME } from "@/lib/brand";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "WorkLedger",
-    short_name: "WorkLedger",
+    name: APP_NAME,
+    short_name: APP_NAME,
     description: "Your complete record of work: hours, breaks, jobs, expenses, and earnings.",
     start_url: "/dashboard",
     display: "standalone",

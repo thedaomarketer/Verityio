@@ -12,6 +12,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { APP_NAME } from "@/lib/brand";
 
 function initials(name: string | null, email: string | null): string {
   if (name && name.trim()) {
@@ -35,7 +36,7 @@ export async function Header({
         <span className="flex size-7 items-center justify-center rounded-[8px] bg-primary text-primary-foreground">
           <ClipboardCheck className="size-4" />
         </span>
-        WorkLedger
+        {APP_NAME}
       </Link>
       <div className="hidden md:block" />
       <DropdownMenu>

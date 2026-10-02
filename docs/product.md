@@ -1,6 +1,6 @@
 # Product
 
-WorkLedger is a worker-focused work management application: a complete,
+Verity is a worker-focused work management application: a complete,
 trustworthy record of when someone worked, what they did, what they should
 have earned, and what happened during their shift.
 

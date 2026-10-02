@@ -7,9 +7,9 @@
  */
 export const en = {
   meta: {
-    title: "WorkLedger",
-    description: "Your complete record of work.",
-    landingTitle: "WorkLedger — Your complete record of work",
+    title: "Verity",
+    description: "The true record of your work.",
+    landingTitle: "Verity — The true record of your work",
     landingDescription:
       "Track shifts, breaks, earnings, overtime, expenses, and work notes in one place. Know what you've worked and what you're owed.",
   },
@@ -92,7 +92,7 @@ export const en = {
   },
 
   pwa: {
-    installPrompt: "Install WorkLedger for one-tap access to clock in and out.",
+    installPrompt: "Install Verity for one-tap access to clock in and out.",
     install: "Install",
   },
 
@@ -108,13 +108,13 @@ export const en = {
     body: "We couldn't load this page. Your recorded hours and data are safe -- try again, or head back to the dashboard.",
     goToDashboard: "Go to dashboard",
     tryAgain: "Try again",
-    globalTitle: "WorkLedger hit a snag",
+    globalTitle: "Verity hit a snag",
     globalBody: "Something went wrong loading the app. Your data is safe -- please try again.",
   },
 
   offline: {
     title: "You're offline",
-    body: "WorkLedger needs a connection to load your hours, jobs, and earnings safely. Reconnect and try again -- nothing has been lost.",
+    body: "Verity needs a connection to load your hours, jobs, and earnings safely. Reconnect and try again -- nothing has been lost.",
     tryAgain: "Try again",
   },
 
@@ -408,7 +408,7 @@ export const en = {
     },
     data: {
       title: "Your data",
-      body: "Download a copy of everything WorkLedger has recorded for you.",
+      body: "Download a copy of everything Verity has recorded for you.",
       export: "Export my data",
     },
     danger: {
@@ -427,7 +427,7 @@ export const en = {
   assistant: {
     title: "AI Assistant",
     newChat: "New chat",
-    intro: "Ask about your hours, earnings, shifts, expenses, or schedule. Answers come straight from your WorkLedger records.",
+    intro: "Ask about your hours, earnings, shifts, expenses, or schedule. Answers come straight from your Verity records.",
     suggestions: [
       "How many hours did I work this week?",
       "How much did I earn last month?",
@@ -471,7 +471,7 @@ export const en = {
 
   auth: {
     welcomeBack: "Welcome back",
-    signInSubtitle: "Sign in to your WorkLedger account.",
+    signInSubtitle: "Sign in to your Verity account.",
     checkEmail: "Check your email to confirm your account, then sign in below.",
     confirmationFailed: "That confirmation link is invalid or has expired. Try signing in, or request a new link.",
     email: "Email",
@@ -482,7 +482,7 @@ export const en = {
     noAccount: "Don't have an account?",
     signUp: "Sign up",
     createTitle: "Create your account",
-    createSubtitle: "Start your complete record of work.",
+    createSubtitle: "Start the true record of your work.",
     fullName: "Full name",
     passwordHint: "At least 8 characters.",
     createAccount: "Create account",
@@ -509,7 +509,7 @@ export const en = {
     heroLine2: "Every dollar.",
     heroLine3: "On the record.",
     heroBody:
-      "WorkLedger keeps your shifts, breaks, earnings, expenses, and work notes in one place, so you always know what you've worked and what you're owed.",
+      "Verity keeps your shifts, breaks, earnings, expenses, and work notes in one place, so you always know what you've worked and what you're owed.",
     createAccount: "Create your account",
     haveAccount: "I already have an account",
     featuresTitle: "Everything about your work, in one app.",
@@ -546,12 +546,12 @@ export const en = {
       },
       mobile: {
         title: "In your language, on your phone",
-        body: "Use WorkLedger in English, French, or Spanish, in your own time zone, installed to your home screen like an app.",
+        body: "Use Verity in English, French, or Spanish, in your own time zone, installed to your home screen like an app.",
       },
     },
     privacyTitle: "Your records are yours.",
     privacyBody:
-      "Work records can be sensitive. WorkLedger is built so that only you can see yours, and you're always free to take them with you.",
+      "Work records can be sensitive. Verity is built so that only you can see yours, and you're always free to take them with you.",
     privacy: {
       private: { title: "Private by default", body: "Every record is locked to your account at the database level." },
       export: { title: "Export anytime", body: "Download everything you've recorded, whenever you want." },
@@ -589,9 +589,9 @@ export const en = {
     testSent: "Test notification sent. It can take a few seconds to arrive.",
     enabled: "Notifications are on for this device.",
     disabled: "Notifications are off for this device.",
-    denied: "Notifications are blocked for WorkLedger. Allow them in your browser's site settings, then try again.",
+    denied: "Notifications are blocked for Verity. Allow them in your browser's site settings, then try again.",
     unsupported: "This browser can't receive push notifications.",
-    iosHint: "On iPhone and iPad, add WorkLedger to your Home Screen first (Share → Add to Home Screen), then turn notifications on from the installed app.",
+    iosHint: "On iPhone and iPad, add Verity to your Home Screen first (Share → Add to Home Screen), then turn notifications on from the installed app.",
     notConfigured: "Push notifications aren't switched on for this workspace yet.",
     remindersOff: "Reminders are turned off under Preferences, so nothing will be sent until you turn them back on.",
   },
@@ -605,7 +605,7 @@ export const en = {
     paydayTitle: "Payday today",
     paydayBody: "Today is payday for {job}.",
     paydayHolidayBody: "Today is payday for {job}. It's also {holiday}, so your pay may arrive a day early or late.",
-    testTitle: "WorkLedger notifications are on",
+    testTitle: "Verity notifications are on",
     testBody: "You'll get reminders here for long shifts, long breaks, and paydays.",
   },
 

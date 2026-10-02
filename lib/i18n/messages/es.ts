@@ -3,9 +3,9 @@ import type { Messages } from "./en";
 /** Spanish (US conventions). Keys and {placeholders} must match en.ts. */
 export const es: Messages = {
   meta: {
-    title: "WorkLedger",
-    description: "El registro completo de tu trabajo.",
-    landingTitle: "WorkLedger — El registro completo de tu trabajo",
+    title: "Verity",
+    description: "El registro fiel de tu trabajo.",
+    landingTitle: "Verity — El registro fiel de tu trabajo",
     landingDescription:
       "Registra turnos, descansos, ganancias, horas extra, gastos y notas de trabajo en un solo lugar. Sabe lo que has trabajado y lo que te deben.",
   },
@@ -87,7 +87,7 @@ export const es: Messages = {
   },
 
   pwa: {
-    installPrompt: "Instala WorkLedger para marcar entrada y salida con un toque.",
+    installPrompt: "Instala Verity para marcar entrada y salida con un toque.",
     install: "Instalar",
   },
 
@@ -103,13 +103,13 @@ export const es: Messages = {
     body: "No pudimos cargar esta página. Tus horas y datos están a salvo: inténtalo de nuevo o vuelve al panel.",
     goToDashboard: "Ir al panel",
     tryAgain: "Intentar de nuevo",
-    globalTitle: "WorkLedger tuvo un problema",
+    globalTitle: "Verity tuvo un problema",
     globalBody: "Algo salió mal al cargar la aplicación. Tus datos están a salvo: inténtalo de nuevo.",
   },
 
   offline: {
     title: "Sin conexión",
-    body: "WorkLedger necesita conexión para cargar tus horas, trabajos y ganancias de forma segura. Vuelve a conectarte e inténtalo de nuevo: no se ha perdido nada.",
+    body: "Verity necesita conexión para cargar tus horas, trabajos y ganancias de forma segura. Vuelve a conectarte e inténtalo de nuevo: no se ha perdido nada.",
     tryAgain: "Intentar de nuevo",
   },
 
@@ -408,7 +408,7 @@ export const es: Messages = {
     },
     data: {
       title: "Tus datos",
-      body: "Descarga una copia de todo lo que WorkLedger ha registrado para ti.",
+      body: "Descarga una copia de todo lo que Verity ha registrado para ti.",
       export: "Exportar mis datos",
     },
     danger: {
@@ -428,7 +428,7 @@ export const es: Messages = {
     title: "Asistente IA",
     newChat: "Nuevo chat",
     intro:
-      "Pregunta sobre tus horas, ganancias, turnos, gastos u horario. Las respuestas salen directamente de tus registros de WorkLedger.",
+      "Pregunta sobre tus horas, ganancias, turnos, gastos u horario. Las respuestas salen directamente de tus registros de Verity.",
     suggestions: [
       "¿Cuántas horas trabajé esta semana?",
       "¿Cuánto gané el mes pasado?",
@@ -472,7 +472,7 @@ export const es: Messages = {
 
   auth: {
     welcomeBack: "Hola de nuevo",
-    signInSubtitle: "Inicia sesión en tu cuenta de WorkLedger.",
+    signInSubtitle: "Inicia sesión en tu cuenta de Verity.",
     checkEmail: "Revisa tu correo para confirmar tu cuenta y luego inicia sesión aquí abajo.",
     confirmationFailed:
       "Ese enlace de confirmación no es válido o ya venció. Intenta iniciar sesión o solicita un enlace nuevo.",
@@ -484,7 +484,7 @@ export const es: Messages = {
     noAccount: "¿No tienes cuenta?",
     signUp: "Regístrate",
     createTitle: "Crea tu cuenta",
-    createSubtitle: "Empieza el registro completo de tu trabajo.",
+    createSubtitle: "Empieza el registro fiel de tu trabajo.",
     fullName: "Nombre completo",
     passwordHint: "Al menos 8 caracteres.",
     createAccount: "Crear cuenta",
@@ -511,7 +511,7 @@ export const es: Messages = {
     heroLine2: "Cada dólar.",
     heroLine3: "Registrado.",
     heroBody:
-      "WorkLedger reúne tus turnos, descansos, ganancias, gastos y notas de trabajo en un solo lugar, para que siempre sepas lo que has trabajado y lo que te deben.",
+      "Verity reúne tus turnos, descansos, ganancias, gastos y notas de trabajo en un solo lugar, para que siempre sepas lo que has trabajado y lo que te deben.",
     createAccount: "Crea tu cuenta",
     haveAccount: "Ya tengo una cuenta",
     featuresTitle: "Todo tu trabajo, en una sola app.",
@@ -548,12 +548,12 @@ export const es: Messages = {
       },
       mobile: {
         title: "En tu idioma, en tu teléfono",
-        body: "Usa WorkLedger en español, inglés o francés, en tu propia zona horaria, instalado en tu pantalla de inicio como una app.",
+        body: "Usa Verity en español, inglés o francés, en tu propia zona horaria, instalado en tu pantalla de inicio como una app.",
       },
     },
     privacyTitle: "Tus registros son tuyos.",
     privacyBody:
-      "Los registros de trabajo pueden ser delicados. WorkLedger está hecho para que solo tú puedas ver los tuyos, y siempre puedes llevártelos.",
+      "Los registros de trabajo pueden ser delicados. Verity está hecho para que solo tú puedas ver los tuyos, y siempre puedes llevártelos.",
     privacy: {
       private: {
         title: "Privado por defecto",
@@ -597,9 +597,9 @@ export const es: Messages = {
     testSent: "Notificación de prueba enviada. Puede tardar unos segundos en llegar.",
     enabled: "Las notificaciones están activadas en este dispositivo.",
     disabled: "Las notificaciones están desactivadas en este dispositivo.",
-    denied: "Las notificaciones están bloqueadas para WorkLedger. Permítelas en la configuración del sitio de tu navegador y vuelve a intentarlo.",
+    denied: "Las notificaciones están bloqueadas para Verity. Permítelas en la configuración del sitio de tu navegador y vuelve a intentarlo.",
     unsupported: "Este navegador no puede recibir notificaciones push.",
-    iosHint: "En iPhone y iPad, primero agrega WorkLedger a tu pantalla de inicio (Compartir → Agregar a inicio) y luego activa las notificaciones desde la app instalada.",
+    iosHint: "En iPhone y iPad, primero agrega Verity a tu pantalla de inicio (Compartir → Agregar a inicio) y luego activa las notificaciones desde la app instalada.",
     notConfigured: "Las notificaciones push aún no están activadas en este espacio.",
     remindersOff: "Los recordatorios están desactivados en Preferencias, así que no se enviará nada hasta que los vuelvas a activar.",
   },
@@ -612,7 +612,7 @@ export const es: Messages = {
     paydayTitle: "Hoy es día de pago",
     paydayBody: "Hoy es día de pago de {job}.",
     paydayHolidayBody: "Hoy es día de pago de {job}. También es {holiday}, así que el pago podría llegar un día antes o después.",
-    testTitle: "Las notificaciones de WorkLedger están activadas",
+    testTitle: "Las notificaciones de Verity están activadas",
     testBody: "Aquí recibirás recordatorios de turnos largos, descansos largos y días de pago.",
   },
 

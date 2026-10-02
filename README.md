@@ -1,8 +1,8 @@
-# WorkLedger
+# Verity
 
 Your complete record of work.
 
-WorkLedger is a worker-focused time tracking and work management app:
+Verity is a worker-focused time tracking and work management app:
 clock in/out, breaks, jobs and overtime rates, a work journal (Work
 Evidence Timeline), expenses, mileage, a dashboard, and reports — for
 employees, contractors, freelancers, and gig workers.

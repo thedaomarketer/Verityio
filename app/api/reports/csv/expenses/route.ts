@@ -1,4 +1,5 @@
 import Papa from "papaparse";
+import { APP_SLUG } from "@/lib/brand";
 import { NextResponse, type NextRequest } from "next/server";
 
 import { createClient } from "@/lib/supabase/server";
@@ -47,7 +48,7 @@ export async function GET(request: NextRequest) {
   return new NextResponse(csv, {
     headers: {
       "Content-Type": "text/csv; charset=utf-8",
-      "Content-Disposition": `attachment; filename="workledger-expenses.csv"`,
+      "Content-Disposition": `attachment; filename="${APP_SLUG}-expenses.csv"`,
     },
   });
 }

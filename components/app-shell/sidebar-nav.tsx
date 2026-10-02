@@ -8,6 +8,7 @@ import { cn } from "@/lib/utils";
 import { useI18n } from "@/lib/i18n/client";
 import { NAV_ITEMS, SECONDARY_NAV_ITEMS } from "./nav-items";
 import { CreateMenu } from "./create-menu";
+import { APP_NAME } from "@/lib/brand";
 
 function isActive(pathname: string, href: string) {
   return pathname === href || pathname.startsWith(`${href}/`);
@@ -23,7 +24,7 @@ export function SidebarNav() {
         <span className="flex size-8 items-center justify-center rounded-[9px] bg-primary text-primary-foreground">
           <ClipboardCheck className="size-[18px]" />
         </span>
-        WorkLedger
+        {APP_NAME}
       </Link>
       <div className="p-3 pb-0">
         <CreateMenu variant="button" />

@@ -2,7 +2,7 @@
 
 PostgreSQL via Supabase. All migrations live in `supabase/migrations/`,
 numbered sequentially, and were applied directly to the live project
-(`WorkLedger`, ref `hdeshlblsdsplpyayanz`) via the Supabase MCP tools during
+(`Verity`, ref `hdeshlblsdsplpyayanz`) via the Supabase MCP tools during
 this build.
 
 ## Tables

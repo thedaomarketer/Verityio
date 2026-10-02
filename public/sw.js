@@ -1,4 +1,4 @@
-// WorkLedger service worker: caches the static app shell for fast repeat
+// Verity service worker: caches the static app shell for fast repeat
 // loads and a graceful offline fallback. Never caches API responses, auth
 // routes, or dynamic pages -- work records must always reflect the live
 // database, never a stale cached copy.
