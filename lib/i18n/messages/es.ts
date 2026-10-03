@@ -3,9 +3,9 @@ import type { Messages } from "./en";
 /** Spanish (US conventions). Keys and {placeholders} must match en.ts. */
 export const es: Messages = {
   meta: {
-    title: "Verity",
+    title: "Verityio",
     description: "El registro fiel de tu trabajo.",
-    landingTitle: "Verity — El registro fiel de tu trabajo",
+    landingTitle: "Verityio — El registro fiel de tu trabajo",
     landingDescription:
       "Registra turnos, descansos, ganancias, horas extra, gastos y notas de trabajo en un solo lugar. Sabe lo que has trabajado y lo que te deben.",
   },
@@ -88,7 +88,7 @@ export const es: Messages = {
   },
 
   pwa: {
-    installPrompt: "Instala Verity para marcar entrada y salida con un toque.",
+    installPrompt: "Instala Verityio para marcar entrada y salida con un toque.",
     install: "Instalar",
   },
 
@@ -104,13 +104,13 @@ export const es: Messages = {
     body: "No pudimos cargar esta página. Tus horas y datos están a salvo: inténtalo de nuevo o vuelve al panel.",
     goToDashboard: "Ir al panel",
     tryAgain: "Intentar de nuevo",
-    globalTitle: "Verity tuvo un problema",
+    globalTitle: "Verityio tuvo un problema",
     globalBody: "Algo salió mal al cargar la aplicación. Tus datos están a salvo: inténtalo de nuevo.",
   },
 
   offline: {
     title: "Sin conexión",
-    body: "Verity necesita conexión para cargar tus horas, trabajos y ganancias de forma segura. Vuelve a conectarte e inténtalo de nuevo: no se ha perdido nada.",
+    body: "Verityio necesita conexión para cargar tus horas, trabajos y ganancias de forma segura. Vuelve a conectarte e inténtalo de nuevo: no se ha perdido nada.",
     tryAgain: "Intentar de nuevo",
   },
 
@@ -413,7 +413,7 @@ export const es: Messages = {
     },
     data: {
       title: "Tus datos",
-      body: "Descarga una copia de todo lo que Verity ha registrado para ti.",
+      body: "Descarga una copia de todo lo que Verityio ha registrado para ti.",
       export: "Exportar mis datos",
     },
     danger: {
@@ -433,7 +433,7 @@ export const es: Messages = {
     title: "Asistente IA",
     newChat: "Nuevo chat",
     intro:
-      "Pregunta sobre tus horas, ganancias, turnos, gastos u horario. Las respuestas salen directamente de tus registros de Verity.",
+      "Pregunta sobre tus horas, ganancias, turnos, gastos u horario. Las respuestas salen directamente de tus registros de Verityio.",
     suggestions: [
       "¿Cuántas horas trabajé esta semana?",
       "¿Cuánto gané el mes pasado?",
@@ -455,7 +455,7 @@ export const es: Messages = {
     country: "País",
     canada: "Canadá",
     unitedStates: "Estados Unidos",
-    disclaimer: "Estos enlaces abren sitios oficiales del gobierno en una pestaña nueva. Verity no está afiliado a ellos.",
+    disclaimer: "Estos enlaces abren sitios oficiales del gobierno en una pestaña nueva. Verityio no está afiliado a ellos.",
     opensInNewTab: "se abre en una pestaña nueva",
     taxTimeTitle: "Temporada de impuestos, con tus propios registros",
     taxTimeBody: "Descarga tus horas y gastos del año, o revisa tu retención estimada.",
@@ -513,7 +513,7 @@ export const es: Messages = {
 
   auth: {
     welcomeBack: "Hola de nuevo",
-    signInSubtitle: "Inicia sesión en tu cuenta de Verity.",
+    signInSubtitle: "Inicia sesión en tu cuenta de Verityio.",
     checkEmail: "Revisa tu correo para confirmar tu cuenta y luego inicia sesión aquí abajo.",
     emailConfirmed: "Tu correo está confirmado. Inicia sesión para empezar.",
     confirmationFailed:
@@ -553,7 +553,7 @@ export const es: Messages = {
     heroLine2: "Cada dólar.",
     heroLine3: "Registrado.",
     heroBody:
-      "Verity reúne tus turnos, descansos, ganancias, gastos y notas de trabajo en un solo lugar, para que siempre sepas lo que has trabajado y lo que te deben.",
+      "Verityio reúne tus turnos, descansos, ganancias, gastos y notas de trabajo en un solo lugar, para que siempre sepas lo que has trabajado y lo que te deben.",
     createAccount: "Crea tu cuenta",
     haveAccount: "Ya tengo una cuenta",
     featuresTitle: "Todo tu trabajo, en una sola app.",
@@ -590,12 +590,12 @@ export const es: Messages = {
       },
       mobile: {
         title: "En tu idioma, en tu teléfono",
-        body: "Usa Verity en español, inglés o francés, en tu propia zona horaria, instalado en tu pantalla de inicio como una app.",
+        body: "Usa Verityio en español, inglés o francés, en tu propia zona horaria, instalado en tu pantalla de inicio como una app.",
       },
     },
     privacyTitle: "Tus registros son tuyos.",
     privacyBody:
-      "Los registros de trabajo pueden ser delicados. Verity está hecho para que solo tú puedas ver los tuyos, y siempre puedes llevártelos.",
+      "Los registros de trabajo pueden ser delicados. Verityio está hecho para que solo tú puedas ver los tuyos, y siempre puedes llevártelos.",
     privacy: {
       private: {
         title: "Privado por defecto",
@@ -662,9 +662,9 @@ export const es: Messages = {
     testSent: "Notificación de prueba enviada. Puede tardar unos segundos en llegar.",
     enabled: "Las notificaciones están activadas en este dispositivo.",
     disabled: "Las notificaciones están desactivadas en este dispositivo.",
-    denied: "Las notificaciones están bloqueadas para Verity. Permítelas en la configuración del sitio de tu navegador y vuelve a intentarlo.",
+    denied: "Las notificaciones están bloqueadas para Verityio. Permítelas en la configuración del sitio de tu navegador y vuelve a intentarlo.",
     unsupported: "Este navegador no puede recibir notificaciones push.",
-    iosHint: "En iPhone y iPad, primero agrega Verity a tu pantalla de inicio (Compartir → Agregar a inicio) y luego activa las notificaciones desde la app instalada.",
+    iosHint: "En iPhone y iPad, primero agrega Verityio a tu pantalla de inicio (Compartir → Agregar a inicio) y luego activa las notificaciones desde la app instalada.",
     notConfigured: "Las notificaciones push aún no están activadas en este espacio.",
     remindersOff: "Los recordatorios están desactivados en Preferencias, así que no se enviará nada hasta que los vuelvas a activar.",
   },
@@ -677,7 +677,7 @@ export const es: Messages = {
     paydayTitle: "Hoy es día de pago",
     paydayBody: "Hoy es día de pago de {job}.",
     paydayHolidayBody: "Hoy es día de pago de {job}. También es {holiday}, así que el pago podría llegar un día antes o después.",
-    testTitle: "Las notificaciones de Verity están activadas",
+    testTitle: "Las notificaciones de Verityio están activadas",
     testBody: "Aquí recibirás recordatorios de turnos largos, descansos largos y días de pago.",
   },
 

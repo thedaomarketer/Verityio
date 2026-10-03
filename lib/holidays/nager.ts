@@ -4,7 +4,7 @@ import { z } from "zod";
 
 import type { PublicHoliday } from "@/lib/calculations/holidays";
 
-/** Countries Verity has regions for (the same set as tax jurisdictions). */
+/** Countries Verityio has regions for (the same set as tax jurisdictions). */
 export type HolidayCountry = "CA" | "US";
 
 const NAGER_BASE_URL = "https://date.nager.at/api/v3";

@@ -39,7 +39,7 @@ Status as of this build. See `docs/current-state.md` for the detailed
   app, plus a floating quick-create action button (mobile bottom nav) and
   matching sidebar button (desktop) for the five most common create flows.
   No push notifications yet.
-- **Deployed**: live on Vercel at https://verity-work.vercel.app.
+- **Deployed**: live on Vercel at https://verityio.vercel.app.
 
 ## Not started
 

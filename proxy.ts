@@ -3,11 +3,11 @@ import { NextResponse, type NextRequest } from "next/server";
 import { updateSession } from "@/lib/supabase/middleware";
 
 /**
- * Addresses the app used before the rename to Verity. Visitors (and old
+ * Addresses the app used before the rename to Verityio. Visitors (and old
  * links in emails or bookmarks) are sent to the same path on the current
  * address. Per-deployment preview URLs are untouched.
  */
-const LEGACY_HOSTS = new Set(["workledger-three.vercel.app", "workledgerio.vercel.app"]);
+const LEGACY_HOSTS = new Set(["workledger-three.vercel.app", "workledgerio.vercel.app", "verity-work.vercel.app"]);
 
 function canonicalHost(): string | null {
   try {
@@ -20,7 +20,10 @@ function canonicalHost(): string | null {
 export function proxy(request: NextRequest) {
   const host = request.headers.get("host");
   const target = canonicalHost();
-  if (host && target && host !== target && LEGACY_HOSTS.has(host)) {
+  // API calls are never redirected: the reminder scheduler (pg_net) doesn't
+  // follow redirects, and a POST must reach the handler where it was sent.
+  const isApi = request.nextUrl.pathname.startsWith("/api/");
+  if (host && target && host !== target && LEGACY_HOSTS.has(host) && !isApi) {
     const url = request.nextUrl.clone();
     url.protocol = "https:";
     url.host = target;

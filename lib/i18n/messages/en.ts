@@ -7,9 +7,9 @@
  */
 export const en = {
   meta: {
-    title: "Verity",
+    title: "Verityio",
     description: "The true record of your work.",
-    landingTitle: "Verity — The true record of your work",
+    landingTitle: "Verityio — The true record of your work",
     landingDescription:
       "Track shifts, breaks, earnings, overtime, expenses, and work notes in one place. Know what you've worked and what you're owed.",
   },
@@ -93,7 +93,7 @@ export const en = {
   },
 
   pwa: {
-    installPrompt: "Install Verity for one-tap access to clock in and out.",
+    installPrompt: "Install Verityio for one-tap access to clock in and out.",
     install: "Install",
   },
 
@@ -109,13 +109,13 @@ export const en = {
     body: "We couldn't load this page. Your recorded hours and data are safe -- try again, or head back to the dashboard.",
     goToDashboard: "Go to dashboard",
     tryAgain: "Try again",
-    globalTitle: "Verity hit a snag",
+    globalTitle: "Verityio hit a snag",
     globalBody: "Something went wrong loading the app. Your data is safe -- please try again.",
   },
 
   offline: {
     title: "You're offline",
-    body: "Verity needs a connection to load your hours, jobs, and earnings safely. Reconnect and try again -- nothing has been lost.",
+    body: "Verityio needs a connection to load your hours, jobs, and earnings safely. Reconnect and try again -- nothing has been lost.",
     tryAgain: "Try again",
   },
 
@@ -413,7 +413,7 @@ export const en = {
     },
     data: {
       title: "Your data",
-      body: "Download a copy of everything Verity has recorded for you.",
+      body: "Download a copy of everything Verityio has recorded for you.",
       export: "Export my data",
     },
     danger: {
@@ -432,7 +432,7 @@ export const en = {
   assistant: {
     title: "AI Assistant",
     newChat: "New chat",
-    intro: "Ask about your hours, earnings, shifts, expenses, or schedule. Answers come straight from your Verity records.",
+    intro: "Ask about your hours, earnings, shifts, expenses, or schedule. Answers come straight from your Verityio records.",
     suggestions: [
       "How many hours did I work this week?",
       "How much did I earn last month?",
@@ -454,7 +454,7 @@ export const en = {
     country: "Country",
     canada: "Canada",
     unitedStates: "United States",
-    disclaimer: "These links open official government sites in a new tab. Verity isn't affiliated with them.",
+    disclaimer: "These links open official government sites in a new tab. Verityio isn't affiliated with them.",
     opensInNewTab: "opens in a new tab",
     taxTimeTitle: "Tax time, from your own records",
     taxTimeBody: "Download your hours and expenses for the year, or check your estimated withholding.",
@@ -512,7 +512,7 @@ export const en = {
 
   auth: {
     welcomeBack: "Welcome back",
-    signInSubtitle: "Sign in to your Verity account.",
+    signInSubtitle: "Sign in to your Verityio account.",
     checkEmail: "Check your email to confirm your account, then sign in below.",
     emailConfirmed: "Your email is confirmed. Sign in to get started.",
     confirmationFailed: "That confirmation link is invalid or has expired. Try signing in, or request a new link.",
@@ -551,7 +551,7 @@ export const en = {
     heroLine2: "Every dollar.",
     heroLine3: "On the record.",
     heroBody:
-      "Verity keeps your shifts, breaks, earnings, expenses, and work notes in one place, so you always know what you've worked and what you're owed.",
+      "Verityio keeps your shifts, breaks, earnings, expenses, and work notes in one place, so you always know what you've worked and what you're owed.",
     createAccount: "Create your account",
     haveAccount: "I already have an account",
     featuresTitle: "Everything about your work, in one app.",
@@ -588,12 +588,12 @@ export const en = {
       },
       mobile: {
         title: "In your language, on your phone",
-        body: "Use Verity in English, French, or Spanish, in your own time zone, installed to your home screen like an app.",
+        body: "Use Verityio in English, French, or Spanish, in your own time zone, installed to your home screen like an app.",
       },
     },
     privacyTitle: "Your records are yours.",
     privacyBody:
-      "Work records can be sensitive. Verity is built so that only you can see yours, and you're always free to take them with you.",
+      "Work records can be sensitive. Verityio is built so that only you can see yours, and you're always free to take them with you.",
     privacy: {
       private: { title: "Private by default", body: "Every record is locked to your account at the database level." },
       export: { title: "Export anytime", body: "Download everything you've recorded, whenever you want." },
@@ -654,9 +654,9 @@ export const en = {
     testSent: "Test notification sent. It can take a few seconds to arrive.",
     enabled: "Notifications are on for this device.",
     disabled: "Notifications are off for this device.",
-    denied: "Notifications are blocked for Verity. Allow them in your browser's site settings, then try again.",
+    denied: "Notifications are blocked for Verityio. Allow them in your browser's site settings, then try again.",
     unsupported: "This browser can't receive push notifications.",
-    iosHint: "On iPhone and iPad, add Verity to your Home Screen first (Share → Add to Home Screen), then turn notifications on from the installed app.",
+    iosHint: "On iPhone and iPad, add Verityio to your Home Screen first (Share → Add to Home Screen), then turn notifications on from the installed app.",
     notConfigured: "Push notifications aren't switched on for this workspace yet.",
     remindersOff: "Reminders are turned off under Preferences, so nothing will be sent until you turn them back on.",
   },
@@ -670,7 +670,7 @@ export const en = {
     paydayTitle: "Payday today",
     paydayBody: "Today is payday for {job}.",
     paydayHolidayBody: "Today is payday for {job}. It's also {holiday}, so your pay may arrive a day early or late.",
-    testTitle: "Verity notifications are on",
+    testTitle: "Verityio notifications are on",
     testBody: "You'll get reminders here for long shifts, long breaks, and paydays.",
   },
 

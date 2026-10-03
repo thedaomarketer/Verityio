@@ -20,7 +20,7 @@ const MULTIPLIERS = [
 /**
  * "What's my week worth?" on the homepage -- runs the app's own
  * calculateEarnings (integer cents, the same overtime split as real
- * shifts), so the numbers match what Verity would record.
+ * shifts), so the numbers match what Verityio would record.
  */
 export function PayEstimator() {
   const { locale, intl, m } = useI18n();

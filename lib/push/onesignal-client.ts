@@ -50,7 +50,7 @@ export function loadOneSignal(appId: string): Promise<OneSignalApi> {
           serviceWorkerPath: "push/onesignal/OneSignalSDKWorker.js",
           serviceWorkerParam: { scope: "/push/onesignal/" },
           allowLocalhostAsSecureOrigin: true,
-          // Verity shows its own "turn on" button; no OneSignal prompts.
+          // Verityio shows its own "turn on" button; no OneSignal prompts.
           promptOptions: { slidedown: { prompts: [] } },
           notifyButton: { enable: false },
         });

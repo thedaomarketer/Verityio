@@ -1,6 +1,6 @@
 # AI Assistant
 
-**Status: implemented.** `/assistant` is a real chat UI backed by the Anthropic API, scoped to the signed-in user's own Verity data.
+**Status: implemented.** `/assistant` is a real chat UI backed by the Anthropic API, scoped to the signed-in user's own Verityio data.
 
 ## Principle
 
@@ -66,7 +66,7 @@ The model is never given direct database or arbitrary-SQL access. Every fact it 
 
 Example:
 
-> Based on your recorded shifts, your estimated gross earnings were $3,842.50. This includes 154 regular hours and 6.5 overtime hours. This is a gross estimate based on your Verity records -- it does not represent your actual payroll deposit.
+> Based on your recorded shifts, your estimated gross earnings were $3,842.50. This includes 154 regular hours and 6.5 overtime hours. This is a gross estimate based on your Verityio records -- it does not represent your actual payroll deposit.
 
 ## Known limitations
 

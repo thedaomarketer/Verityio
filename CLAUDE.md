@@ -2,9 +2,9 @@
 
 ## Project
 
-You are building Verity.
+You are building Verityio.
 
-Verity is a worker-focused work recording and productivity platform.
+Verityio is a worker-focused work recording and productivity platform.
 
 Its core purpose is to help users accurately record:
 

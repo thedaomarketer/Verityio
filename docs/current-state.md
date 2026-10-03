@@ -67,7 +67,7 @@ for what's next.
   throughout the UI. Also surfaced as a compact "next payday" card on the
   dashboard. See `docs/tax.md`.
 - **Installable / offline-resilient app (PWA)**: `app/manifest.ts` +
-  `public/sw.js` make Verity installable to a phone's home screen
+  `public/sw.js` make Verityio installable to a phone's home screen
   (`components/pwa/install-prompt.tsx` prompts on supporting browsers) and
   keeps the static app shell available when the network drops, falling back
   to a friendly `/offline` page instead of a browser error. Dynamic/auth
@@ -129,7 +129,7 @@ for what's next.
   read in the user's saved zone on the server -- see "Time zones" in
   `docs/architecture.md`.
 
-Verified directly against the live Supabase project (`Verity`,
+Verified directly against the live Supabase project (`WorkLedger`,
 `hdeshlblsdsplpyayanz`) via SQL: the new-user trigger creates a profile and
 default settings row, the one-active-shift constraint rejects a duplicate
 clock-in, and RLS correctly hides one user's jobs/shifts/breaks from another
@@ -209,7 +209,7 @@ exercise the authenticated app directly.
   US; Flinks or Plaid in Canada), a signed agreement, per-connection fees,
   and a security review for storing access tokens -- see the plan discussed
   with the product owner before starting.
-- **Tax preparation**: Verity estimates withholding and exports records,
+- **Tax preparation**: Verityio estimates withholding and exports records,
   but doesn't file returns; the Resources page links to official free
   filing help.
 - **Translations**: French and Spanish were written in-house, not by a
@@ -225,11 +225,15 @@ exercise the authenticated app directly.
 
 ## Live deployment
 
-- Production: **https://verity-work.vercel.app** (Vercel project
-  `workledger`). The earlier addresses `workledgerio.vercel.app` and
-  `workledger-three.vercel.app` redirect there (308, same path) from
-  `proxy.ts`; `verity.vercel.app` and similar were already taken by other
-  Vercel accounts.
+- Production: **https://verityio.vercel.app** (Vercel project
+  `workledger`). Earlier addresses -- `verity-work.vercel.app`,
+  `workledgerio.vercel.app` and `workledger-three.vercel.app` -- redirect
+  pages there (308, same path) from `proxy.ts`; `/api/` requests are never
+  redirected, because the reminder scheduler's pg_net calls don't follow
+  redirects.
+- The reminder scheduler's Vault URL (`workledger_app_url`) still points at
+  `verity-work.vercel.app`, which keeps working because of the `/api/`
+  exemption; update it to the new address when convenient.
 - `NEXT_PUBLIC_SITE_URL` is the production URL (used for email links and
   push notification links). Supabase Auth's **Site URL** and **Redirect
   URLs** must list the same address, or confirmation/reset emails link to
@@ -244,7 +248,7 @@ exercise the authenticated app directly.
 
 ## Name
 
-The product was renamed from WorkLedger to **Verity** ("The true record of
+The product was renamed from WorkLedger to Verity, then to **Verityio** ("The true record of
 your work."). The name lives in `lib/brand.ts` and the message
 dictionaries. Internal identifiers keep the old name on purpose -- the
 `wl-` cookies, `workledger:` localStorage keys, `workledger_*` Vault
@@ -255,7 +259,7 @@ benefit.
 
 ## Live Supabase project
 
-- Project: `Verity` (ref `hdeshlblsdsplpyayanz`, `us-east-1`), created
+- Project: `WorkLedger` (ref `hdeshlblsdsplpyayanz`, `us-east-1`), created
   under the same organization as the user's other projects, on the free
   tier.
 - To free up a project slot, `gloworganicatelier@gmail.com's Project` was
