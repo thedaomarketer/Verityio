@@ -9,3 +9,9 @@ export const APP_NAME = "Verityio";
 
 /** File-name prefix for downloads, e.g. "verityio-hours.csv". */
 export const APP_SLUG = "verityio";
+
+/** Shown in the "Built by …" credit in footers and on the Help screen. */
+export const BUILT_BY = "DAO";
+
+/** Holder of the Verityio™ mark, named in the trademark notice. */
+export const TRADEMARK_OWNER = "Nexora Digital Systems";

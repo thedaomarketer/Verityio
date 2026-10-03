@@ -2,6 +2,7 @@ import Link from "next/link";
 import { ChevronRight, HelpCircle } from "lucide-react";
 
 import { getI18n } from "@/lib/i18n/server";
+import { BrandCredit } from "@/components/brand-credit";
 import type { Messages } from "@/lib/i18n/messages/en";
 import { NAV_ITEMS, SECONDARY_NAV_ITEMS, type NavItem } from "@/components/app-shell/nav-items";
 
@@ -40,6 +41,7 @@ export default async function MorePage() {
       <h1 className="text-[28px] leading-tight font-bold tracking-tight">{m.nav.more}</h1>
       <Group m={m} items={NAV_ITEMS.filter((item) => !item.mobile)} />
       <Group m={m} items={[...SECONDARY_NAV_ITEMS, HELP_ITEM]} />
+      <BrandCredit className="text-center" />
     </div>
   );
 }

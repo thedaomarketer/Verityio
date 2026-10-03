@@ -28,6 +28,7 @@ import { PayEstimator } from "@/components/landing/pay-estimator";
 import { Reveal } from "@/components/landing/reveal";
 import { safeRedirectPath } from "@/lib/safe-redirect";
 import { APP_NAME } from "@/lib/brand";
+import { BrandCredit } from "@/components/brand-credit";
 
 export async function generateMetadata(): Promise<Metadata> {
   const { m } = await getI18n();
@@ -199,7 +200,10 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ n
 
       <footer className="border-t border-black/[0.06] pb-[env(safe-area-inset-bottom)]">
         <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-3 px-4 py-6 text-sm text-muted-foreground sm:flex-row sm:px-6">
-          <p>&copy; {new Date().getFullYear()} {APP_NAME}</p>
+          <div className="space-y-1 text-center sm:text-left">
+            <p>&copy; {new Date().getFullYear()} {APP_NAME}</p>
+            <BrandCredit />
+          </div>
           <div className="flex items-center gap-5">
             <LanguageSwitcher className="sm:hidden" />
             <Link href="/login" className="hover:text-foreground">

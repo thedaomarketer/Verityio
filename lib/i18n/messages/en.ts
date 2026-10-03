@@ -15,6 +15,8 @@ export const en = {
   },
 
   common: {
+    builtBy: "Built by {name}",
+    trademark: "{app}™ is a trademark of {owner}.",
     save: "Save",
     saving: "Saving...",
     saveChanges: "Save changes",

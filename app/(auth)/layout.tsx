@@ -4,6 +4,7 @@ import { ChevronLeft, ClipboardCheck } from "lucide-react";
 import { getI18n } from "@/lib/i18n/server";
 import { LanguageSwitcher } from "@/components/language-switcher";
 import { APP_NAME } from "@/lib/brand";
+import { BrandCredit } from "@/components/brand-credit";
 
 export default async function AuthLayout({ children }: { children: React.ReactNode }) {
   const { m } = await getI18n();
@@ -32,6 +33,7 @@ export default async function AuthLayout({ children }: { children: React.ReactNo
         </Link>
         {children}
       </div>
+      <BrandCredit className="text-center" />
     </div>
   );
 }

@@ -1,5 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { getI18n } from "@/lib/i18n/server";
+import { BrandCredit } from "@/components/brand-credit";
 
 export default async function HelpPage() {
   const { m } = await getI18n();
@@ -16,6 +17,7 @@ export default async function HelpPage() {
           </Card>
         ))}
       </div>
+      <BrandCredit className="text-center" />
     </div>
   );
 }

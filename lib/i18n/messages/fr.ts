@@ -11,6 +11,8 @@ export const fr: Messages = {
   },
 
   common: {
+    builtBy: "Conçu par {name}",
+    trademark: "{app}™ est une marque de commerce de {owner}.",
     save: "Enregistrer",
     saving: "Enregistrement...",
     saveChanges: "Enregistrer les modifications",

@@ -257,6 +257,12 @@ GitHub repository and the local folder -- because renaming them would reset
 users' saved preferences or require infrastructure moves for no visible
 benefit.
 
+Credit and trademark notice: "Built by DAO · Verityio™ is a trademark of
+Nexora Digital Systems." (`BUILT_BY` / `TRADEMARK_OWNER` in `lib/brand.ts`,
+translated strings `common.builtBy` / `common.trademark`, rendered by
+`components/brand-credit.tsx`). It appears in the landing-page footer, under
+the sign-in/register forms, on the Help page and on the mobile More screen.
+
 ## Live Supabase project
 
 - Project: `WorkLedger` (ref `hdeshlblsdsplpyayanz`, `us-east-1`), created
