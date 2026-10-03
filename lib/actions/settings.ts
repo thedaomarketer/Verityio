@@ -6,6 +6,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { getI18n, setLocaleCookie } from "@/lib/i18n/server";
 import { validationMessage } from "@/lib/i18n/validation";
+import { formText } from "@/lib/validation/form";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { logAudit } from "@/lib/audit/log";
 import {
@@ -28,8 +29,8 @@ export async function updateProfileAction(
   const { m } = await getI18n();
   const parsed = profileSchema.safeParse({
     fullName: formData.get("fullName"),
-    phone: formData.get("phone"),
-    country: formData.get("country"),
+    phone: formText(formData, "phone"),
+    country: formText(formData, "country"),
     defaultHourlyRate: formData.get("defaultHourlyRate") || undefined,
   });
 
@@ -172,9 +173,9 @@ export async function updateTaxSettingsAction(
 ): Promise<ActionResult> {
   const { m } = await getI18n();
   const parsed = taxSettingsSchema.safeParse({
-    taxCountry: formData.get("taxCountry"),
-    taxRegion: formData.get("taxRegion"),
-    taxCity: formData.get("taxCity"),
+    taxCountry: formText(formData, "taxCountry"),
+    taxRegion: formText(formData, "taxRegion"),
+    taxCity: formText(formData, "taxCity"),
   });
 
   if (!parsed.success) {

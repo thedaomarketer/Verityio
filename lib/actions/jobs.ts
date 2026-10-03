@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { getI18n } from "@/lib/i18n/server";
 import { validationMessage } from "@/lib/i18n/validation";
+import { formText } from "@/lib/validation/form";
 import { logAudit } from "@/lib/audit/log";
 import { jobSchema } from "@/lib/validation/jobs";
 
@@ -15,18 +16,18 @@ export interface ActionResult {
 function parseJobForm(formData: FormData) {
   return jobSchema.safeParse({
     name: formData.get("name"),
-    companyName: formData.get("companyName"),
-    jobTitle: formData.get("jobTitle"),
-    description: formData.get("description"),
+    companyName: formText(formData, "companyName"),
+    jobTitle: formText(formData, "jobTitle"),
+    description: formText(formData, "description"),
     hourlyRate: formData.get("hourlyRate") || undefined,
     overtimeRate: formData.get("overtimeRate") || undefined,
     overtimeThresholdHours: formData.get("overtimeThresholdHours") || undefined,
-    startDate: formData.get("startDate"),
-    endDate: formData.get("endDate"),
+    startDate: formText(formData, "startDate"),
+    endDate: formText(formData, "endDate"),
     color: formData.get("color") || "#2563eb",
-    notes: formData.get("notes"),
+    notes: formText(formData, "notes"),
     payFrequency: formData.get("payFrequency") || undefined,
-    payAnchorDate: formData.get("payAnchorDate"),
+    payAnchorDate: formText(formData, "payAnchorDate"),
   });
 }
 

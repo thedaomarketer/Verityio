@@ -43,9 +43,12 @@ export async function updateSession(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   if (!user && !isPublicPath(pathname) && pathname !== "/") {
+    // Signed-out visitors land on the homepage first (not straight on a
+    // sign-in form); its sign-in button carries them back to `next`.
     const url = request.nextUrl.clone();
-    url.pathname = "/login";
-    url.searchParams.set("redirectTo", pathname);
+    url.pathname = "/";
+    url.search = "";
+    url.searchParams.set("next", pathname);
     return NextResponse.redirect(url);
   }
 

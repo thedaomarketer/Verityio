@@ -156,6 +156,26 @@ exercise the authenticated app directly.
   off. **Dormant until** `NEXT_PUBLIC_ONESIGNAL_APP_ID` and
   `ONESIGNAL_REST_API_KEY` are set in Vercel -- the card says so until then.
 
+- **Interactive homepage**: the hero phone is a live demo (ticking timer;
+  Start break / Clock out / Clock in work and update the week's totals), and
+  a pay estimator (rate, hours, overtime threshold and multiplier) runs the
+  real `calculateEarnings` in integer cents. Sections fade in on scroll,
+  except with reduced motion.
+- **Dashboard interactions**: metric tiles link to the page behind the
+  number, and a "Week so far" bar shows progress toward the default overtime
+  threshold (overflow in the overtime colour).
+- **Resources** (`/resources`, under More): official, free links for taxes,
+  pay and rights, benefits and safety, for Canada or the US (defaulting to
+  the Pay & Taxes country), plus a "Tax time" panel pointing at the user's
+  own CSV exports, tax estimate and full data export. Every link was checked
+  live when added (`lib/resources.ts`).
+- **Where links land**: signed-out visitors opening any app link land on the
+  homepage (`/?next=...`), whose Sign in buttons return them to that page;
+  the installed app starts at `/`. Email confirmation links of both formats
+  are handled (`?token_hash=` and Supabase's default `?code=`); a code
+  opened on another device reports "email confirmed, sign in" instead of an
+  error.
+
 ## What's stubbed or missing
 
 - **Attachments/receipts**: the `attachments` table and private storage
@@ -185,6 +205,13 @@ exercise the authenticated app directly.
 - **AI Assistant in production**: needs `ANTHROPIC_API_KEY` in the Vercel
   project; until it's set, `/assistant` shows a "not switched on yet"
   notice instead of a chat that can only fail.
+- **Bank account linking**: not built. It needs an aggregator (Plaid in the
+  US; Flinks or Plaid in Canada), a signed agreement, per-connection fees,
+  and a security review for storing access tokens -- see the plan discussed
+  with the product owner before starting.
+- **Tax preparation**: Verity estimates withholding and exports records,
+  but doesn't file returns; the Resources page links to official free
+  filing help.
 - **Translations**: French and Spanish were written in-house, not by a
   professional translator; province/state/city names in tax lines stay in
   English. Supabase's own auth error messages (e.g. on signup) and emails

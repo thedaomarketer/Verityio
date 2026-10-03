@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { getI18n } from "@/lib/i18n/server";
 import { validationMessage } from "@/lib/i18n/validation";
+import { formText } from "@/lib/validation/form";
 import { logAudit } from "@/lib/audit/log";
 import { mileageEntrySchema } from "@/lib/validation/mileage";
 
@@ -18,14 +19,14 @@ export async function createMileageEntryAction(
 ): Promise<ActionResult> {
   const { m } = await getI18n();
   const parsed = mileageEntrySchema.safeParse({
-    jobId: formData.get("jobId"),
+    jobId: formText(formData, "jobId"),
     date: formData.get("date"),
-    startLocation: formData.get("startLocation"),
-    endLocation: formData.get("endLocation"),
+    startLocation: formText(formData, "startLocation"),
+    endLocation: formText(formData, "endLocation"),
     distance: formData.get("distance"),
     unit: formData.get("unit") || "km",
     rate: formData.get("rate") || 0,
-    notes: formData.get("notes"),
+    notes: formText(formData, "notes"),
   });
 
   if (!parsed.success) {

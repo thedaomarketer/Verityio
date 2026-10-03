@@ -76,6 +76,11 @@ upcoming windows across a month end, and localized names.
 long-break (1h) thresholds, payday reminders only on the local payday after
 8am, the local-date-vs-UTC case near midnight, and the holiday note.
 
+`tests/unit/validation/form.test.ts` — regression for the "Please check the
+highlighted details" error: disabled or unrendered form controls (the City
+select for Canadian provinces, the Job select for users without jobs) must
+read as "not provided", not `null`.
+
 `tests/unit/supabase-env.test.ts` — the admin key falls back to
 `SUPABASE_SECRET_KEY` when `SUPABASE_SERVICE_ROLE_KEY` is blank.
 

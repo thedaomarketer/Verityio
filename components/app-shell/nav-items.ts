@@ -13,6 +13,7 @@ import {
   BarChart3,
   Landmark,
   Settings,
+  LifeBuoy,
 } from "lucide-react";
 
 export interface NavItem {
@@ -40,6 +41,7 @@ export const NAV_ITEMS: NavItem[] = [
   { href: "/reports", label: "reports", icon: BarChart3, mobile: true },
   { href: "/taxes", label: "taxes", icon: Landmark },
   { href: "/assistant", label: "assistant", icon: Sparkles },
+  { href: "/resources", label: "resources", icon: LifeBuoy },
 ];
 
 export const SECONDARY_NAV_ITEMS: NavItem[] = [

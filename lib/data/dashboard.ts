@@ -28,7 +28,14 @@ export async function getDashboardData() {
   const month = getLocalMonthBounds(now, ctx.timezone);
 
   const today = localDateString(now, ctx.timezone);
-  const holidayRegion = await getHolidayRegion(supabase, ctx.userId);
+  const [holidayRegion, { data: overtimeSettings }] = await Promise.all([
+    getHolidayRegion(supabase, ctx.userId),
+    supabase
+      .from("user_settings")
+      .select("overtime_enabled, overtime_threshold_minutes")
+      .eq("user_id", ctx.userId)
+      .maybeSingle(),
+  ]);
 
   const [
     { data: profile },
@@ -105,5 +112,10 @@ export async function getDashboardData() {
     recentCompletedShifts: monthShifts.filter((s) => s.status === "completed").slice(0, 5),
     nextPayday: paydays[0] ?? null,
     upcomingHolidays: upcomingHolidays(regionHolidays, today, 30).slice(0, 2),
+    /** The default weekly overtime threshold (jobs may set their own). */
+    overtimeThresholdMinutes:
+      overtimeSettings?.overtime_enabled && overtimeSettings.overtime_threshold_minutes > 0
+        ? overtimeSettings.overtime_threshold_minutes
+        : null,
   };
 }

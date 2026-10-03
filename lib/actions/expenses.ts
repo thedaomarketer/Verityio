@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { getI18n } from "@/lib/i18n/server";
 import { validationMessage } from "@/lib/i18n/validation";
+import { formText } from "@/lib/validation/form";
 import { logAudit } from "@/lib/audit/log";
 import { expenseSchema } from "@/lib/validation/expenses";
 import type { ExpenseCategory } from "@/lib/supabase/database.types";
@@ -19,10 +20,10 @@ export async function createExpenseAction(
 ): Promise<ActionResult> {
   const { m } = await getI18n();
   const parsed = expenseSchema.safeParse({
-    jobId: formData.get("jobId"),
+    jobId: formText(formData, "jobId"),
     amount: formData.get("amount"),
     category: formData.get("category"),
-    description: formData.get("description"),
+    description: formText(formData, "description"),
     expenseDate: formData.get("expenseDate"),
   });
 

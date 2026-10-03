@@ -13,7 +13,7 @@ import { LoginForm } from "./login-form";
 export default async function LoginPage({
   searchParams,
 }: {
-  searchParams: Promise<{ redirectTo?: string; registered?: string; error?: string }>;
+  searchParams: Promise<{ redirectTo?: string; registered?: string; error?: string; confirmed?: string }>;
 }) {
   const [params, { m }] = await Promise.all([searchParams, getI18n()]);
 
@@ -27,6 +27,11 @@ export default async function LoginPage({
         {params.registered && (
           <p className="mb-4 rounded-xl bg-success/10 px-3.5 py-2.5 text-sm text-success">
             {m.auth.checkEmail}
+          </p>
+        )}
+        {params.confirmed && (
+          <p role="status" className="mb-4 rounded-xl bg-success/10 px-3.5 py-2.5 text-sm text-success">
+            {m.auth.emailConfirmed}
           </p>
         )}
         {params.error === "confirmation-failed" && (

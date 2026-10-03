@@ -19,13 +19,14 @@ import {
 } from "lucide-react";
 
 import { createClient } from "@/lib/supabase/server";
-import { formatCents } from "@/lib/calculations/money";
-import { formatMinutesAsHours } from "@/lib/format";
 import { getI18n } from "@/lib/i18n/server";
-import type { Locale } from "@/lib/i18n/config";
 import type { Messages } from "@/lib/i18n/messages/en";
 import { Button } from "@/components/ui/button";
 import { LanguageSwitcher } from "@/components/language-switcher";
+import { LiveDemo } from "@/components/landing/live-demo";
+import { PayEstimator } from "@/components/landing/pay-estimator";
+import { Reveal } from "@/components/landing/reveal";
+import { safeRedirectPath } from "@/lib/safe-redirect";
 import { APP_NAME } from "@/lib/brand";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -63,79 +64,21 @@ function AppIcon({ className = "size-8" }: { className?: string }) {
   );
 }
 
-/** A static, illustrative rendering of the app (not real data). */
-function PhoneMockup({ m, locale, intl }: { m: Messages; locale: Locale; intl: string }) {
-  const t = m.landing.mockup;
-  const date = new Date(Date.UTC(2024, 5, 11)).toLocaleDateString(intl, {
-    weekday: "long",
-    month: "long",
-    day: "numeric",
-    timeZone: "UTC",
-  });
-  return (
-    <div aria-hidden="true" className="relative mx-auto w-[280px] select-none sm:w-[300px]">
-      <div className="absolute -inset-10 -z-10 rounded-full bg-[radial-gradient(closest-side,rgb(0_113_227/0.25),transparent)] blur-2xl" />
-      <div className="rounded-[48px] bg-[#1c1c1e] p-3 shadow-[0_30px_80px_rgb(0_0_0/0.25)]">
-        <div className="relative overflow-hidden rounded-[38px] bg-background px-4 pt-10 pb-6">
-          <div className="absolute top-3 left-1/2 h-6 w-24 -translate-x-1/2 rounded-full bg-[#1c1c1e]" />
-          <p className="text-[11px] text-muted-foreground">{date}</p>
-          <p className="text-xl font-bold tracking-tight">{t.greeting}</p>
-
-          <div className="mt-4 rounded-2xl bg-card p-4 shadow-sm">
-            <div className="flex items-center gap-2 text-[11px] font-medium text-success">
-              <span className="size-2 animate-pulse rounded-full bg-success" /> {t.clockedIn}
-            </div>
-            <p className="mt-1 text-3xl font-bold tracking-tight tabular-nums">3:42:18</p>
-            <div className="mt-3 grid grid-cols-2 gap-2">
-              <span className="rounded-full bg-secondary py-2 text-center text-[11px] font-semibold text-primary">
-                {t.startBreak}
-              </span>
-              <span className="rounded-full bg-primary py-2 text-center text-[11px] font-semibold text-primary-foreground">
-                {t.clockOut}
-              </span>
-            </div>
-          </div>
-
-          <div className="mt-3 grid grid-cols-2 gap-3">
-            <div className="rounded-2xl bg-card p-3 shadow-sm">
-              <p className="text-[10px] text-muted-foreground">{t.thisWeek}</p>
-              <p className="text-lg font-bold tracking-tight whitespace-nowrap">{formatMinutesAsHours(32 * 60 + 15, locale)}</p>
-            </div>
-            <div className="rounded-2xl bg-card p-3 shadow-sm">
-              <p className="text-[10px] text-muted-foreground">{t.earnings}</p>
-              <p className="text-lg font-bold tracking-tight">{formatCents(77400, "USD", intl)}</p>
-            </div>
-          </div>
-
-          <div className="mt-3 rounded-2xl bg-card p-3 shadow-sm">
-            <p className="text-[10px] text-muted-foreground">{t.hoursByWeek}</p>
-            <div className="mt-2 flex h-16 items-end gap-2">
-              {[45, 70, 55, 90, 62].map((h, i) => (
-                <div key={i} className="flex flex-1 flex-col-reverse gap-0.5">
-                  <div className="rounded-t-[3px] bg-chart-1" style={{ height: `${h * 0.55}px` }} />
-                  {i === 3 && <div className="rounded-t-[3px] bg-chart-2" style={{ height: "8px" }} />}
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <div className="mx-auto mt-5 h-1 w-24 rounded-full bg-foreground/80" />
-        </div>
-      </div>
-    </div>
-  );
-}
-
-export default async function Home() {
+export default async function Home({ searchParams }: { searchParams: Promise<{ next?: string }> }) {
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
 
-  if (user) redirect("/dashboard");
+  const { next } = await searchParams;
+  if (user) redirect(safeRedirectPath(next, "/dashboard"));
 
-  const { locale, intl, m } = await getI18n();
+  const { m } = await getI18n();
   const t = m.landing;
+  // Someone who opened an app link while signed out lands here first; signing
+  // in takes them on to where they were going.
+  const continueTo = next ? safeRedirectPath(next, "") : "";
+  const signInHref = continueTo ? `/login?redirectTo=${encodeURIComponent(continueTo)}` : "/login";
 
   return (
     <div className="relative flex min-h-svh flex-col overflow-x-clip">
@@ -153,7 +96,7 @@ export default async function Home() {
           <nav className="flex items-center gap-1 sm:gap-2">
             <LanguageSwitcher className="max-sm:hidden" />
             <Button asChild variant="ghost" size="sm">
-              <Link href="/login">{t.signIn}</Link>
+              <Link href={signInHref}>{t.signIn}</Link>
             </Button>
             <Button asChild size="sm">
               <Link href="/register">{t.getStarted}</Link>
@@ -188,11 +131,17 @@ export default async function Home() {
                 </Link>
               </Button>
               <Button asChild size="lg" variant="outline" className="w-full sm:w-auto">
-                <Link href="/login">{t.haveAccount}</Link>
+                <Link href={signInHref}>{t.haveAccount}</Link>
               </Button>
             </div>
           </div>
-          <PhoneMockup m={m} locale={locale} intl={intl} />
+          <LiveDemo />
+        </section>
+
+        <section className="mx-auto max-w-6xl px-4 py-8 sm:px-6">
+          <Reveal>
+            <PayEstimator />
+          </Reveal>
         </section>
 
         <section className="mx-auto max-w-6xl px-4 py-16 sm:px-6">
@@ -200,11 +149,11 @@ export default async function Home() {
             <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">{t.featuresTitle}</h2>
             <p className="mt-3 text-muted-foreground">{t.featuresBody}</p>
           </div>
-          <div className="mt-10 grid gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-4">
+          <Reveal className="mt-10 grid gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-4">
             {FEATURES.map((feature) => (
               <div
                 key={feature.key}
-                className="flex gap-4 rounded-3xl bg-card p-5 shadow-[0_1px_2px_rgb(0_0_0/0.04)] sm:block sm:p-6"
+                className="flex gap-4 rounded-3xl bg-card p-5 shadow-[0_1px_2px_rgb(0_0_0/0.04)] transition-[transform,box-shadow] duration-200 hover:-translate-y-1 hover:shadow-[0_12px_32px_rgb(0_0_0/0.08)] sm:block sm:p-6"
               >
                 <span
                   className={`flex size-11 shrink-0 items-center justify-center rounded-[12px] text-white ${feature.tile}`}
@@ -217,11 +166,11 @@ export default async function Home() {
                 </div>
               </div>
             ))}
-          </div>
+          </Reveal>
         </section>
 
         <section className="mx-auto max-w-6xl px-4 py-16 sm:px-6">
-          <div className="rounded-[32px] bg-[#1c1c1e] px-6 py-12 text-white sm:px-12">
+          <Reveal className="rounded-[32px] bg-[#1c1c1e] px-6 py-12 text-white sm:px-12">
             <h2 className="max-w-xl text-3xl font-bold tracking-tight sm:text-4xl">{t.privacyTitle}</h2>
             <p className="mt-3 max-w-xl text-white/70">{t.privacyBody}</p>
             <div className="mt-10 grid gap-8 sm:grid-cols-3">
@@ -233,7 +182,7 @@ export default async function Home() {
                 </div>
               ))}
             </div>
-          </div>
+          </Reveal>
         </section>
 
         <section className="mx-auto max-w-6xl px-4 pt-8 pb-24 text-center sm:px-6">

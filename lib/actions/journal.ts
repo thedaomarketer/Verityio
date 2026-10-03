@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { getI18n } from "@/lib/i18n/server";
 import { validationMessage } from "@/lib/i18n/validation";
+import { formText } from "@/lib/validation/form";
 import { logAudit } from "@/lib/audit/log";
 import { requireUserContext } from "@/lib/data/context";
 import { localDateTimeToInstant } from "@/lib/calculations";
@@ -22,9 +23,9 @@ export async function createJournalEntryAction(
   const { m } = await getI18n();
   const parsed = journalEntrySchema.safeParse({
     entryType: formData.get("entryType"),
-    jobId: formData.get("jobId"),
-    title: formData.get("title"),
-    content: formData.get("content"),
+    jobId: formText(formData, "jobId"),
+    title: formText(formData, "title"),
+    content: formText(formData, "content"),
     eventAt: formData.get("eventAt"),
   });
 

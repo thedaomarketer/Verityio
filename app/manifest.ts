@@ -5,8 +5,9 @@ export default function manifest(): MetadataRoute.Manifest {
   return {
     name: APP_NAME,
     short_name: APP_NAME,
-    description: "Your complete record of work: hours, breaks, jobs, expenses, and earnings.",
-    start_url: "/dashboard",
+    description: "The true record of your work: hours, breaks, jobs, expenses, and earnings.",
+    // The homepage sends signed-in people straight to their dashboard.
+    start_url: "/",
     display: "standalone",
     background_color: "#f2f2f7",
     theme_color: "#f2f2f7",

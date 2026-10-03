@@ -106,6 +106,13 @@ names (`lib/timezone.ts#modernTimeZoneId`) so search matches what people
 expect. Zones are validated in Zod (`isValidTimeZone`) and again by a
 database check constraint (see `docs/database.md`).
 
+## Form parsing
+
+Server actions read optional fields with `lib/validation/form.ts#formText`,
+which turns a control the browser didn't submit (disabled or not rendered)
+into `undefined`. `formData.get` returns `null` for those, which `.optional()`
+Zod schemas reject.
+
 ## Public holidays
 
 `lib/holidays/nager.ts` fetches Nager.Date server-side (Zod-validated, 4s
