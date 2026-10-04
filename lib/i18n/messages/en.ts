@@ -625,6 +625,12 @@ export const en = {
     },
   },
 
+  privacy: {
+    hideBalances: "Hide balances",
+    showBalances: "Show balances",
+    hiddenAmount: "Amount hidden",
+  },
+
   help: {
     title: "Help",
     faqs: [

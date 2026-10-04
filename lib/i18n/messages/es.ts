@@ -626,6 +626,12 @@ export const es: Messages = {
     },
   },
 
+  privacy: {
+    hideBalances: "Ocultar saldos",
+    showBalances: "Mostrar saldos",
+    hiddenAmount: "Monto oculto",
+  },
+
   help: {
     title: "Ayuda",
     faqs: [

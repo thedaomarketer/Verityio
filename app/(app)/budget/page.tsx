@@ -17,6 +17,7 @@ import { PremiumUpsell } from "@/components/premium/premium-upsell";
 import { ConnectBankButton } from "@/components/budget/connect-bank-button";
 import { DisconnectBankButton, RefreshBanksButton } from "@/components/budget/bank-actions";
 import { cn } from "@/lib/utils";
+import { Amount, AmountsToggle } from "@/components/privacy/amounts-visibility";
 
 /** Fixed category -> color mapping (never re-assigned by rank); "other" is neutral gray. */
 const CATEGORY_COLORS: Record<SpendingCategory, string> = {
@@ -114,6 +115,8 @@ export default async function BudgetPage() {
   const money = (cents: number) => formatCents(cents, ctx.currency, intl);
   const hours = (minutes: number) => formatMinutesAsHours(minutes, locale);
   const kept = data.earnedCents - data.spentCents;
+  // Split the sentence around its amount so the amount alone can be masked.
+  const [spentSubBefore, spentSubAfter = ""] = fmt(m.budget.spentSub, { days: data.dayOfMonth, amount: "\u0000" }).split("\u0000");
 
   const donutData = SPENDING_CATEGORIES.map((category) => ({
     key: category,
@@ -131,19 +134,30 @@ export default async function BudgetPage() {
       {heading}
 
       <section className="hero-surface overflow-hidden rounded-3xl p-5 shadow-[0_18px_40px_-18px_rgb(10_30_80/0.55)] md:p-6">
-        <h2 className="text-sm font-medium text-white/75">{m.budget.spentThisMonth}</h2>
-        <p className="mt-1 text-[40px] leading-none font-bold tracking-tight tabular-nums md:text-5xl">{money(data.spentCents)}</p>
+        <div className="flex items-start justify-between gap-3">
+          <h2 className="text-sm font-medium text-white/75">{m.budget.spentThisMonth}</h2>
+          <AmountsToggle tone="dark" className="-mt-2.5 -mr-2" />
+        </div>
+        <p className="mt-1 text-[40px] leading-none font-bold tracking-tight tabular-nums md:text-5xl">
+          <Amount value={money(data.spentCents)} />
+        </p>
         <p className="mt-1.5 text-xs text-white/70">
-          {fmt(m.budget.spentSub, { days: data.dayOfMonth, amount: money(data.lastMonthToDateCents) })}
+          {spentSubBefore}
+          <Amount value={money(data.lastMonthToDateCents)} />
+          {spentSubAfter}
         </p>
         <dl className="mt-5 grid grid-cols-3 gap-2 border-t border-white/15 pt-4">
           <div className="min-w-0">
             <dt className="truncate text-xs text-white/70">{m.budget.earned}</dt>
-            <dd className="mt-0.5 text-lg leading-tight font-semibold tabular-nums">{money(data.earnedCents)}</dd>
+            <dd className="mt-0.5 text-lg leading-tight font-semibold tabular-nums">
+              <Amount value={money(data.earnedCents)} />
+            </dd>
           </div>
           <div className="min-w-0">
             <dt className="truncate text-xs text-white/70">{kept >= 0 ? m.budget.kept : m.budget.overBy}</dt>
-            <dd className="mt-0.5 text-lg leading-tight font-semibold tabular-nums">{money(Math.abs(kept))}</dd>
+            <dd className="mt-0.5 text-lg leading-tight font-semibold tabular-nums">
+              <Amount value={money(Math.abs(kept))} />
+            </dd>
           </div>
           <div className="min-w-0">
             <dt className="truncate text-xs text-white/70">{m.budget.hoursWorked}</dt>
@@ -247,7 +261,12 @@ export default async function BudgetPage() {
       <Card>
         <CardHeader className="flex flex-row items-start justify-between gap-2">
           <CardTitle className="text-base">{m.budget.banksTitle}</CardTitle>
-          {bankConfigured && data.banks.length > 0 && <RefreshBanksButton />}
+          {bankConfigured && data.banks.length > 0 && (
+            <div className="flex items-start gap-1">
+              <AmountsToggle className="-mt-1.5" />
+              <RefreshBanksButton />
+            </div>
+          )}
         </CardHeader>
         <CardContent className="space-y-4">
           {!bankConfigured ? (
@@ -287,9 +306,10 @@ export default async function BudgetPage() {
                             {account.mask && <span className="text-muted-foreground"> ••{account.mask}</span>}
                           </span>
                           {account.current_balance !== null && (
-                            <span className="font-medium tabular-nums">
-                              {formatCents(dollarsToCents(account.current_balance), account.iso_currency_code ?? ctx.currency, intl)}
-                            </span>
+                            <Amount
+                              className="font-medium tabular-nums"
+                              value={formatCents(dollarsToCents(account.current_balance), account.iso_currency_code ?? ctx.currency, intl)}
+                            />
                           )}
                         </li>
                       ))}
@@ -325,8 +345,9 @@ export default async function BudgetPage() {
                   </div>
                   {/* Plaid: positive = money out. Show money in as +. */}
                   <span className={cn("shrink-0 font-medium tabular-nums", t.amount < 0 && "text-success")}>
-                    {t.amount < 0 ? "+" : ""}
-                    {formatCents(Math.abs(dollarsToCents(t.amount)), t.iso_currency_code ?? ctx.currency, intl)}
+                    <Amount
+                      value={`${t.amount < 0 ? "+" : ""}${formatCents(Math.abs(dollarsToCents(t.amount)), t.iso_currency_code ?? ctx.currency, intl)}`}
+                    />
                   </span>
                 </li>
               ))}

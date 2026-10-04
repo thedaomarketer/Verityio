@@ -212,6 +212,12 @@ exercise the authenticated app directly.
   gradient sparkle icon in the header instead of a nav item. The **+**
   button opens a swipeable carousel of the four everyday actions (log a
   shift, expense, mileage, journal note); "Add a job" lives on Jobs.
+- **Hide balances**: an eye button on the dashboard's week card, the
+  Budget page and the bank accounts card masks money figures (week
+  earnings, spent/earned/kept, bank balances, transaction amounts) as
+  "••••••". Remembered per device in the `wl-hide-amounts` cookie
+  (`lib/privacy.ts`), read by the app layout so pages render already
+  masked. A screen-privacy convenience, not a security control.
 - **Dashboard week totals** now include shifts from the start of a workweek
   that began in the previous month (previously only the current month's
   shifts were loaded, undercounting such weeks).
@@ -294,8 +300,9 @@ exercise the authenticated app directly.
 - The admin client uses `SUPABASE_SECRET_KEY` from the Vercel Supabase
   integration because `SUPABASE_SERVICE_ROLE_KEY` is blank there (see
   `docs/security.md`).
-- `ANTHROPIC_API_KEY`, `NEXT_PUBLIC_ONESIGNAL_APP_ID`,
-  `ONESIGNAL_REST_API_KEY`, the Stripe keys and the Plaid keys are **not**
+- `NEXT_PUBLIC_ONESIGNAL_APP_ID` is set (OneSignal app
+  `023dc5b1-…`; the worker in `public/push/onesignal/` matches OneSignal's
+  v16 download). `ANTHROPIC_API_KEY`, `ONESIGNAL_REST_API_KEY`, the Stripe keys and the Plaid keys are **not**
   yet set: the AI Assistant, push notifications, Premium checkout and bank
   connections show "not switched on yet" until they are.
 
