@@ -2,13 +2,14 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ClipboardCheck, HelpCircle } from "lucide-react";
+import { HelpCircle } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import { useI18n } from "@/lib/i18n/client";
 import { NAV_ITEMS, SECONDARY_NAV_ITEMS } from "./nav-items";
 import { CreateMenu } from "./create-menu";
 import { APP_NAME } from "@/lib/brand";
+import { BrandMark } from "@/components/brand-mark";
 
 function isActive(pathname: string, href: string) {
   return pathname === href || pathname.startsWith(`${href}/`);
@@ -21,9 +22,7 @@ export function SidebarNav() {
   return (
     <aside className="glass sticky top-0 hidden h-svh w-64 shrink-0 flex-col border-r border-black/[0.06] md:flex">
       <Link href="/dashboard" className="flex h-16 items-center gap-2.5 px-5 text-[17px] font-semibold tracking-tight">
-        <span className="flex size-8 items-center justify-center rounded-[9px] bg-primary text-primary-foreground">
-          <ClipboardCheck className="size-[18px]" />
-        </span>
+        <BrandMark className="size-8" />
         {APP_NAME}
       </Link>
       <div className="p-3 pb-0">

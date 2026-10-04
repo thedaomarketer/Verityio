@@ -1,10 +1,11 @@
 import Link from "next/link";
-import { ChevronLeft, ClipboardCheck } from "lucide-react";
+import { ChevronLeft } from "lucide-react";
 
 import { getI18n } from "@/lib/i18n/server";
 import { LanguageSwitcher } from "@/components/language-switcher";
 import { APP_NAME } from "@/lib/brand";
 import { BrandCredit } from "@/components/brand-credit";
+import { BrandMark } from "@/components/brand-mark";
 
 export default async function AuthLayout({ children }: { children: React.ReactNode }) {
   const { m } = await getI18n();
@@ -26,9 +27,7 @@ export default async function AuthLayout({ children }: { children: React.ReactNo
 
       <div className="mx-auto flex w-full max-w-sm flex-1 flex-col justify-center py-8">
         <Link href="/" className="mx-auto mb-8 flex flex-col items-center gap-3">
-          <span className="flex size-16 items-center justify-center rounded-[27%] bg-primary text-primary-foreground shadow-[0_8px_24px_rgb(0_113_227/0.35)]">
-            <ClipboardCheck className="size-8" />
-          </span>
+          <BrandMark className="size-16 shadow-[inset_0_1px_0_rgb(255_255_255/0.35),0_8px_24px_rgb(0_113_227/0.35)]" />
           <span className="text-lg font-semibold tracking-tight">{APP_NAME}</span>
         </Link>
         {children}

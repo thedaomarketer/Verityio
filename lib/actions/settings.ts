@@ -8,6 +8,8 @@ import { getI18n, setLocaleCookie } from "@/lib/i18n/server";
 import { validationMessage } from "@/lib/i18n/validation";
 import { formText } from "@/lib/validation/form";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { revokeBankItems } from "@/lib/bank/revoke";
+import { cancelSubscriptionForDeletedAccount } from "@/lib/billing/cancel";
 import { logAudit } from "@/lib/audit/log";
 import {
   preferencesSchema,
@@ -218,6 +220,12 @@ export async function deleteAccountAction(): Promise<ActionResult> {
   await logAudit({ userId: user.id, entityType: "account", entityId: user.id, action: "deleted" });
 
   try {
+    // Stop anything that would outlive the account: a live Stripe
+    // subscription would keep charging, and a linked bank would keep
+    // syncing at Plaid. Best effort -- deletion proceeds regardless.
+    await cancelSubscriptionForDeletedAccount(user.id);
+    await revokeBankItems(user.id);
+
     const admin = createAdminClient();
     const { error } = await admin.auth.admin.deleteUser(user.id);
     if (error) throw error;

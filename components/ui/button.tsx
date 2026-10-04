@@ -9,7 +9,8 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        default: "bg-primary text-primary-foreground hover:bg-primary/90",
+        default:
+          "bg-primary text-primary-foreground shadow-[0_1px_2px_rgb(0_0_0/0.08),0_4px_12px_-2px_rgb(0_113_227/0.35)] hover:bg-primary/90",
         destructive: "bg-destructive text-destructive-foreground hover:bg-destructive/90",
         // iOS "gray" button: tinted fill, accent-colored label.
         outline: "bg-secondary text-primary hover:bg-secondary/70",

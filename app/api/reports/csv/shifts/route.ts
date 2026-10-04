@@ -5,6 +5,7 @@ import { NextResponse, type NextRequest } from "next/server";
 
 import { createClient } from "@/lib/supabase/server";
 import { requireUserContext } from "@/lib/data/context";
+import { getEntitlement } from "@/lib/data/subscription";
 import { addDaysToDateString, calculateShiftDuration, isDateString, localDateString, localDayStart } from "@/lib/calculations";
 import { getI18n } from "@/lib/i18n/server";
 
@@ -16,6 +17,9 @@ function localIso(instant: string, timezone: string): string {
 export async function GET(request: NextRequest) {
   const [ctx, { m }] = await Promise.all([requireUserContext(), getI18n()]);
   if (!ctx) return NextResponse.json({ error: m.errors.mustSignIn }, { status: 401 });
+  if (!(await getEntitlement(ctx.userId)).premium) {
+    return NextResponse.json({ error: m.errors.premiumRequired }, { status: 403 });
+  }
 
   const supabase = await createClient();
   const { searchParams } = request.nextUrl;

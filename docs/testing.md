@@ -86,6 +86,28 @@ read as "not provided", not `null`.
 
 Run: `npm test` (or `npm run test:watch`).
 
+Also covered (added with Premium, Budget and the new charts):
+
+- `calculations/budget.test.ts`: Plaid category mapping (income, transfers
+  and credit-card payments excluded; groceries vs. eating out), refunds
+  netting without going negative, daily buckets, minutes-of-work and hourly
+  rate (null instead of guesses), month-end projection, 50/30/20 targets
+  adding up exactly, and the insight rules (overspending first,
+  like-for-like month comparison with minimum thresholds, no pace in the
+  first days, at most five).
+- `calculations/report-range.test.ts`: presets across month and year
+  boundaries and leap years, free vs. Premium ranges, swapped and capped
+  custom ranges.
+- `billing/billing.test.ts`: prices in cents and the yearly saving, plan id
+  validation, which statuses grant Premium, gating off until billing is
+  configured, Stripe form encoding, and webhook signatures (valid, rotated
+  secrets, tampered body, wrong secret, missing header, replay window).
+- `bank/token-crypto.test.ts`: encryption round trip, fresh IVs, tamper and
+  wrong-key rejection, key validation.
+- `charts/donut.test.ts`, `charts/line.test.ts`,
+  `charts/value-format.test.ts`: slice folding, percents, arc paths,
+  scaling, crosshair snapping, label selection, chart number formats.
+
 ## Database-level verification
 
 Because the build sandbox couldn't reach the live Supabase project's API

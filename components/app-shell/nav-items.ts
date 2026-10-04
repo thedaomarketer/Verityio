@@ -9,7 +9,8 @@ import {
   Briefcase,
   Car,
   Receipt,
-  Sparkles,
+  Wallet,
+  Crown,
   BarChart3,
   Landmark,
   Settings,
@@ -38,12 +39,13 @@ export const NAV_ITEMS: NavItem[] = [
   { href: "/journal", label: "journal", icon: BookText },
   { href: "/expenses", label: "expenses", icon: Receipt },
   { href: "/mileage", label: "mileage", icon: Car },
+  { href: "/budget", label: "budget", icon: Wallet },
   { href: "/reports", label: "reports", icon: BarChart3, mobile: true },
   { href: "/taxes", label: "taxes", icon: Landmark },
-  { href: "/assistant", label: "assistant", icon: Sparkles },
   { href: "/resources", label: "resources", icon: LifeBuoy },
 ];
 
 export const SECONDARY_NAV_ITEMS: NavItem[] = [
+  { href: "/premium", label: "premium", icon: Crown },
   { href: "/settings", label: "settings", icon: Settings },
 ];

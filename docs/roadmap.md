@@ -41,18 +41,20 @@ Status as of this build. See `docs/current-state.md` for the detailed
   No push notifications yet.
 - **Deployed**: live on Vercel at https://verityio.vercel.app.
 
+- **Premium**: Stripe subscriptions ($2.99/month, $29.99/year) gating bank
+  connections, budget insights, the AI assistant and advanced reports --
+  dormant until a Verityio Stripe account's keys are added.
+- **Budget and bank connections**: Plaid-linked accounts, spending by
+  category and over time, insights tied to hours worked, 50/30/20 plan.
+- **Reports**: presets, pie and line charts, Save as PDF.
+
 ## Not started
 
-- **Billing/subscriptions**: Stripe integration for the Free/Pro/Business
-  plans described in the original spec, using the already-connected
-  "Di Juicy Oasis" Stripe account. Not started.
 - **Push notifications**: web push for payday/shift/break reminders --
   `user_settings.notifications_enabled` exists as the preference toggle,
   but nothing sends a push yet (would need a `push_subscriptions` table +
   VAPID keys + a scheduled sender, e.g. a Supabase Edge Function on
   `pg_cron`).
-- **Phase 8 — Monetization**: not started. No Stripe integration, no plan
-  gating.
 - **Phase 9 — Business/Teams**: not started.
 
 ## Immediate next steps, in priority order
@@ -72,8 +74,11 @@ for polish):
    overview page.
 4. **P1** — Attachment upload UI (receipts on expenses, files on journal
    entries), wired to the existing private bucket + signed URLs.
-5. **P2** — PDF export for reports.
-6. **P2** — Billing/subscriptions (Stripe) — next up.
+5. **P0** — Apply migrations 23 (subscriptions) and 24 (bank connections)
+   to the live database and run the advisors.
+6. **P1** — Switch on Premium (Stripe keys + webhook) and bank connections
+   (Plaid keys, encryption key, Plaid production approval).
+7. **P2** — Plaid webhooks and update-mode re-login; a yearly tax summary.
 7. **P3** — Push notifications (shift/clock-in/clock-out/break reminders,
    weekly summary, payday reminders) — `user_settings.notifications_enabled`
    already exists as the preference toggle; the app is now installable, so

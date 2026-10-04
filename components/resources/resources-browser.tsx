@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { ArrowUpRight, Download, FileSpreadsheet, HeartHandshake, Landmark, Receipt, ShieldCheck, Wallet, type LucideIcon } from "lucide-react";
+import { ArrowUpRight, Briefcase, Download, FileSpreadsheet, HeartHandshake, Landmark, PiggyBank, Receipt, ShieldCheck, Wallet, type LucideIcon } from "lucide-react";
 
 import { RESOURCE_CATEGORIES, RESOURCE_LINKS, type ResourceCategory, type ResourceCountry } from "@/lib/resources";
 import { useI18n } from "@/lib/i18n/client";
@@ -12,6 +12,8 @@ const CATEGORY_STYLE: Record<ResourceCategory, { icon: LucideIcon; tile: string 
   taxes: { icon: Landmark, tile: "bg-[#5856d6]" },
   pay: { icon: Wallet, tile: "bg-[#248a3d]" },
   benefits: { icon: HeartHandshake, tile: "bg-[#0071e3]" },
+  money: { icon: PiggyBank, tile: "bg-[#a35a00]" },
+  jobs: { icon: Briefcase, tile: "bg-[#8944ab]" },
   safety: { icon: ShieldCheck, tile: "bg-[#c93400]" },
 };
 

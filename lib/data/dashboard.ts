@@ -41,7 +41,7 @@ export async function getDashboardData() {
     { data: profile },
     { data: jobs },
     activeShift,
-    monthShifts,
+    rangeShifts,
     upcomingShifts,
     { data: journalEntries },
     paydays,
@@ -50,8 +50,12 @@ export async function getDashboardData() {
       supabase.from("profiles").select("full_name").eq("id", ctx.userId).maybeSingle(),
       supabase.from("jobs").select("*").eq("user_id", ctx.userId).eq("is_active", true),
       getActiveShift(ctx.userId),
-      // Fetch the whole month once; today/week are subsets of it.
-      getCompletedShiftsInRange(ctx.userId, month.start, month.end),
+      // One fetch covering both the month and the workweek -- a week can start in the previous month.
+      getCompletedShiftsInRange(
+        ctx.userId,
+        week.start < month.start ? week.start : month.start,
+        week.end > month.end ? week.end : month.end
+      ),
       getUpcomingShifts(ctx.userId, 5),
       supabase
         .from("journal_entries")
@@ -77,7 +81,13 @@ export async function getDashboardData() {
     ])
   );
 
-  const toShiftInput = (shifts: typeof monthShifts) =>
+  const within = (bounds: { start: Date; end: Date }) =>
+    rangeShifts.filter(
+      (s) => s.actual_start && s.actual_start >= bounds.start.toISOString() && s.actual_start < bounds.end.toISOString()
+    );
+  const monthShifts = within(month);
+
+  const toShiftInput = (shifts: typeof rangeShifts) =>
     shifts
       .filter((s) => s.actual_start)
       .map((s) => ({
@@ -87,12 +97,8 @@ export async function getDashboardData() {
         breaks: s.breaks.map((b) => ({ startedAt: b.started_at, endedAt: b.ended_at, isPaid: b.is_paid })),
       }));
 
-  const todayShifts = monthShifts.filter(
-    (s) => s.actual_start && s.actual_start >= day.start.toISOString() && s.actual_start < day.end.toISOString()
-  );
-  const weekShifts = monthShifts.filter(
-    (s) => s.actual_start && s.actual_start >= week.start.toISOString() && s.actual_start < week.end.toISOString()
-  );
+  const todayShifts = within(day);
+  const weekShifts = within(week);
 
   const todayTotals = sumJobSummaries(summarizeShiftsByJob(toShiftInput(todayShifts), jobRates));
   const weekTotals = sumJobSummaries(summarizeShiftsByJob(toShiftInput(weekShifts), jobRates));

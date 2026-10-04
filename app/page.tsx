@@ -5,7 +5,6 @@ import {
   ArrowRight,
   BarChart3,
   BookText,
-  ClipboardCheck,
   Clock,
   Download,
   Landmark,
@@ -28,6 +27,7 @@ import { PayEstimator } from "@/components/landing/pay-estimator";
 import { Reveal } from "@/components/landing/reveal";
 import { safeRedirectPath } from "@/lib/safe-redirect";
 import { APP_NAME } from "@/lib/brand";
+import { BrandMark } from "@/components/brand-mark";
 import { BrandCredit } from "@/components/brand-credit";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -55,16 +55,6 @@ const PRIVACY_POINTS: { key: keyof Messages["landing"]["privacy"]; icon: LucideI
   { key: "delete", icon: Trash2 },
 ];
 
-function AppIcon({ className = "size-8" }: { className?: string }) {
-  return (
-    <span
-      className={`flex items-center justify-center rounded-[27%] bg-primary text-primary-foreground shadow-[0_4px_12px_rgb(0_113_227/0.3)] ${className}`}
-    >
-      <ClipboardCheck className="size-[55%]" />
-    </span>
-  );
-}
-
 export default async function Home({ searchParams }: { searchParams: Promise<{ next?: string }> }) {
   const supabase = await createClient();
   const {
@@ -91,7 +81,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ n
       <header className="glass sticky top-0 z-30 border-b border-black/[0.06] pt-[env(safe-area-inset-top)]">
         <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-4 sm:px-6">
           <Link href="/" className="flex items-center gap-2 text-[17px] font-semibold tracking-tight">
-            <AppIcon className="size-7" />
+            <BrandMark className="size-7" />
             {APP_NAME}
           </Link>
           <nav className="flex items-center gap-1 sm:gap-2">
@@ -187,7 +177,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ n
         </section>
 
         <section className="mx-auto max-w-6xl px-4 pt-8 pb-24 text-center sm:px-6">
-          <AppIcon className="mx-auto size-16" />
+          <BrandMark className="mx-auto size-16" />
           <h2 className="mt-6 text-3xl font-bold tracking-tight sm:text-4xl">{t.ctaTitle}</h2>
           <p className="mt-3 text-muted-foreground">{t.ctaBody}</p>
           <Button asChild size="lg" className="mt-8">

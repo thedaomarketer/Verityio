@@ -5,7 +5,7 @@ import type { Database } from "./database.types";
 import { getSupabaseAnonKey, getSupabaseUrl } from "./env";
 
 // /api/cron authenticates itself with CRON_SECRET (it's called by the scheduler, never a browser).
-const PUBLIC_PATHS = ["/login", "/register", "/reset-password", "/update-password", "/auth", "/offline", "/api/cron"];
+const PUBLIC_PATHS = ["/login", "/register", "/reset-password", "/update-password", "/auth", "/offline", "/api/cron", "/api/stripe/webhook"];
 
 function isPublicPath(pathname: string): boolean {
   return PUBLIC_PATHS.some((path) => pathname === path || pathname.startsWith(`${path}/`));

@@ -87,12 +87,51 @@ the owning user's folder. The app must never construct or expose a public
 URL for a stored file — always issue a short-lived signed URL server-side
 once the upload UI exists.
 
+## Billing (Stripe)
+
+- `STRIPE_SECRET_KEY` and `STRIPE_WEBHOOK_SECRET` are server-only and read
+  only in `lib/billing/stripe.ts` (`server-only`). No Stripe SDK; plain
+  `fetch` with a 10s timeout.
+- Premium is granted **only** by the webhook. It verifies the
+  `Stripe-Signature` header (HMAC-SHA256 over the raw body, constant-time
+  compare, 5-minute replay window -- `lib/billing/stripe-signature.ts`,
+  unit-tested with valid, tampered, wrong-secret and stale cases) before
+  parsing anything, then re-reads the subscription from Stripe rather than
+  trusting the event snapshot. Returning to the success URL grants nothing.
+- The checkout form only says "monthly" or "yearly"; amounts come from the
+  server's `PLANS`. `subscriptions` has no user write policies.
+- Billing is off until both keys are set, and while it's off nothing is
+  locked (`hasPremiumAccess`), so a misconfiguration can't strand users.
+  Once on, an unreadable subscription row fails closed (free).
+- Premium checks run server-side on every gated surface: the assistant API,
+  the CSV export routes, the bank actions, and the pages themselves.
+
+## Bank connections (Plaid)
+
+- Read-only: the app requests the `transactions` product only and can't
+  move money. Bank logins happen inside Plaid Link; Verityio never sees
+  them. The one-time public token is exchanged server-to-server.
+- Access tokens: AES-256-GCM with a random 12-byte IV per token and an auth
+  tag (`lib/bank/token-crypto.ts`), keyed by `BANK_TOKEN_ENCRYPTION_KEY`
+  (32 random bytes, env only), stored in `bank_item_secrets`, which has RLS
+  enabled and no policies. Decrypted only in server code, never logged.
+  Rotating the key makes stored tokens unreadable (banks must reconnect).
+- Every bank action verifies the session, Premium and configuration;
+  disconnect proves ownership by reading the item through RLS and is
+  allowed even after Premium ends.
+- Disconnecting, and account deletion, call Plaid `/item/remove` so access
+  is revoked at the source, then delete the rows (cascade).
+
 ## Account deletion
 
 Deleting the `auth.users` row cascades to every user-owned table via
 `on delete cascade` foreign keys, removing profile, jobs, shifts, breaks,
 journal entries, expenses, mileage, schedule entries, attachment metadata,
-audit logs, settings, and AI conversation history in one operation. It does
+audit logs, settings, AI conversation history, subscription state and
+linked-bank data in one operation. Before the delete, the action cancels
+any live Stripe subscription immediately (so a deleted account is never
+billed again) and revokes linked banks at Plaid; both are best effort and
+never block the deletion. It does
 not currently delete the underlying files in the Storage bucket — that's a
 known gap (see `docs/current-state.md`) since there's no attachment upload
 UI yet to have created any.

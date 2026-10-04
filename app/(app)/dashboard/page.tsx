@@ -7,7 +7,7 @@ import { getI18n } from "@/lib/i18n/server";
 import { fmt } from "@/lib/i18n/config";
 import { ActiveShiftCard } from "@/components/time/active-shift-card";
 import { ClockInCard } from "@/components/time/clock-in-card";
-import { MetricCard } from "@/components/dashboard/metric-card";
+import { WeekHero } from "@/components/dashboard/week-hero";
 import { UpcomingShifts } from "@/components/dashboard/upcoming-shifts";
 import { RecentActivity } from "@/components/dashboard/recent-activity";
 import { NextPaydayCard } from "@/components/dashboard/next-payday-card";
@@ -56,28 +56,24 @@ export default async function DashboardPage() {
         <ClockInCard jobs={data.jobs} />
       )}
 
+      <WeekHero
+        title={m.common.thisWeek}
+        earnings={formatCents(data.weekTotals.earningsCents, data.currency, intl)}
+        earningsLabel={m.dashboard.estEarningsHint}
+        href="/reports"
+        linkLabel={m.nav.reports}
+        stats={[
+          { label: m.dashboard.hoursWorked, value: fmtHrs(data.weekTotals.paidMinutes) },
+          { label: m.common.overtime, value: fmtHrs(data.weekTotals.overtimeMinutes) },
+          { label: m.dashboard.today, value: fmtHrs(data.todayTotals.paidMinutes) },
+        ]}
+      />
+
       {data.nextPayday && <NextPaydayCard payday={data.nextPayday} timezone={data.timezone} />}
 
       {data.overtimeThresholdMinutes && (
         <WeekProgress workedMinutes={data.weekTotals.paidMinutes} thresholdMinutes={data.overtimeThresholdMinutes} />
       )}
-
-      <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-        <MetricCard href="/time" label={m.dashboard.today} value={fmtHrs(data.todayTotals.paidMinutes)} />
-        <MetricCard href="/time" label={m.common.thisWeek} value={fmtHrs(data.weekTotals.paidMinutes)} />
-        <MetricCard
-          href="/reports"
-          label={m.common.overtime}
-          value={fmtHrs(data.weekTotals.overtimeMinutes)}
-          sub={data.weekTotals.overtimeMinutes > 0 ? m.common.thisWeekLower : undefined}
-        />
-        <MetricCard
-          href="/reports"
-          label={m.dashboard.estEarnings}
-          value={formatCents(data.weekTotals.earningsCents, data.currency, intl)}
-          sub={m.common.thisWeekLower}
-        />
-      </div>
 
       <div className="grid gap-4 lg:grid-cols-2">
         <RecentActivity

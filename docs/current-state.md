@@ -176,7 +176,55 @@ exercise the authenticated app directly.
   opened on another device reports "email confirmed, sign in" instead of an
   error.
 
+- **Verityio Premium** (`/premium`, Stripe): $2.99/month or $29.99/year
+  (16% off; prices in `lib/billing/plans.ts`, integer cents). Checkout and
+  the billing portal are Stripe-hosted; Premium is granted only by the
+  signed webhook (`app/api/stripe/webhook`), which re-reads the
+  subscription from Stripe and writes `subscriptions` with the service-role
+  client. The product and prices are created on the first checkout by
+  lookup key, so setup is just the keys. Premium covers bank connections,
+  budget insights, the AI assistant, and advanced reports (pie/line charts,
+  longer and custom ranges, PDF/CSV export). **Until Stripe is configured,
+  gating is off and every feature is open** (`hasPremiumAccess`); everything
+  else -- tracking, pay/tax estimates, expenses, mileage, journal, the full
+  data export -- is always free.
+- **Budget** (`/budget`, Premium): spending this month vs. last month at the
+  same point, by category (pie) and over time (line), measured against the
+  user's own earnings and hours: what they kept, how many hours of work
+  their spending equals, the biggest and fastest-changing categories, the
+  month-end pace, and a 50/30/20 suggested budget from estimated earnings.
+  All derived in `lib/calculations/budget.ts` (pure, integer cents). Uses
+  linked bank transactions when there are any, otherwise recorded expenses.
+- **Bank connections** (Plaid Link, Premium): read-only; US and Canadian
+  banks. Access tokens are AES-256-GCM encrypted with
+  `BANK_TOKEN_ENCRYPTION_KEY` and stored in a table no user can read.
+  Transactions sync on connect, on "Refresh", and every six hours via the
+  existing 15-minute scheduler. Disconnecting (or deleting the account)
+  revokes the item at Plaid.
+- **Reports**: range presets (this week/month, last month; last 3 months,
+  this year and custom ranges with Premium), six summary tiles (adds average
+  per hour), an earnings-by-week line chart, pie charts for hours by job and
+  expenses by category (bar charts on the free plan), Save as PDF (print
+  stylesheet) and CSV exports for Premium.
+- **Look and feel**: a dark "hero" card leads the dashboard (this week's
+  estimated earnings, hours, overtime, today), glossy app icon, softer
+  layered card shadows, a faint blue page wash. The AI assistant is a
+  gradient sparkle icon in the header instead of a nav item. The **+**
+  button opens a swipeable carousel of the four everyday actions (log a
+  shift, expense, mileage, journal note); "Add a job" lives on Jobs.
+- **Dashboard week totals** now include shifts from the start of a workweek
+  that began in the previous month (previously only the current month's
+  shifts were loaded, undercounting such weeks).
+
 ## What's stubbed or missing
+
+- **Migrations 23 and 24 are not applied to the live database yet**: the
+  Supabase tools lost write (and then read) permission during this work,
+  so `subscriptions` and the `bank_*` tables exist only in
+  `supabase/migrations/`. Apply both (SQL editor or `supabase db push`),
+  then run the security and performance advisors. Until then the app reads
+  them as empty: everyone is treated as free-but-unlocked (billing is off
+  anyway) and Budget uses recorded expenses.
 
 - **Attachments/receipts**: the `attachments` table and private storage
   bucket + RLS policies exist, but there's no upload UI yet. Expenses have
@@ -184,7 +232,8 @@ exercise the authenticated app directly.
 - **Job detail tabs**: the spec describes Overview/Time/Journal/Expenses/Reports/Settings
   tabs per job. The current `/jobs/[id]` page is a single overview (stats +
   this month's shifts + edit), not tabbed.
-- **PDF export**: only CSV export is implemented for reports.
+- **PDF export**: via the browser's print dialog ("Save as PDF") with a
+  print stylesheet, not a generated PDF file.
 - **Notifications**: `user_settings.notifications_enabled` exists as a
   preference, but no actual push/email notifications are sent (payday and
   shift reminders are shown in-app only -- see Pay & Taxes below).
@@ -196,19 +245,22 @@ exercise the authenticated app directly.
   instead verified at the database layer directly (see `docs/security.md`).
   Run `npm run dev` with `.env.local` filled in from a network that can
   reach `*.supabase.co` to do a real browser pass.
-- **Monetization, teams/business features**: not started (Phase 8/9 in the
-  original spec). Coming next: billing/subscriptions (Stripe), reusing the
-  existing connected Stripe account.
+- **Teams/business features**: not started (Phase 9 in the original spec).
+- **Premium in production**: needs a Verityio Stripe account's
+  `STRIPE_SECRET_KEY` and a webhook endpoint's `STRIPE_WEBHOOK_SECRET` in
+  Vercel. Prices are USD only.
 - **AI Assistant**: non-streaming (shows a "Thinking..." indicator, not
   token-by-token output), no conversation switcher (only the most recent
   conversation is resumed), and no rate limiting on the chat endpoint yet.
 - **AI Assistant in production**: needs `ANTHROPIC_API_KEY` in the Vercel
   project; until it's set, `/assistant` shows a "not switched on yet"
   notice instead of a chat that can only fail.
-- **Bank account linking**: not built. It needs an aggregator (Plaid in the
-  US; Flinks or Plaid in Canada), a signed agreement, per-connection fees,
-  and a security review for storing access tokens -- see the plan discussed
-  with the product owner before starting.
+- **Bank connections in production**: need `PLAID_CLIENT_ID`,
+  `PLAID_SECRET`, `PLAID_ENV` and `BANK_TOKEN_ENCRYPTION_KEY` in Vercel, and
+  Plaid production access (an application reviewed by Plaid) before real
+  banks work; the sandbox only has test banks. No Plaid webhooks yet (sync
+  is on demand plus every six hours) and no "update mode" re-login: a bank
+  that needs a new sign-in is disconnected and connected again.
 - **Tax preparation**: Verityio estimates withholding and exports records,
   but doesn't file returns; the Resources page links to official free
   filing help.
@@ -242,9 +294,10 @@ exercise the authenticated app directly.
 - The admin client uses `SUPABASE_SECRET_KEY` from the Vercel Supabase
   integration because `SUPABASE_SERVICE_ROLE_KEY` is blank there (see
   `docs/security.md`).
-- `ANTHROPIC_API_KEY`, `NEXT_PUBLIC_ONESIGNAL_APP_ID` and
-  `ONESIGNAL_REST_API_KEY` are **not** yet set: the AI Assistant and push
-  notifications show "not switched on yet" until they are.
+- `ANTHROPIC_API_KEY`, `NEXT_PUBLIC_ONESIGNAL_APP_ID`,
+  `ONESIGNAL_REST_API_KEY`, the Stripe keys and the Plaid keys are **not**
+  yet set: the AI Assistant, push notifications, Premium checkout and bank
+  connections show "not switched on yet" until they are.
 
 ## Name
 

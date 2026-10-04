@@ -318,6 +318,110 @@ export interface Database {
         Update: Partial<Database["public"]["Tables"]["notification_deliveries"]["Row"]>;
         Relationships: [];
       };
+      subscriptions: {
+        Row: {
+          user_id: string;
+          stripe_customer_id: string | null;
+          stripe_subscription_id: string | null;
+          status: string;
+          plan_interval: "month" | "year" | null;
+          current_period_end: string | null;
+          cancel_at_period_end: boolean;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: Partial<Database["public"]["Tables"]["subscriptions"]["Row"]> & {
+          user_id: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["subscriptions"]["Row"]>;
+        Relationships: [];
+      };
+      bank_items: {
+        Row: {
+          id: string;
+          user_id: string;
+          plaid_item_id: string;
+          institution_id: string | null;
+          institution_name: string | null;
+          status: "active" | "login_required" | "error";
+          last_synced_at: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: Partial<Database["public"]["Tables"]["bank_items"]["Row"]> & {
+          user_id: string;
+          plaid_item_id: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["bank_items"]["Row"]>;
+        Relationships: [];
+      };
+      bank_item_secrets: {
+        Row: {
+          item_id: string;
+          user_id: string;
+          access_token_ciphertext: string;
+          sync_cursor: string | null;
+          updated_at: string;
+        };
+        Insert: Partial<Database["public"]["Tables"]["bank_item_secrets"]["Row"]> & {
+          item_id: string;
+          user_id: string;
+          access_token_ciphertext: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["bank_item_secrets"]["Row"]>;
+        Relationships: [];
+      };
+      bank_accounts: {
+        Row: {
+          id: string;
+          user_id: string;
+          item_id: string;
+          plaid_account_id: string;
+          name: string;
+          mask: string | null;
+          type: string | null;
+          subtype: string | null;
+          current_balance: number | null;
+          available_balance: number | null;
+          iso_currency_code: string | null;
+          updated_at: string;
+        };
+        Insert: Partial<Database["public"]["Tables"]["bank_accounts"]["Row"]> & {
+          user_id: string;
+          item_id: string;
+          plaid_account_id: string;
+          name: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["bank_accounts"]["Row"]>;
+        Relationships: [];
+      };
+      bank_transactions: {
+        Row: {
+          id: string;
+          user_id: string;
+          account_id: string;
+          plaid_transaction_id: string;
+          date: string;
+          name: string;
+          merchant_name: string | null;
+          amount: number;
+          iso_currency_code: string | null;
+          category_primary: string | null;
+          category_detailed: string | null;
+          pending: boolean;
+          created_at: string;
+        };
+        Insert: Partial<Database["public"]["Tables"]["bank_transactions"]["Row"]> & {
+          user_id: string;
+          account_id: string;
+          plaid_transaction_id: string;
+          date: string;
+          name: string;
+          amount: number;
+        };
+        Update: Partial<Database["public"]["Tables"]["bank_transactions"]["Row"]>;
+        Relationships: [];
+      };
       ai_conversations: {
         Row: {
           id: string;

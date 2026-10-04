@@ -21,6 +21,10 @@ this build.
 | `audit_logs` | Append-only change log | `user_id` |
 | `user_settings` | Per-user preferences | `user_id` |
 | `ai_conversations` / `ai_messages` | AI assistant chat history | `user_id` |
+| `push_subscriptions` / `notification_deliveries` | Push devices and sent-reminder log | `user_id` |
+| `subscriptions` | Verityio Premium (Stripe) state, one row per user | `user_id` |
+| `bank_items` / `bank_accounts` / `bank_transactions` | Linked banks (Plaid) and their data | `user_id` |
+| `bank_item_secrets` | Encrypted Plaid access token + sync cursor per bank | `user_id` |
 
 Every table has `alter table ... enable row level security` plus four
 policies (`select`/`insert`/`update`/`delete`) scoped to
@@ -28,6 +32,24 @@ policies (`select`/`insert`/`update`/`delete`) scoped to
 only has a `select` policy — inserts happen exclusively through the
 service-role client from server-side code, never from an authenticated
 user's own session.
+
+### Server-written tables
+
+`subscriptions` (migration 23) and the `bank_*` tables (migration 24) are
+written only by trusted server code with the service-role client: the
+Stripe webhook after verifying Stripe's signature, and the bank actions /
+scheduler with data straight from Plaid's API. Users get `select` policies
+only -- an insert/update policy would let anyone grant themselves Premium
+or fabricate bank transactions from the browser. `bank_item_secrets` has
+RLS enabled and **no policies at all**, so no user (not even the owner) can
+read an access token through the API; the tokens are also AES-256-GCM
+encrypted with an app key that never touches the database. Money columns
+are `numeric(14,2)`; Plaid amounts keep Plaid's sign (positive = money
+out). Everything cascades from `auth.users`.
+
+**Status:** migrations 23 and 24 are written but not yet applied to the
+live project (the Supabase tools lost permission mid-session). Apply them,
+then run `get_advisors` (security + performance).
 
 ## Key constraints
 

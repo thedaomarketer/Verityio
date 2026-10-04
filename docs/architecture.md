@@ -230,6 +230,40 @@ swatches throughout the dashboard/payday UI), charts reuse *that* instead
 of the categorical palette, for one consistent color-to-job mapping across
 the whole app rather than two competing ones.
 
+### Pie and line charts
+
+`donut-chart.tsx` and `line-chart.tsx` are client components (hover state,
+a resize observer for the line's width). Their geometry is pure and tested
+in `lib/charts/donut.ts` (folding to at most six segments with "Other",
+whole percents that sum to 100, ring-segment SVG paths) and
+`lib/charts/line.ts` (scaling, paths, crosshair snapping, collision-free x
+labels). Because Server Components can't pass functions to client
+components, they take a serializable `ValueFormat`
+(`{ kind: "money", currency, intl }` or `{ kind: "hours", locale }`) and
+build the formatter themselves (`lib/charts/value-format.ts`); passing a
+`formatValue` function to them crashes the page at render. Both follow the
+dataviz rules: one y-axis, 2px lines, 10% area wash for a single series,
+crosshair tooltip listing every series, legends with values and percents,
+and a screen-reader table.
+
+## Premium and billing
+
+`lib/billing/` holds the plan prices (`plans.ts`), the entitlement rules
+(`entitlements.ts`), Stripe's form encoding and webhook signature check
+(pure, tested), and a small fetch-based Stripe client (`stripe.ts`).
+`lib/data/subscription.ts#getEntitlement` (cached per request) is what
+pages, API routes and actions ask. Gated UI renders
+`components/premium/premium-upsell.tsx`.
+
+## Bank connections and budget
+
+`lib/bank/` wraps Plaid (`plaid.ts`), token encryption (`token-crypto.ts`),
+the cursor-based transaction sync (`sync.ts`) and revocation
+(`revoke.ts`). `lib/calculations/budget.ts` turns transactions or expenses
+into category totals, insights and a 50/30/20 plan;
+`lib/data/budget.ts` assembles the Budget page from those plus the month's
+shifts (via the shared `lib/data/earnings.ts` helpers).
+
 ## Visual design
 
 The look follows current iOS conventions, implemented as token and
@@ -242,6 +276,11 @@ radius cards, filled 44px inputs, 51x31 switches, segmented tabs, bottom
 sheet dialogs on phones). Pages mostly inherit the look for free. The app
 is light-only today -- `user_settings.dark_mode` exists but nothing applies
 the `.dark` class yet.
+
+The "premium" layer on top: a `hero-surface` utility (deep ink-to-blue
+gradient, AA-contrast white text) for the one card a screen leads with,
+`components/brand-mark.tsx` for the glossy app icon, layered card shadows,
+gradient primary buttons, and a fixed faint blue page wash.
 
 ## Why the shadcn CLI wasn't used
 
