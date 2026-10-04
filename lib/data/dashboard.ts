@@ -11,6 +11,7 @@ import {
   getLocalMonthBounds,
   getWorkweekBounds,
   localDateString,
+  summarizeRangeByJob,
   summarizeShiftsByJob,
   sumJobSummaries,
   upcomingHolidays,
@@ -51,9 +52,10 @@ export async function getDashboardData() {
       supabase.from("jobs").select("*").eq("user_id", ctx.userId).eq("is_active", true),
       getActiveShift(ctx.userId),
       // One fetch covering both the month and the workweek -- a week can start in the previous month.
+      // From the start of the workweek the month begins in, so that week's earlier days count toward overtime.
       getCompletedShiftsInRange(
         ctx.userId,
-        week.start < month.start ? week.start : month.start,
+        getWorkweekBounds(month.start, ctx.timezone, ctx.weekStartsOn).start,
         week.end > month.end ? week.end : month.end
       ),
       getUpcomingShifts(ctx.userId, 5),
@@ -97,12 +99,15 @@ export async function getDashboardData() {
         breaks: s.breaks.map((b) => ({ startedAt: b.started_at, endedAt: b.ended_at, isPaid: b.is_paid })),
       }));
 
-  const todayShifts = within(day);
   const weekShifts = within(week);
 
-  const todayTotals = sumJobSummaries(summarizeShiftsByJob(toShiftInput(todayShifts), jobRates));
+  // Overtime is weekly, so today's and the month's totals are split per
+  // workweek with the earlier days of each week counted (the fetch covers the
+  // whole current workweek).
+  const allInputs = toShiftInput(rangeShifts);
+  const todayTotals = sumJobSummaries(summarizeRangeByJob(allInputs, jobRates, ctx.timezone, ctx.weekStartsOn, day.start, day.end));
   const weekTotals = sumJobSummaries(summarizeShiftsByJob(toShiftInput(weekShifts), jobRates));
-  const monthTotals = sumJobSummaries(summarizeShiftsByJob(toShiftInput(monthShifts), jobRates));
+  const monthTotals = sumJobSummaries(summarizeRangeByJob(allInputs, jobRates, ctx.timezone, ctx.weekStartsOn, month.start, month.end));
 
   return {
     fullName: profile?.full_name ?? null,

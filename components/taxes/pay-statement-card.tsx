@@ -53,7 +53,8 @@ export async function PayStatementCard({
                     <span className="shrink-0 text-xs text-muted-foreground">
                       {isEmpty
                         ? fmt(m.taxes.starts, { date: periodDate(statement.periodStart) })
-                        : `${periodDate(statement.periodStart)} – ${periodDate(statement.periodEnd)}`}
+                        : // periodEnd is exclusive (it's payday's midnight): show the last day worked.
+                          `${periodDate(statement.periodStart)} – ${periodDate(new Date(statement.periodEnd.getTime() - 1))}`}
                     </span>
                   </div>
 
@@ -61,6 +62,10 @@ export async function PayStatementCard({
                     <p className="text-sm text-muted-foreground">{m.taxes.notStarted}</p>
                   ) : (
                     <div className="space-y-1.5 text-sm">
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">{m.taxes.payday}</span>
+                        <span>{periodDate(statement.payDate)}</span>
+                      </div>
                       <div className="flex justify-between">
                         <span className="text-muted-foreground">{m.taxes.hoursWorked}</span>
                         <span>{formatMinutesAsHours(statement.paidMinutes, locale)}</span>

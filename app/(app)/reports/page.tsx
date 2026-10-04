@@ -1,27 +1,21 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { Crown, Download, Lock } from "lucide-react";
+import { Download, Lock } from "lucide-react";
 
-import { createClient } from "@/lib/supabase/server";
 import { requireUserContext } from "@/lib/data/context";
 import { getEntitlement } from "@/lib/data/subscription";
-import { jobRatesFrom, shiftInputsFrom } from "@/lib/data/earnings";
+import { getReportData, type ReportSearchParams } from "@/lib/data/reports";
 import {
-  addDaysToDateString,
   dollarsToCents,
+  fitGranularity,
   formatCents,
   FREE_REPORT_PRESETS,
-  getWorkweekBounds,
   hourlyRateCents,
-  localDateString,
-  localDayStart,
+  isGranularity,
   REPORT_PRESETS,
-  resolveReportRange,
-  summarizeByWeek,
-  summarizeShiftsByJob,
-  sumJobSummaries,
 } from "@/lib/calculations";
-import { formatCalendarDate, formatMinutesAsHours, formatShortDate } from "@/lib/format";
+import { formatBucketLabel, formatCalendarDate, formatMinutesAsHours, formatShortDate } from "@/lib/format";
+import { GranularityTabs } from "@/components/reports/granularity-tabs";
 import { getI18n } from "@/lib/i18n/server";
 import { fmt } from "@/lib/i18n/config";
 import type { ExpenseCategory } from "@/lib/supabase/database.types";
@@ -34,6 +28,7 @@ import { CategoryBarChart } from "@/components/charts/category-bar-chart";
 import { DonutChart } from "@/components/charts/donut-chart";
 import { LineChart } from "@/components/charts/line-chart";
 import { PrintButton } from "@/components/reports/print-button";
+import { DownloadButton } from "@/components/download-button";
 import { cn } from "@/lib/utils";
 
 const MAX_BAR_WEEKS = 16;
@@ -47,21 +42,7 @@ const EXPENSE_CATEGORY_COLORS: Record<ExpenseCategory, string> = {
   other: "var(--chart-6)",
 };
 
-/** A small "Premium" tag beside features a free plan can see but not use. */
-function PremiumTag({ label }: { label: string }) {
-  return (
-    <span className="inline-flex items-center gap-1 rounded-full bg-[#f5a623]/15 px-2 py-0.5 text-[11px] font-semibold text-[#8a5300]">
-      <Crown className="size-3" aria-hidden="true" />
-      {label}
-    </span>
-  );
-}
-
-export default async function ReportsPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ range?: string; start?: string; end?: string }>;
-}) {
+export default async function ReportsPage({ searchParams }: { searchParams: Promise<ReportSearchParams> }) {
   const [params, ctx, { locale, intl, m }] = await Promise.all([searchParams, requireUserContext(), getI18n()]);
   if (!ctx) redirect("/login");
   const { premium } = await getEntitlement(ctx.userId);
@@ -70,43 +51,24 @@ export default async function ReportsPage({
   const fmtCents = (cents: number) => formatCents(cents, ctx.currency, intl);
   const moneyFormat = { kind: "money" as const, currency: ctx.currency, intl };
 
-  // Inclusive local calendar dates; shifts are matched on instants from
-  // local midnight on the first day to local midnight after the last.
-  const now = new Date();
-  const today = localDateString(now, ctx.timezone);
-  const weekStart = localDateString(getWorkweekBounds(now, ctx.timezone, ctx.weekStartsOn).start, ctx.timezone);
-  const range = resolveReportRange(params, { today, weekStart, premium });
+  const data = await getReportData(ctx, params, premium);
+  const { range, summaries, totals, jobsById, expenses, totalExpensesCents, totalMileageCents, rangeQuery } = data;
   const { start: startDate, end: endDate } = range;
-  const rangeStart = localDayStart(startDate, ctx.timezone);
-  const rangeEnd = localDayStart(addDaysToDateString(endDate, 1), ctx.timezone);
-
-  const supabase = await createClient();
-  const [{ data: jobs }, { data: shifts }, { data: expenses }, { data: mileage }] = await Promise.all([
-    supabase.from("jobs").select("*").eq("user_id", ctx.userId),
-    supabase
-      .from("shifts")
-      .select("*, breaks(*)")
-      .eq("user_id", ctx.userId)
-      .eq("status", "completed")
-      .gte("actual_start", rangeStart.toISOString())
-      .lt("actual_start", rangeEnd.toISOString()),
-    supabase.from("expenses").select("*").eq("user_id", ctx.userId).gte("expense_date", startDate).lte("expense_date", endDate),
-    supabase.from("mileage_entries").select("*").eq("user_id", ctx.userId).gte("date", startDate).lte("date", endDate),
-  ]);
-
-  const jobRates = jobRatesFrom(jobs ?? []);
-  const shiftInputs = shiftInputsFrom(shifts ?? []);
-  const summaries = summarizeShiftsByJob(shiftInputs, jobRates);
-  const totals = sumJobSummaries(summaries);
-  const totalExpensesCents = (expenses ?? []).reduce((sum, e) => sum + dollarsToCents(e.amount), 0);
-  const totalMileageCents = (mileage ?? []).reduce((sum, t) => sum + dollarsToCents(t.reimbursement), 0);
   const avgRate = hourlyRateCents(totals.earningsCents, totals.paidMinutes);
-
-  const jobsById = new Map((jobs ?? []).map((j) => [j.id, j]));
   const csvParams = new URLSearchParams({ start: startDate, end: endDate }).toString();
+  const breakdown = (metric: string) => `/reports/${metric}?${rangeQuery}`;
 
-  const weeklyTotals = summarizeByWeek(shiftInputs, jobRates, ctx.timezone, ctx.weekStartsOn, rangeStart, rangeEnd);
-  const weekLabel = (week: (typeof weeklyTotals)[number]) => formatShortDate(week.weekStart, ctx.timezone, intl);
+  const weeklyTotals = data.bucketTotals("week");
+  const weekLabel = (week: (typeof weeklyTotals)[number]) => formatShortDate(week.start, ctx.timezone, intl);
+
+  // Earnings over time, at the granularity the user picks (default weekly).
+  const wanted = isGranularity(params.by) ? params.by : "week";
+  const granularity = fitGranularity(startDate, endDate, wanted);
+  const earningsBuckets = data.bucketTotals(granularity);
+  const earningsSeries = earningsBuckets.map((bucket) => ({
+    label: formatBucketLabel(bucket, granularity, ctx.timezone, intl),
+    values: { earnings: bucket.earningsCents },
+  }));
 
   const jobSlices = Object.entries(summaries).map(([jobId, summary]) => ({
     key: jobId,
@@ -117,7 +79,7 @@ export default async function ReportsPage({
   }));
 
   const expensesByCategory = new Map<ExpenseCategory, number>();
-  for (const expense of expenses ?? []) {
+  for (const expense of expenses) {
     expensesByCategory.set(expense.category, (expensesByCategory.get(expense.category) ?? 0) + dollarsToCents(expense.amount));
   }
   const expenseSlices = [...expensesByCategory.entries()].map(([category, cents]) => ({
@@ -140,16 +102,12 @@ export default async function ReportsPage({
           {premium ? (
             <>
               <PrintButton label={m.reports.savePdf} />
-              <Button asChild variant="outline" size="sm">
-                <a href={`/api/reports/csv/shifts?${csvParams}`}>
-                  <Download /> {m.reports.hoursCsv}
-                </a>
-              </Button>
-              <Button asChild variant="outline" size="sm">
-                <a href={`/api/reports/csv/expenses?${csvParams}`}>
-                  <Download /> {m.reports.expensesCsv}
-                </a>
-              </Button>
+              <DownloadButton href={`/api/reports/csv/shifts?${csvParams}`} fallbackName="verityio-hours.csv">
+                <Download /> {m.reports.hoursCsv}
+              </DownloadButton>
+              <DownloadButton href={`/api/reports/csv/expenses?${csvParams}`} fallbackName="verityio-expenses.csv">
+                <Download /> {m.reports.expensesCsv}
+              </DownloadButton>
             </>
           ) : (
             <Button asChild variant="outline" size="sm">
@@ -226,42 +184,51 @@ export default async function ReportsPage({
       </div>
 
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-3">
-        <MetricCard label={m.reports.totalHours} value={fmtHours(totals.paidMinutes)} />
-        <MetricCard label={m.common.overtime} value={fmtHours(totals.overtimeMinutes)} />
-        <MetricCard label={m.reports.estEarnings} value={fmtCents(totals.earningsCents)} sub={m.reports.beforeDeductions} />
-        <MetricCard label={m.reports.avgPerHour} value={avgRate !== null ? fmtCents(avgRate) : "—"} />
-        <MetricCard label={m.nav.expenses} value={fmtCents(totalExpensesCents)} />
-        <MetricCard label={m.nav.mileage} value={fmtCents(totalMileageCents)} />
+        <MetricCard href={breakdown("hours")} label={m.reports.totalHours} value={fmtHours(totals.paidMinutes)} />
+        <MetricCard href={breakdown("overtime")} label={m.common.overtime} value={fmtHours(totals.overtimeMinutes)} />
+        <MetricCard href={breakdown("earnings")} label={m.reports.estEarnings} value={fmtCents(totals.earningsCents)} sub={m.reports.beforeDeductions} />
+        <MetricCard href={breakdown("rate")} label={m.reports.avgPerHour} value={avgRate !== null ? fmtCents(avgRate) : "—"} />
+        <MetricCard href={breakdown("expenses")} label={m.nav.expenses} value={fmtCents(totalExpensesCents)} />
+        <MetricCard href={breakdown("mileage")} label={m.nav.mileage} value={fmtCents(totalMileageCents)} />
       </div>
 
-      {weeklyTotals.length > 1 && (
-        <div className="grid gap-4 lg:grid-cols-2">
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between gap-2">
-              <CardTitle className="text-base">{m.reports.earningsTrend}</CardTitle>
-              {!premium && <PremiumTag label={m.premium.badge} />}
-            </CardHeader>
-            <CardContent>
-              {premium ? (
-                <LineChart
-                  data={weeklyTotals.map((week) => ({ label: weekLabel(week), values: { earnings: week.earningsCents } }))}
-                  series={[{ key: "earnings", label: m.common.earnings, color: "var(--chart-1)" }]}
-                  format={moneyFormat}
-                  emptyMessage={m.reports.noShifts}
-                  caption={m.reports.earningsTrend}
-                />
-              ) : (
-                <Link
-                  href="/premium"
-                  className="flex h-44 flex-col items-center justify-center gap-2 rounded-2xl bg-secondary/60 text-center text-sm text-muted-foreground transition-colors hover:bg-secondary"
-                >
-                  <Lock className="size-5" aria-hidden="true" />
-                  {m.reports.trendPremium}
-                </Link>
-              )}
-            </CardContent>
-          </Card>
+      <Card>
+        <CardHeader className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <CardTitle className="text-base">{m.reports.earningsOverTime}</CardTitle>
+          <GranularityTabs
+            basePath="/reports"
+            query={rangeQuery}
+            current={granularity}
+            labels={m.reports.granularity}
+            label={m.reports.earningsOverTime}
+          />
+        </CardHeader>
+        <CardContent>
+          {premium && earningsSeries.length > 1 ? (
+            <LineChart
+              data={earningsSeries}
+              series={[{ key: "earnings", label: m.common.earnings, color: "var(--chart-1)" }]}
+              format={moneyFormat}
+              emptyMessage={m.reports.noShifts}
+              caption={m.reports.earningsOverTime}
+            />
+          ) : earningsSeries.length <= 31 ? (
+            <TimeSeriesBarChart
+              data={earningsSeries}
+              series={[{ key: "earnings", label: m.common.earnings, colorClassName: "bg-chart-1" }]}
+              formatValue={fmtCents}
+              emptyMessage={m.reports.noShifts}
+            />
+          ) : (
+            <Link href={breakdown("earnings") + `&by=${granularity}`} className="text-sm font-semibold text-primary">
+              {m.reports.seeBreakdown}
+            </Link>
+          )}
+        </CardContent>
+      </Card>
 
+      {weeklyTotals.length > 1 && (
+        <div className="grid gap-4">
           {weeklyTotals.length <= MAX_BAR_WEEKS && (
             <Card>
               <CardHeader>

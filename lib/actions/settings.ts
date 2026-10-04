@@ -9,6 +9,7 @@ import { validationMessage } from "@/lib/i18n/validation";
 import { formText } from "@/lib/validation/form";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { revokeBankItems } from "@/lib/bank/revoke";
+import { ATTACHMENTS_BUCKET } from "@/lib/uploads/paths";
 import { cancelSubscriptionForDeletedAccount } from "@/lib/billing/cancel";
 import { logAudit } from "@/lib/audit/log";
 import {
@@ -227,6 +228,14 @@ export async function deleteAccountAction(): Promise<ActionResult> {
     await revokeBankItems(user.id);
 
     const admin = createAdminClient();
+    // Storage files don't cascade with the user row: remove receipts and the profile photo too.
+    const [{ data: files }, { data: profileRow }] = await Promise.all([
+      admin.from("attachments").select("storage_path").eq("user_id", user.id),
+      admin.from("profiles").select("avatar_url").eq("id", user.id).maybeSingle(),
+    ]);
+    const paths = [...(files ?? []).map((f) => f.storage_path), ...(profileRow?.avatar_url ? [profileRow.avatar_url] : [])];
+    if (paths.length > 0) await admin.storage.from(ATTACHMENTS_BUCKET).remove(paths);
+
     const { error } = await admin.auth.admin.deleteUser(user.id);
     if (error) throw error;
   } catch (error) {

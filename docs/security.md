@@ -122,6 +122,24 @@ once the upload UI exists.
 - Disconnecting, and account deletion, call Plaid `/item/remove` so access
   is revoked at the source, then delete the rows (cascade).
 
+## Uploads (profile photos, receipts)
+
+- Files live in the private `attachments` bucket under `<user id>/...`;
+  the bucket's RLS policies (migration 14) only let a user read or write
+  their own top-level folder, so the browser uploads directly with the
+  user's session.
+- The server never trusts the client's path: `lib/uploads/paths.ts`
+  requires the exact shape (`<uid>/avatar/<uuid>.<jpg|png|webp>`,
+  `<uid>/receipts/<expense id>/<uuid>.<jpg|png|webp|pdf>`), the expense must
+  be the user's (read through RLS), and the object must exist before a row
+  is written. Types and the 10 MB limit are validated with Zod.
+- Photos are re-encoded in the browser, which drops EXIF metadata such as
+  GPS location.
+- Files are served only via 60-second (receipts) or 1-hour (avatar) signed
+  URLs behind authenticated routes; storage paths are never public links.
+- Deleting an expense removes its files; deleting the account removes all
+  receipts and the profile photo before the user row is deleted.
+
 ## Account deletion
 
 Deleting the `auth.users` row cascades to every user-owned table via

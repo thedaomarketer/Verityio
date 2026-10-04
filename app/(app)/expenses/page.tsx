@@ -40,7 +40,7 @@ export default async function ExpensesPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-[28px] leading-tight font-bold tracking-tight md:text-3xl">{m.expenses.title}</h1>
-        <CreateExpenseDialog jobs={jobs ?? []} timezone={ctx.timezone} />
+        <CreateExpenseDialog jobs={jobs ?? []} timezone={ctx.timezone} userId={ctx.userId} />
       </div>
 
       <Card>
@@ -64,7 +64,7 @@ export default async function ExpensesPage() {
 
       <Card>
         <CardContent className="px-0 pt-6 sm:px-6">
-          <ExpensesList expenses={expenses ?? []} />
+          <ExpensesList expenses={expenses ?? []} userId={ctx.userId} />
         </CardContent>
       </Card>
     </div>

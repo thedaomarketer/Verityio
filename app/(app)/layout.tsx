@@ -23,7 +23,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
 
   const { data: profile } = await supabase
     .from("profiles")
-    .select("full_name, email, timezone")
+    .select("full_name, email, timezone, avatar_url")
     .eq("id", user.id)
     .maybeSingle();
 
@@ -34,7 +34,11 @@ export default async function AppLayout({ children }: { children: React.ReactNod
       <div className="flex min-h-svh">
         <SidebarNav />
         <div className="flex min-w-0 flex-1 flex-col">
-          <Header fullName={profile?.full_name ?? null} email={profile?.email ?? user.email ?? null} />
+          <Header
+              fullName={profile?.full_name ?? null}
+              email={profile?.email ?? user.email ?? null}
+              avatarVersion={profile?.avatar_url ?? null}
+            />
           <TimeZonePrompt savedTimeZone={safeTimeZone(profile?.timezone)} />
           <InstallPrompt />
           <main className="flex-1 pb-[calc(7rem+env(safe-area-inset-bottom))] md:pb-0">

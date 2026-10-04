@@ -9,9 +9,12 @@ import { formText } from "@/lib/validation/form";
 import { logAudit } from "@/lib/audit/log";
 import { expenseSchema } from "@/lib/validation/expenses";
 import type { ExpenseCategory } from "@/lib/supabase/database.types";
+import { ATTACHMENTS_BUCKET } from "@/lib/uploads/paths";
 
 export interface ActionResult {
   error?: string;
+  /** The new expense's id, so the form can attach a receipt to it. */
+  id?: string;
 }
 
 export async function createExpenseAction(
@@ -61,7 +64,7 @@ export async function createExpenseAction(
 
   revalidatePath("/expenses");
   revalidatePath("/reports");
-  return {};
+  return { id: data.id };
 }
 
 export async function deleteExpenseAction(expenseId: string): Promise<ActionResult> {
@@ -81,6 +84,19 @@ export async function deleteExpenseAction(expenseId: string): Promise<ActionResu
 
   const { error } = await supabase.from("expenses").delete().eq("id", expenseId).eq("user_id", user.id);
   if (error) return { error: m.errors.expenseDeleteFailed };
+
+  // Attachments are polymorphic (no foreign key to cascade), so remove the
+  // expense's receipt files and rows explicitly.
+  const { data: receipts } = await supabase
+    .from("attachments")
+    .select("id, storage_path")
+    .eq("user_id", user.id)
+    .eq("entity_type", "expense")
+    .eq("entity_id", expenseId);
+  if (receipts?.length) {
+    await supabase.storage.from(ATTACHMENTS_BUCKET).remove(receipts.map((r) => r.storage_path));
+    await supabase.from("attachments").delete().in("id", receipts.map((r) => r.id));
+  }
 
   await logAudit({ userId: user.id, entityType: "expense", entityId: expenseId, action: "deleted", oldData: before });
 

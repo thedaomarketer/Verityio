@@ -5,9 +5,11 @@ import { createClient } from "@/lib/supabase/server";
 import { requireUserContext } from "@/lib/data/context";
 import { getOrCreateUserSettings } from "@/lib/data/settings";
 import { getI18n } from "@/lib/i18n/server";
-import { Button } from "@/components/ui/button";
+import { DownloadButton } from "@/components/download-button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ProfileForm } from "@/components/settings/profile-form";
+import { AvatarUpload } from "@/components/settings/avatar-upload";
+import { initials } from "@/components/app-shell/header";
 import { PreferencesForm } from "@/components/settings/preferences-form";
 import { RegionForm } from "@/components/settings/region-form";
 import { PushCard } from "@/components/settings/push-card";
@@ -36,6 +38,12 @@ export default async function SettingsPage() {
     <div className="max-w-2xl space-y-6">
       <h1 className="text-[28px] leading-tight font-bold tracking-tight md:text-3xl">{m.settings.title}</h1>
 
+      <AvatarUpload
+        userId={ctx.userId}
+        avatarVersion={profile.avatar_url}
+        initials={initials(profile.full_name, profile.email)}
+        name={profile.full_name || profile.email || m.header.yourAccount}
+      />
       <ProfileForm profile={profile} />
       <RegionForm profile={{ locale: profile.locale, timezone: ctx.timezone, currency: profile.currency }} />
       <PreferencesForm settings={settings} />
@@ -51,11 +59,9 @@ export default async function SettingsPage() {
         </CardHeader>
         <CardContent>
           <p className="mb-3 text-sm text-muted-foreground">{m.settings.data.body}</p>
-          <Button asChild variant="outline">
-            <a href="/api/account/export">
-              <Download /> {m.settings.data.export}
-            </a>
-          </Button>
+          <DownloadButton href="/api/account/export" fallbackName="verityio-export.json" size="default">
+            <Download /> {m.settings.data.export}
+          </DownloadButton>
         </CardContent>
       </Card>
 

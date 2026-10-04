@@ -20,9 +20,9 @@ export default async function TaxesPage() {
   const supabase = await createClient();
   const [settings, incomeEstimate, paydays, statements] = await Promise.all([
     getOrCreateUserSettings(supabase, ctx.userId),
-    getAnnualIncomeEstimate(ctx.userId),
+    getAnnualIncomeEstimate(ctx.userId, ctx.timezone, ctx.weekStartsOn),
     getUpcomingPaydays(ctx.userId, ctx.timezone),
-    getPayPeriodStatements(ctx.userId, ctx.timezone),
+    getPayPeriodStatements(ctx.userId, ctx.timezone, ctx.weekStartsOn),
   ]);
 
   if (!settings) throw new Error("Could not load tax settings.");

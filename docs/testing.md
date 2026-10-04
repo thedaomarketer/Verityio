@@ -108,6 +108,16 @@ Also covered (added with Premium, Budget and the new charts):
   `charts/value-format.test.ts`: slice folding, percents, arc paths,
   scaling, crosshair snapping, label selection, chart number formats.
 
+- `calculations/range-summary.test.ts`: per-workweek overtime for any range
+  (a normal fortnight isn't overtime, chronological split within a week,
+  earlier days of a straddling week count, per-job thresholds, open shifts
+  and out-of-range shifts skipped).
+- `calculations/buckets.test.ts`: day/week/month/year buckets clipped to the
+  range, DST-safe local midnights.
+- `uploads/paths.test.ts`, `download.test.ts`, `privacy.test.ts`: storage
+  path ownership rules, Content-Disposition file names, the hide-balances
+  cookie.
+
 ## Database-level verification
 
 Because the build sandbox couldn't reach the live Supabase project's API

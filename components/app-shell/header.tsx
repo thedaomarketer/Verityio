@@ -3,7 +3,7 @@ import { Crown, LogOut, Settings, Sparkles, User as UserIcon } from "lucide-reac
 
 import { signOutAction } from "@/lib/actions/auth";
 import { getI18n } from "@/lib/i18n/server";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -15,7 +15,7 @@ import {
 import { APP_NAME } from "@/lib/brand";
 import { BrandMark } from "@/components/brand-mark";
 
-function initials(name: string | null, email: string | null): string {
+export function initials(name: string | null, email: string | null): string {
   if (name && name.trim()) {
     const parts = name.trim().split(/\s+/);
     return (parts[0][0] + (parts[1]?.[0] ?? "")).toUpperCase();
@@ -26,9 +26,12 @@ function initials(name: string | null, email: string | null): string {
 export async function Header({
   fullName,
   email,
+  avatarVersion,
 }: {
   fullName: string | null;
   email: string | null;
+  /** The stored photo path; changes when the photo does, so the image URL busts the cache. */
+  avatarVersion?: string | null;
 }) {
   const { m } = await getI18n();
   return (
@@ -54,6 +57,7 @@ export async function Header({
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" size="icon" className="rounded-full" aria-label={m.header.accountMenu}>
               <Avatar className="size-8">
+                {avatarVersion && <AvatarImage src={`/api/avatar?v=${encodeURIComponent(avatarVersion)}`} alt="" className="object-cover" />}
                 <AvatarFallback className="bg-primary/10 text-xs font-semibold text-primary">{initials(fullName, email)}</AvatarFallback>
               </Avatar>
             </Button>

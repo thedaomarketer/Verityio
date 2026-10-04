@@ -212,6 +212,45 @@ exercise the authenticated app directly.
   gradient sparkle icon in the header instead of a nav item. The **+**
   button opens a swipeable carousel of the four everyday actions (log a
   shift, expense, mileage, journal note); "Add a job" lives on Jobs.
+- **Overtime is per workweek everywhere**: pay periods, the tax income
+  estimate, month totals, Reports ranges and Budget earnings now use
+  `summarizeRangeByJob` (`lib/calculations/range-summary.ts`): shifts are
+  grouped into workweeks, each job's minutes accumulate chronologically,
+  and only minutes past that week's threshold are overtime -- earlier days
+  of a week that starts before the range still count. Previously a weekly
+  threshold was applied to the whole range (a normal 80-hour fortnight
+  showed 40 hours of overtime). The pay-period card also shows the last
+  day worked (the period's end is payday, exclusive) and the payday, and on
+  payday itself "current" means the period now being worked.
+- **Reports drill-down**: every tile opens `/reports/<metric>` (hours,
+  overtime, earnings, rate, expenses, mileage) for the same range, with a
+  Daily / Weekly / Monthly / Yearly switch, a chart, per-period table, per-job
+  totals and the individual shifts, expenses or trips. The main page's
+  earnings chart has the same switch. Both share `lib/data/reports.ts`.
+- **Calendar**: an iOS-style month grid (job-colored dots, today in red, the
+  selected day's shifts below, a Today button) with Compact / Details
+  (bars + hours per day) / List views; now includes planned (scheduled)
+  shifts.
+- **Downloads in the installed app**: exports are fetched in the background
+  (`components/download-button.tsx`) and handed to the share sheet ("Save
+  to Files") in the home-screen app, or saved via a temporary link in a
+  browser. A plain link used to replace the app with the raw file and no
+  way back.
+- **Profile photo** (Settings) and **receipt photos** (each expense, and the
+  Add expense form): images are downsized and re-encoded as JPEG in the
+  browser (which strips location metadata), uploaded straight to the user's
+  own folder in the private `attachments` bucket, then recorded by a server
+  action that checks the exact path shape and that the file exists. Files
+  are only ever served through short-lived signed URLs (`/api/avatar`,
+  `/api/attachments/[id]`). Deleting an expense or the account removes its
+  files. No new migrations were needed (the bucket, `attachments` table and
+  `profiles.avatar_url` already existed).
+- **Logo**: a "V" drawn as a checkmark with the dot of the "i" on a glossy
+  blue squircle -- `public/brand/verityio-mark.svg` (plus square and
+  maskable variants and a 1024px PNG), used for the favicon, the app icons
+  and `components/brand-mark.tsx`.
+- **Expenses list** is now a phone-friendly list (with receipt and delete
+  buttons per row) instead of a six-column table.
 - **Hide balances**: an eye button on the dashboard's week card, the
   Budget page and the bank accounts card masks money figures (week
   earnings, spent/earned/kept, bank balances, transaction amounts) as
@@ -232,9 +271,9 @@ exercise the authenticated app directly.
   them as empty: everyone is treated as free-but-unlocked (billing is off
   anyway) and Budget uses recorded expenses.
 
-- **Attachments/receipts**: the `attachments` table and private storage
-  bucket + RLS policies exist, but there's no upload UI yet. Expenses have
-  a `receipt_url` column that's currently unused.
+- **Attachments**: receipts on expenses only; journal entries and shifts
+  don't take files yet. `expenses.receipt_url` holds the first receipt's
+  path as a "has a receipt" marker for lists.
 - **Job detail tabs**: the spec describes Overview/Time/Journal/Expenses/Reports/Settings
   tabs per job. The current `/jobs/[id]` page is a single overview (stats +
   this month's shifts + edit), not tabbed.

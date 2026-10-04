@@ -6,6 +6,7 @@ import { ArrowUpRight, Briefcase, Download, FileSpreadsheet, HeartHandshake, Lan
 
 import { RESOURCE_CATEGORIES, RESOURCE_LINKS, type ResourceCategory, type ResourceCountry } from "@/lib/resources";
 import { useI18n } from "@/lib/i18n/client";
+import { DownloadButton } from "@/components/download-button";
 import { cn } from "@/lib/utils";
 
 const CATEGORY_STYLE: Record<ResourceCategory, { icon: LucideIcon; tile: string }> = {
@@ -54,9 +55,9 @@ export function ResourcesBrowser({ defaultCountry }: { defaultCountry: ResourceC
           <Link href="/taxes" className="inline-flex min-h-10 items-center gap-2 rounded-full bg-secondary px-4 text-sm font-semibold text-primary transition-transform active:scale-95">
             <Receipt className="size-4" aria-hidden="true" /> {r.taxTimeTaxes}
           </Link>
-          <a href="/api/account/export" className="inline-flex min-h-10 items-center gap-2 rounded-full bg-secondary px-4 text-sm font-semibold text-primary transition-transform active:scale-95">
+          <DownloadButton href="/api/account/export" fallbackName="verityio-export.json" variant="outline" size="default" className="min-h-10">
             <Download className="size-4" aria-hidden="true" /> {r.taxTimeExport}
-          </a>
+          </DownloadButton>
         </div>
       </section>
 

@@ -274,6 +274,7 @@ export const fr: Messages = {
       lodging: "Hébergement",
       other: "Autre",
     },
+    hasReceipt: "Reçu joint",
   },
 
   mileage: {
@@ -300,6 +301,12 @@ export const fr: Messages = {
     worked: "Travaillé",
     scheduled: "Prévu",
     shift: "Quart",
+    today: "Aujourd'hui",
+    noEvents: "Aucun événement",
+    allDay: "Toute la journée",
+    viewOptions: "Options d'affichage",
+    views: { compact: "Compact", details: "Détails", list: "Liste" },
+    workedTotal: "{hours} travaillées",
   },
 
   reports: {
@@ -340,6 +347,20 @@ export const fr: Messages = {
     otherJobs: "Autres emplois",
     totalExpenses: "Total",
     footnote: "Les gains sont des estimations calculées à partir de vos quarts enregistrés et des taux de vos emplois pour {range}. Ce n'est pas un relevé de paie.",
+    earningsOverTime: "Gains dans le temps",
+    granularity: { day: "Jour", week: "Semaine", month: "Mois", year: "Année" },
+    seeBreakdown: "Voir le détail complet",
+    byPeriod: "{metric} par période",
+    period: "Période",
+    hoursShort: "Heures",
+    perHourShort: "Par heure",
+    jobLine: "{shifts} quarts · {hours} · {overtime} supp. · {rate}/h",
+    shiftsTitle: "Quarts",
+    overtimeNote: "Les heures supplémentaires sont calculées par semaine de travail, selon le seuil hebdomadaire de chaque emploi; les heures plus tôt dans la semaine comptent donc.",
+    allExpenses: "Toutes les dépenses",
+    allTrips: "Tous les déplacements",
+    noTrips: "Aucun déplacement pour cette période.",
+    tripsSummary: "{trips} déplacements · {distance} {unit}",
   },
 
   taxes: {
@@ -394,6 +415,7 @@ export const fr: Messages = {
       socialSecurity: "Sécurité sociale",
       medicare: "Medicare",
     },
+    payday: "Jour de paie",
   },
 
   settings: {
@@ -630,6 +652,27 @@ export const fr: Messages = {
     hideBalances: "Masquer les soldes",
     showBalances: "Afficher les soldes",
     hiddenAmount: "Montant masqué",
+  },
+
+  uploads: {
+    addPhoto: "Ajouter une photo",
+    changePhoto: "Changer la photo",
+    removePhoto: "Retirer la photo",
+    photoUpdated: "Photo de profil mise à jour.",
+    notAnImage: "Veuillez choisir une photo.",
+    tooLarge: "Ce fichier est trop volumineux. La limite est de 10 Mo.",
+    unsupported: "Veuillez choisir une photo ou un PDF.",
+    receiptOptional: "Reçu (facultatif)",
+    addReceiptPhoto: "Ajouter une photo du reçu",
+    photoSelected: "Photo sélectionnée",
+    uploading: "Téléversement...",
+    receiptsTitle: "Reçus",
+    noReceipts: "Aucun reçu pour l'instant. Prenez une photo ou choisissez-en une dans votre photothèque.",
+    viewReceipts: "Voir les reçus",
+    openReceipt: "Ouvrir le reçu",
+    deleteReceipt: "Supprimer le reçu",
+    deleteReceiptConfirm: "Supprimer ce reçu? Cette action est irréversible.",
+    privateNote: "Vos reçus sont privés et conservés de façon sécurisée.",
   },
 
   help: {
@@ -882,6 +925,8 @@ export const fr: Messages = {
     pushSendFailed: "Impossible d'envoyer la notification. Veuillez réessayer.",
     pushTooSoon: "Un test vient d'être envoyé. Attendez une minute avant d'en envoyer un autre.",
     premiumRequired: "Cette fonction fait partie de Verityio Premium.",
+    downloadFailed: "Impossible de télécharger ce fichier. Veuillez réessayer.",
+    uploadFailed: "Impossible de téléverser ce fichier. Veuillez réessayer.",
   },
 
   validation: {

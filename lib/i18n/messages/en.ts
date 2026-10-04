@@ -277,6 +277,7 @@ export const en = {
       lodging: "Lodging",
       other: "Other",
     },
+    hasReceipt: "Has a receipt",
   },
 
   mileage: {
@@ -303,6 +304,12 @@ export const en = {
     worked: "Worked",
     scheduled: "Scheduled",
     shift: "Shift",
+    today: "Today",
+    noEvents: "No Events",
+    allDay: "All day",
+    viewOptions: "View options",
+    views: { compact: "Compact", details: "Details", list: "List" },
+    workedTotal: "{hours} worked",
   },
 
   reports: {
@@ -343,6 +350,20 @@ export const en = {
     otherJobs: "Other jobs",
     totalExpenses: "Total",
     footnote: "Earnings are estimates calculated from your recorded shifts and job rates for {range}. They are not a payroll statement.",
+    earningsOverTime: "Earnings over time",
+    granularity: { day: "Daily", week: "Weekly", month: "Monthly", year: "Yearly" },
+    seeBreakdown: "See the full breakdown",
+    byPeriod: "{metric} by period",
+    period: "Period",
+    hoursShort: "Hours",
+    perHourShort: "Per hour",
+    jobLine: "{shifts} shifts · {hours} · {overtime} overtime · {rate}/h",
+    shiftsTitle: "Shifts",
+    overtimeNote: "Overtime is worked out per workweek, using each job's weekly threshold, so hours earlier in a week count toward it.",
+    allExpenses: "All expenses",
+    allTrips: "All trips",
+    noTrips: "No trips in this range.",
+    tripsSummary: "{trips} trips · {distance} {unit}",
   },
 
   taxes: {
@@ -394,6 +415,7 @@ export const en = {
       socialSecurity: "Social Security",
       medicare: "Medicare",
     },
+    payday: "Payday",
   },
 
   settings: {
@@ -629,6 +651,27 @@ export const en = {
     hideBalances: "Hide balances",
     showBalances: "Show balances",
     hiddenAmount: "Amount hidden",
+  },
+
+  uploads: {
+    addPhoto: "Add photo",
+    changePhoto: "Change photo",
+    removePhoto: "Remove photo",
+    photoUpdated: "Profile photo updated.",
+    notAnImage: "Please choose a photo.",
+    tooLarge: "That file is too large. The limit is 10 MB.",
+    unsupported: "Please choose a photo or a PDF.",
+    receiptOptional: "Receipt (optional)",
+    addReceiptPhoto: "Add receipt photo",
+    photoSelected: "Photo selected",
+    uploading: "Uploading...",
+    receiptsTitle: "Receipts",
+    noReceipts: "No receipts yet. Take a photo or choose one from your library.",
+    viewReceipts: "View receipts",
+    openReceipt: "Open receipt",
+    deleteReceipt: "Delete receipt",
+    deleteReceiptConfirm: "Delete this receipt? This can't be undone.",
+    privateNote: "Receipts are private to your account and stored securely.",
   },
 
   help: {
@@ -875,6 +918,8 @@ export const en = {
     pushSendFailed: "We couldn't send the notification. Please try again.",
     pushTooSoon: "A test was just sent. Wait a minute before sending another.",
     premiumRequired: "This feature is part of Verityio Premium.",
+    downloadFailed: "We couldn't download that file. Please try again.",
+    uploadFailed: "We couldn't upload that file. Please try again.",
   },
 
   /** Zod validation messages; schemas in lib/validation reference these keys. */

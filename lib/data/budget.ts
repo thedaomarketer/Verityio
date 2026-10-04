@@ -15,7 +15,8 @@ import {
   localMonthString,
   projectToMonthEnd,
   spendingByCategory,
-  summarizeShiftsByJob,
+  summarizeRangeByJob,
+  getWorkweekBounds,
   sumJobSummaries,
   totalSpending,
   type SpendingItem,
@@ -60,7 +61,8 @@ export async function getBudgetData(ctx: UserContext) {
       .select("job_id, actual_start, actual_end, breaks(started_at, ended_at, is_paid)")
       .eq("user_id", ctx.userId)
       .eq("status", "completed")
-      .gte("actual_start", localDayStart(monthStart, ctx.timezone).toISOString())
+      // From the start of the workweek the month begins in: those days count toward that week's overtime.
+      .gte("actual_start", getWorkweekBounds(localDayStart(monthStart, ctx.timezone), ctx.timezone, ctx.weekStartsOn).start.toISOString())
       .lt("actual_start", now.toISOString()),
     // The bank tables arrive with migration 24; until then these read as empty.
     supabase
@@ -115,7 +117,16 @@ export async function getBudgetData(ctx: UserContext) {
   const lastMonthByCategory = spendingByCategory(lastMonthItems);
   const spentCents = totalSpending(thisMonthByCategory);
 
-  const earnings = sumJobSummaries(summarizeShiftsByJob(shiftInputsFrom(shifts ?? []), jobRatesFrom(jobs ?? [])));
+  const earnings = sumJobSummaries(
+    summarizeRangeByJob(
+      shiftInputsFrom(shifts ?? []),
+      jobRatesFrom(jobs ?? []),
+      ctx.timezone,
+      ctx.weekStartsOn,
+      localDayStart(monthStart, ctx.timezone),
+      now
+    )
+  );
 
   // Spending to date, day by day, against last month at the same point.
   const thisMonthDates = datesFrom(monthStart, dayOfMonth);

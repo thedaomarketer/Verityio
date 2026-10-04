@@ -275,6 +275,7 @@ export const es: Messages = {
       lodging: "Alojamiento",
       other: "Otro",
     },
+    hasReceipt: "Tiene recibo",
   },
 
   mileage: {
@@ -301,6 +302,12 @@ export const es: Messages = {
     worked: "Trabajado",
     scheduled: "Programado",
     shift: "Turno",
+    today: "Hoy",
+    noEvents: "Sin eventos",
+    allDay: "Todo el día",
+    viewOptions: "Opciones de vista",
+    views: { compact: "Compacta", details: "Detalles", list: "Lista" },
+    workedTotal: "{hours} trabajadas",
   },
 
   reports: {
@@ -341,6 +348,20 @@ export const es: Messages = {
     otherJobs: "Otros trabajos",
     totalExpenses: "Total",
     footnote: "Las ganancias son estimaciones calculadas a partir de tus turnos registrados y las tarifas de tus trabajos para {range}. No son un recibo de nómina.",
+    earningsOverTime: "Ganancias en el tiempo",
+    granularity: { day: "Diario", week: "Semanal", month: "Mensual", year: "Anual" },
+    seeBreakdown: "Ver el desglose completo",
+    byPeriod: "{metric} por periodo",
+    period: "Periodo",
+    hoursShort: "Horas",
+    perHourShort: "Por hora",
+    jobLine: "{shifts} turnos · {hours} · {overtime} extra · {rate}/h",
+    shiftsTitle: "Turnos",
+    overtimeNote: "Las horas extra se calculan por semana laboral, con el umbral semanal de cada trabajo, así que cuentan las horas anteriores de esa semana.",
+    allExpenses: "Todos los gastos",
+    allTrips: "Todos los viajes",
+    noTrips: "No hay viajes en este periodo.",
+    tripsSummary: "{trips} viajes · {distance} {unit}",
   },
 
   taxes: {
@@ -394,6 +415,7 @@ export const es: Messages = {
       socialSecurity: "Seguro Social",
       medicare: "Medicare",
     },
+    payday: "Día de pago",
   },
 
   settings: {
@@ -630,6 +652,27 @@ export const es: Messages = {
     hideBalances: "Ocultar saldos",
     showBalances: "Mostrar saldos",
     hiddenAmount: "Monto oculto",
+  },
+
+  uploads: {
+    addPhoto: "Agregar foto",
+    changePhoto: "Cambiar foto",
+    removePhoto: "Quitar foto",
+    photoUpdated: "Foto de perfil actualizada.",
+    notAnImage: "Elige una foto.",
+    tooLarge: "Ese archivo es demasiado grande. El límite es de 10 MB.",
+    unsupported: "Elige una foto o un PDF.",
+    receiptOptional: "Recibo (opcional)",
+    addReceiptPhoto: "Agregar foto del recibo",
+    photoSelected: "Foto seleccionada",
+    uploading: "Subiendo...",
+    receiptsTitle: "Recibos",
+    noReceipts: "Aún no hay recibos. Toma una foto o elige una de tu galería.",
+    viewReceipts: "Ver recibos",
+    openReceipt: "Abrir recibo",
+    deleteReceipt: "Eliminar recibo",
+    deleteReceiptConfirm: "¿Eliminar este recibo? No se puede deshacer.",
+    privateNote: "Tus recibos son privados y se guardan de forma segura.",
   },
 
   help: {
@@ -881,6 +924,8 @@ export const es: Messages = {
     pushSendFailed: "No pudimos enviar la notificación. Inténtalo de nuevo.",
     pushTooSoon: "Acabamos de enviar una prueba. Espera un minuto antes de enviar otra.",
     premiumRequired: "Esta función es parte de Verityio Premium.",
+    downloadFailed: "No pudimos descargar ese archivo. Inténtalo de nuevo.",
+    uploadFailed: "No pudimos subir ese archivo. Inténtalo de nuevo.",
   },
 
   validation: {

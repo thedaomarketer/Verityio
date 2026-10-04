@@ -71,3 +71,17 @@ export function formatDaysAway(days: number, m: Messages): string {
   if (days === 1) return m.common.tomorrow;
   return fmt(m.common.inDays, { n: days });
 }
+
+/** Label for a report bucket: "Oct 5" (day or week start), "Oct 2026" (month), "2026" (year). */
+export function formatBucketLabel(
+  bucket: { start: Date; startDate: string },
+  granularity: "day" | "week" | "month" | "year",
+  timezone: string,
+  intl: string
+): string {
+  if (granularity === "year") return bucket.startDate.slice(0, 4);
+  if (granularity === "month") {
+    return bucket.start.toLocaleDateString(intl, { month: "short", year: "numeric", timeZone: timezone });
+  }
+  return formatShortDate(bucket.start, timezone, intl);
+}
