@@ -44,7 +44,7 @@ export async function getAnnualIncomeEstimate(
 
   const [shifts, { data: jobs }] = await Promise.all([
     getCompletedShiftsInRange(userId, contextStart, end),
-    supabase.from("jobs").select("id, hourly_rate, overtime_rate, overtime_threshold_minutes").eq("user_id", userId),
+    supabase.from("jobs").select("id, hourly_rate, overtime_rate, overtime_threshold_minutes, daily_overtime_threshold_minutes, double_time_threshold_minutes, double_time_rate").eq("user_id", userId),
   ]);
 
   const { earningsCents } = sumJobSummaries(
@@ -103,6 +103,8 @@ export interface PayPeriodStatement {
   paidMinutes: number;
   regularMinutes: number;
   overtimeMinutes: number;
+  /** The part of overtimeMinutes paid at the double-time rate. */
+  doubleTimeMinutes: number;
   grossEarningsCents: number;
 }
 
@@ -119,7 +121,7 @@ export async function getPayPeriodStatements(
   const supabase = await createClient();
   const { data: jobs } = await supabase
     .from("jobs")
-    .select("id, name, color, hourly_rate, overtime_rate, overtime_threshold_minutes, pay_frequency, pay_anchor_date")
+    .select("id, name, color, hourly_rate, overtime_rate, overtime_threshold_minutes, daily_overtime_threshold_minutes, double_time_threshold_minutes, double_time_rate, pay_frequency, pay_anchor_date")
     .eq("user_id", userId)
     .eq("is_active", true)
     .not("pay_frequency", "is", null)
@@ -146,7 +148,7 @@ export async function getPayPeriodStatements(
         weekStartsOn,
         start,
         end
-      )[job.id] ?? { paidMinutes: 0, regularMinutes: 0, overtimeMinutes: 0, earningsCents: 0, shiftCount: 0 };
+      )[job.id] ?? { paidMinutes: 0, regularMinutes: 0, overtimeMinutes: 0, doubleTimeMinutes: 0, earningsCents: 0, shiftCount: 0 };
 
       return {
         jobId: job.id,
@@ -160,6 +162,7 @@ export async function getPayPeriodStatements(
         paidMinutes: summary.paidMinutes,
         regularMinutes: summary.regularMinutes,
         overtimeMinutes: summary.overtimeMinutes,
+        doubleTimeMinutes: summary.doubleTimeMinutes,
         grossEarningsCents: summary.earningsCents,
       };
     })

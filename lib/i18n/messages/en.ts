@@ -217,7 +217,7 @@ export const en = {
       hourlyRate: "Hourly rate",
       overtimeRate: "Overtime rate",
       overtimeAfter: "Overtime after (hours/week)",
-      overtimeHint: "Leave blank to disable overtime for this job.",
+      overtimeHint: "Leave a field blank to turn that rule off. Hours already paid as daily overtime don't count toward the weekly threshold.",
       startDate: "Start date",
       endDate: "End date",
       color: "Color",
@@ -226,6 +226,23 @@ export const en = {
       payScheduleHint: "Powers the payday countdown and tax withholding estimate on the Pay & Taxes page.",
       payFrequency: "Pay frequency",
       knownPayDate: "A known pay date",
+      overtimeRules: "Overtime rules",
+      overtimeRulesHint: "Weekly overtime, plus daily overtime and double time where your province or state requires it.",
+      overtimePreset: "Start from",
+      overtimePresetPlaceholder: "Choose a common rule set",
+      overtimePresets: {
+        weekly40: "Over 40 h a week (US federal)",
+        weekly44: "Over 44 h a week (most of Canada)",
+        california: "California: 8 h/day, 12 h/day double, 40 h/week",
+        britishColumbia: "British Columbia: 8 h/day, 12 h/day double, 40 h/week",
+        daily8: "Over 8 h a day + 40 h a week (Alaska, Nevada)",
+        colorado: "Colorado: over 12 h a day + 40 h a week",
+      },
+      dailyOvertimeAfter: "Daily overtime after (hours)",
+      doubleTimeAfter: "Double time after (hours/day)",
+      doubleTimeRate: "Double-time rate",
+      doubleTimeRatePlaceholder: "Twice the hourly rate",
+      none: "None",
     },
     frequency: {
       weekly: "Weekly",
@@ -416,6 +433,7 @@ export const en = {
       medicare: "Medicare",
     },
     payday: "Payday",
+    ofWhichDoubleTime: "of which double time",
   },
 
   settings: {
@@ -672,6 +690,12 @@ export const en = {
     deleteReceipt: "Delete receipt",
     deleteReceiptConfirm: "Delete this receipt? This can't be undone.",
     privateNote: "Receipts are private to your account and stored securely.",
+    scanReceipt: "Scan a receipt",
+    scanning: "Reading receipt...",
+    scanFilled: "Filled in from your receipt. Check the details before saving.",
+    scanFailed: "We couldn't read that receipt. You can still enter the details yourself.",
+    notAReceipt: "That doesn't look like a receipt. You can still attach it and enter the details yourself.",
+    scanNotConfigured: "Receipt scanning isn't switched on yet.",
   },
 
   help: {
@@ -943,6 +967,7 @@ export const en = {
     currencyInvalid: "Use a 3-letter currency code.",
     chooseRegion: "Choose a province or state.",
     messageRequired: "Enter a message.",
+    doubleTimeAfterDaily: "Double time must start after daily overtime.",
   },
 };
 

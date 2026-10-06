@@ -5,6 +5,9 @@ interface JobRateRow {
   hourly_rate: number | null;
   overtime_rate: number | null;
   overtime_threshold_minutes: number | null;
+  daily_overtime_threshold_minutes?: number | null;
+  double_time_threshold_minutes?: number | null;
+  double_time_rate?: number | null;
 }
 
 interface ShiftRow {
@@ -23,6 +26,9 @@ export function jobRatesFrom(jobs: JobRateRow[]): Record<string, JobRateConfig> 
         hourlyRateCents: job.hourly_rate ? dollarsToCents(job.hourly_rate) : 0,
         overtimeRateCents: job.overtime_rate ? dollarsToCents(job.overtime_rate) : null,
         overtimeThresholdMinutes: job.overtime_threshold_minutes,
+        dailyOvertimeThresholdMinutes: job.daily_overtime_threshold_minutes ?? null,
+        doubleTimeThresholdMinutes: job.double_time_threshold_minutes ?? null,
+        doubleTimeRateCents: job.double_time_rate ? dollarsToCents(job.double_time_rate) : null,
       },
     ])
   );

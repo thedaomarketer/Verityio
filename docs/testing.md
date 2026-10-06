@@ -111,7 +111,13 @@ Also covered (added with Premium, Budget and the new charts):
 - `calculations/range-summary.test.ts`: per-workweek overtime for any range
   (a normal fortnight isn't overtime, chronological split within a week,
   earlier days of a straddling week count, per-job thresholds, open shifts
-  and out-of-range shifts skipped).
+  and out-of-range shifts skipped), plus `splitShiftMinutes` and daily
+  overtime / double time (California-style 8/12 hour days, several shifts
+  in one workday, a shift crossing midnight counting toward the day it
+  starts, daily overtime not double-counted toward the weekly threshold,
+  the double-time rate and its 2x default).
+- `receipt-fields.test.ts`: receipt-scan output normalisation (amount
+  formats, future/ancient/impossible dates, currency codes, not-a-receipt).
 - `calculations/buckets.test.ts`: day/week/month/year buckets clipped to the
   range, DST-safe local midnights.
 - `uploads/paths.test.ts`, `download.test.ts`, `privacy.test.ts`: storage

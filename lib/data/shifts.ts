@@ -17,7 +17,7 @@ export async function getCompletedShiftsInRange(userId: string, start: Date, end
   const supabase = await createClient();
   const { data } = await supabase
     .from("shifts")
-    .select("*, breaks(*), job:jobs(id, name, color, hourly_rate, overtime_rate, overtime_threshold_minutes)")
+    .select("*, breaks(*), job:jobs(id, name, color, hourly_rate, overtime_rate, overtime_threshold_minutes, daily_overtime_threshold_minutes, double_time_threshold_minutes, double_time_rate)")
     .eq("user_id", userId)
     .eq("status", "completed")
     .gte("actual_start", start.toISOString())
@@ -43,7 +43,7 @@ export async function getRecentShiftHistory(userId: string, limit = 25) {
   const supabase = await createClient();
   const { data } = await supabase
     .from("shifts")
-    .select("*, breaks(*), job:jobs(id, name, color, hourly_rate, overtime_rate, overtime_threshold_minutes)")
+    .select("*, breaks(*), job:jobs(id, name, color, hourly_rate, overtime_rate, overtime_threshold_minutes, daily_overtime_threshold_minutes, double_time_threshold_minutes, double_time_rate)")
     .eq("user_id", userId)
     .not("actual_start", "is", null)
     .order("actual_start", { ascending: false })
@@ -55,7 +55,7 @@ export async function getShiftById(userId: string, shiftId: string) {
   const supabase = await createClient();
   const { data } = await supabase
     .from("shifts")
-    .select("*, breaks(*), job:jobs(id, name, color, hourly_rate, overtime_rate, overtime_threshold_minutes)")
+    .select("*, breaks(*), job:jobs(id, name, color, hourly_rate, overtime_rate, overtime_threshold_minutes, daily_overtime_threshold_minutes, double_time_threshold_minutes, double_time_rate)")
     .eq("user_id", userId)
     .eq("id", shiftId)
     .maybeSingle();

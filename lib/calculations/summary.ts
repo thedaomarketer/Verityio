@@ -10,14 +10,23 @@ export interface ShiftSummaryInput {
 }
 
 export interface JobRateConfig extends JobRate {
-  /** null or 0 disables overtime for this job. */
+  /** Weekly threshold; null or 0 disables weekly overtime for this job. */
   overtimeThresholdMinutes: number | null;
+  /** Paid minutes in one workday before daily overtime; null/0 = none. */
+  dailyOvertimeThresholdMinutes?: number | null;
+  /** Paid minutes in one workday before double time; null/0 = none. */
+  doubleTimeThresholdMinutes?: number | null;
+  /** Double-time hourly rate in cents; null = twice the hourly rate. */
+  doubleTimeRateCents?: number | null;
 }
 
 export interface JobSummary {
   paidMinutes: number;
   regularMinutes: number;
+  /** All premium time (overtime + double time). */
   overtimeMinutes: number;
+  /** The part of `overtimeMinutes` paid at the double-time rate. */
+  doubleTimeMinutes: number;
   earningsCents: number;
   shiftCount: number;
 }
@@ -25,7 +34,11 @@ export interface JobSummary {
 /**
  * Aggregates a set of shifts (already filtered to a single time range, e.g.
  * a workweek) into per-job totals, applying each job's own rate and
- * overtime threshold to that job's total paid minutes for the range.
+ * weekly overtime threshold to that job's total paid minutes for the range.
+ *
+ * Weekly-only and whole-range: prefer `summarizeRangeByJob`, which splits
+ * overtime per workweek and applies daily overtime and double time. Kept
+ * for the landing-page estimator's simple single-week math and its tests.
  */
 export function summarizeShiftsByJob(
   shifts: ShiftSummaryInput[],
@@ -54,6 +67,7 @@ export function summarizeShiftsByJob(
       paidMinutes,
       regularMinutes: earnings.regularMinutes,
       overtimeMinutes: earnings.overtimeMinutes,
+      doubleTimeMinutes: 0,
       earningsCents: earnings.totalEarningsCents,
       shiftCount: shiftCountByJob.get(jobId) ?? 0,
     };
@@ -66,19 +80,22 @@ export function sumJobSummaries(summaries: Record<string, JobSummary>): {
   paidMinutes: number;
   regularMinutes: number;
   overtimeMinutes: number;
+  doubleTimeMinutes: number;
   earningsCents: number;
 } {
   let paidMinutes = 0;
   let regularMinutes = 0;
   let overtimeMinutes = 0;
+  let doubleTimeMinutes = 0;
   let earningsCents = 0;
 
   for (const summary of Object.values(summaries)) {
     paidMinutes += summary.paidMinutes;
     regularMinutes += summary.regularMinutes;
     overtimeMinutes += summary.overtimeMinutes;
+    doubleTimeMinutes += summary.doubleTimeMinutes;
     earningsCents += summary.earningsCents;
   }
 
-  return { paidMinutes, regularMinutes, overtimeMinutes, earningsCents };
+  return { paidMinutes, regularMinutes, overtimeMinutes, doubleTimeMinutes, earningsCents };
 }

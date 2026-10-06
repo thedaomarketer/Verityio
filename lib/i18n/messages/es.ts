@@ -213,7 +213,7 @@ export const es: Messages = {
       hourlyRate: "Tarifa por hora",
       overtimeRate: "Tarifa de horas extra",
       overtimeAfter: "Horas extra después de (horas/semana)",
-      overtimeHint: "Déjalo en blanco para desactivar las horas extra en este trabajo.",
+      overtimeHint: "Deja un campo vacío para desactivar esa regla. Las horas ya pagadas como horas extra diarias no cuentan para el umbral semanal.",
       startDate: "Fecha de inicio",
       endDate: "Fecha de fin",
       color: "Color",
@@ -223,6 +223,23 @@ export const es: Messages = {
         "Se usa para la cuenta regresiva del día de pago y la estimación de retenciones en Pago e impuestos.",
       payFrequency: "Frecuencia de pago",
       knownPayDate: "Una fecha de pago conocida",
+      overtimeRules: "Reglas de horas extra",
+      overtimeRulesHint: "Horas extra semanales, más horas extra diarias y pago doble donde tu provincia o estado lo exija.",
+      overtimePreset: "Partir de",
+      overtimePresetPlaceholder: "Elige un conjunto de reglas común",
+      overtimePresets: {
+        weekly40: "Más de 40 h por semana (federal de EE. UU.)",
+        weekly44: "Más de 44 h por semana (casi todo Canadá)",
+        california: "California: 8 h/día, doble tras 12 h/día, 40 h/semana",
+        britishColumbia: "Columbia Británica: 8 h/día, doble tras 12 h/día, 40 h/semana",
+        daily8: "Más de 8 h al día + 40 h por semana (Alaska, Nevada)",
+        colorado: "Colorado: más de 12 h al día + 40 h por semana",
+      },
+      dailyOvertimeAfter: "Horas extra diarias después de (horas)",
+      doubleTimeAfter: "Pago doble después de (horas/día)",
+      doubleTimeRate: "Tarifa de pago doble",
+      doubleTimeRatePlaceholder: "El doble de la tarifa por hora",
+      none: "Ninguna",
     },
     frequency: {
       weekly: "Semanal",
@@ -416,6 +433,7 @@ export const es: Messages = {
       medicare: "Medicare",
     },
     payday: "Día de pago",
+    ofWhichDoubleTime: "de las cuales pago doble",
   },
 
   settings: {
@@ -673,6 +691,12 @@ export const es: Messages = {
     deleteReceipt: "Eliminar recibo",
     deleteReceiptConfirm: "¿Eliminar este recibo? No se puede deshacer.",
     privateNote: "Tus recibos son privados y se guardan de forma segura.",
+    scanReceipt: "Escanear un recibo",
+    scanning: "Leyendo el recibo...",
+    scanFilled: "Completado a partir de tu recibo. Revisa los datos antes de guardar.",
+    scanFailed: "No pudimos leer ese recibo. Aún puedes ingresar los datos tú mismo.",
+    notAReceipt: "Eso no parece un recibo. Aún puedes adjuntarlo e ingresar los datos tú mismo.",
+    scanNotConfigured: "El escaneo de recibos aún no está activado.",
   },
 
   help: {
@@ -948,5 +972,6 @@ export const es: Messages = {
     currencyInvalid: "Usa un código de moneda de 3 letras.",
     chooseRegion: "Elige una provincia o un estado.",
     messageRequired: "Escribe un mensaje.",
+    doubleTimeAfterDaily: "El pago doble debe empezar después de las horas extra diarias.",
   },
 };

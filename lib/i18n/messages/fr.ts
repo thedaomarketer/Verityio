@@ -213,7 +213,7 @@ export const fr: Messages = {
       hourlyRate: "Taux horaire",
       overtimeRate: "Taux des heures supplémentaires",
       overtimeAfter: "Heures supplémentaires après (heures/semaine)",
-      overtimeHint: "Laissez vide pour désactiver les heures supplémentaires pour cet emploi.",
+      overtimeHint: "Laissez un champ vide pour désactiver cette règle. Les heures déjà payées en heures supplémentaires quotidiennes ne comptent pas dans le seuil hebdomadaire.",
       startDate: "Date de début",
       endDate: "Date de fin",
       color: "Couleur",
@@ -222,6 +222,23 @@ export const fr: Messages = {
       payScheduleHint: "Sert au compte à rebours de la paie et à l'estimation des retenues d'impôt dans Paie et impôts.",
       payFrequency: "Fréquence de paie",
       knownPayDate: "Une date de paie connue",
+      overtimeRules: "Règles d'heures supplémentaires",
+      overtimeRulesHint: "Heures supplémentaires hebdomadaires, plus les heures supplémentaires quotidiennes et le temps double si votre province ou État l'exige.",
+      overtimePreset: "Partir de",
+      overtimePresetPlaceholder: "Choisir un ensemble de règles courant",
+      overtimePresets: {
+        weekly40: "Plus de 40 h par semaine (fédéral É.-U.)",
+        weekly44: "Plus de 44 h par semaine (la plupart du Canada)",
+        california: "Californie : 8 h/jour, double après 12 h/jour, 40 h/semaine",
+        britishColumbia: "Colombie-Britannique : 8 h/jour, double après 12 h/jour, 40 h/semaine",
+        daily8: "Plus de 8 h par jour + 40 h par semaine (Alaska, Nevada)",
+        colorado: "Colorado : plus de 12 h par jour + 40 h par semaine",
+      },
+      dailyOvertimeAfter: "Heures supp. quotidiennes après (heures)",
+      doubleTimeAfter: "Temps double après (heures/jour)",
+      doubleTimeRate: "Taux du temps double",
+      doubleTimeRatePlaceholder: "Deux fois le taux horaire",
+      none: "Aucun",
     },
     frequency: {
       weekly: "Hebdomadaire",
@@ -416,6 +433,7 @@ export const fr: Messages = {
       medicare: "Medicare",
     },
     payday: "Jour de paie",
+    ofWhichDoubleTime: "dont temps double",
   },
 
   settings: {
@@ -673,6 +691,12 @@ export const fr: Messages = {
     deleteReceipt: "Supprimer le reçu",
     deleteReceiptConfirm: "Supprimer ce reçu? Cette action est irréversible.",
     privateNote: "Vos reçus sont privés et conservés de façon sécurisée.",
+    scanReceipt: "Numériser un reçu",
+    scanning: "Lecture du reçu...",
+    scanFilled: "Rempli à partir de votre reçu. Vérifiez les détails avant d'enregistrer.",
+    scanFailed: "Impossible de lire ce reçu. Vous pouvez quand même entrer les détails vous-même.",
+    notAReceipt: "Cela ne ressemble pas à un reçu. Vous pouvez quand même le joindre et entrer les détails vous-même.",
+    scanNotConfigured: "La numérisation des reçus n'est pas encore activée.",
   },
 
   help: {
@@ -949,5 +973,6 @@ export const fr: Messages = {
     currencyInvalid: "Utilisez un code de devise à 3 lettres.",
     chooseRegion: "Choisissez une province ou un État.",
     messageRequired: "Saisissez un message.",
+    doubleTimeAfterDaily: "Le temps double doit commencer après les heures supplémentaires quotidiennes.",
   },
 };

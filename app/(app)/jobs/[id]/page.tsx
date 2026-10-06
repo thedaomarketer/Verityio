@@ -3,12 +3,8 @@ import { notFound, redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { requireUserContext } from "@/lib/data/context";
 import { getCompletedShiftsInRange } from "@/lib/data/shifts";
-import {
-  dollarsToCents,
-  formatCents,
-  getLocalMonthBounds,
-  summarizeShiftsByJob,
-} from "@/lib/calculations";
+import { formatCents, getLocalMonthBounds, getWorkweekBounds, summarizeRangeByJob } from "@/lib/calculations";
+import { jobRatesFrom, shiftInputsFrom } from "@/lib/data/earnings";
 import { formatMinutesAsHours } from "@/lib/format";
 import { getI18n } from "@/lib/i18n/server";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -36,25 +32,18 @@ export default async function JobDetailPage({
   if (!job) notFound();
 
   const { start, end } = getLocalMonthBounds(new Date(), ctx.timezone);
-  const monthShifts = await getCompletedShiftsInRange(ctx.userId, start, end);
-  const jobShifts = monthShifts.filter((s) => s.job_id === job.id);
+  // From the start of the workweek the month begins in, so those days count toward that week's overtime.
+  const contextStart = getWorkweekBounds(start, ctx.timezone, ctx.weekStartsOn).start;
+  const rangeShifts = await getCompletedShiftsInRange(ctx.userId, contextStart, end);
+  const jobShifts = rangeShifts.filter((s) => s.job_id === job.id && s.actual_start && s.actual_start >= start.toISOString());
 
-  const summary = summarizeShiftsByJob(
-    jobShifts
-      .filter((s) => s.actual_start)
-      .map((s) => ({
-        jobId: s.job_id,
-        start: s.actual_start!,
-        end: s.actual_end,
-        breaks: s.breaks.map((b) => ({ startedAt: b.started_at, endedAt: b.ended_at, isPaid: b.is_paid })),
-      })),
-    {
-      [job.id]: {
-        hourlyRateCents: job.hourly_rate ? dollarsToCents(job.hourly_rate) : 0,
-        overtimeRateCents: job.overtime_rate ? dollarsToCents(job.overtime_rate) : null,
-        overtimeThresholdMinutes: job.overtime_threshold_minutes,
-      },
-    }
+  const summary = summarizeRangeByJob(
+    shiftInputsFrom(rangeShifts.filter((s) => s.job_id === job.id)),
+    jobRatesFrom([job]),
+    ctx.timezone,
+    ctx.weekStartsOn,
+    start,
+    end
   )[job.id];
 
   return (

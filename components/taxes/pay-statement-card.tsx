@@ -76,6 +76,12 @@ export async function PayStatementCard({
                           <span>{formatMinutesAsHours(statement.overtimeMinutes, locale)}</span>
                         </div>
                       )}
+                      {statement.doubleTimeMinutes > 0 && (
+                        <div className="flex justify-between pl-3 text-xs">
+                          <span className="text-muted-foreground">{m.taxes.ofWhichDoubleTime}</span>
+                          <span>{formatMinutesAsHours(statement.doubleTimeMinutes, locale)}</span>
+                        </div>
+                      )}
                       <div className="flex justify-between font-medium">
                         <span>{m.taxes.grossPay}</span>
                         <span>{money(statement.grossEarningsCents)}</span>

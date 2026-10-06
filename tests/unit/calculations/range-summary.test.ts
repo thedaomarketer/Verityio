@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { summarizeRangeByJob } from "@/lib/calculations/range-summary";
+import { splitShiftMinutes, summarizeRangeByJob } from "@/lib/calculations/range-summary";
 import { summarizeShiftsByJob, type JobRateConfig, type ShiftSummaryInput } from "@/lib/calculations/summary";
 
 const TZ = "America/Toronto";
@@ -64,5 +64,104 @@ describe("summarizeRangeByJob", () => {
 
   it("returns nothing for an empty range", () => {
     expect(summarizeRangeByJob([], RATES, TZ, MONDAY, new Date(), new Date())).toEqual({});
+  });
+});
+
+describe("splitShiftMinutes (daily overtime and double time)", () => {
+  const weeklyOnly = { weeklyMinutes: 2400, dailyMinutes: null, doubleTimeMinutes: null };
+  const california = { weeklyMinutes: 2400, dailyMinutes: 480, doubleTimeMinutes: 720 };
+
+  it("reduces to the plain weekly split without daily rules", () => {
+    expect(splitShiftMinutes(600, 0, 2100, weeklyOnly)).toEqual({ regular: 300, overtime: 300, doubleTime: 0 });
+    expect(splitShiftMinutes(600, 0, 0, { weeklyMinutes: null, dailyMinutes: null, doubleTimeMinutes: null })).toEqual({
+      regular: 600,
+      overtime: 0,
+      doubleTime: 0,
+    });
+  });
+
+  it("pays a 10-hour California day as 8 regular + 2 overtime", () => {
+    expect(splitShiftMinutes(600, 0, 0, california)).toEqual({ regular: 480, overtime: 120, doubleTime: 0 });
+  });
+
+  it("pays a 13-hour day as 8 regular + 4 overtime + 1 double time", () => {
+    expect(splitShiftMinutes(780, 0, 0, california)).toEqual({ regular: 480, overtime: 240, doubleTime: 60 });
+  });
+
+  it("counts earlier shifts the same day toward the daily threshold", () => {
+    // 6h already worked today; a 4h second shift is 2h regular + 2h overtime.
+    expect(splitShiftMinutes(240, 360, 360, california)).toEqual({ regular: 120, overtime: 120, doubleTime: 0 });
+  });
+
+  it("applies weekly overtime only to hours that weren't already daily overtime", () => {
+    // 40 regular hours already this week (from 10h days paid 8 + 2): an 8h day is all overtime.
+    expect(splitShiftMinutes(480, 0, 2400, california)).toEqual({ regular: 0, overtime: 480, doubleTime: 0 });
+    // 36 regular so far: a 10h day is 4 regular, 4 weekly OT and 2 daily OT.
+    expect(splitShiftMinutes(600, 0, 2160, california)).toEqual({ regular: 240, overtime: 360, doubleTime: 0 });
+  });
+
+  it("supports double time without daily overtime", () => {
+    expect(
+      splitShiftMinutes(780, 0, 0, { weeklyMinutes: null, dailyMinutes: null, doubleTimeMinutes: 720 })
+    ).toEqual({ regular: 720, overtime: 0, doubleTime: 60 });
+  });
+});
+
+describe("summarizeRangeByJob with daily overtime", () => {
+  // $20/h, $30/h overtime, double time defaults to 2x ($40/h).
+  const CA: Record<string, JobRateConfig> = {
+    job: {
+      hourlyRateCents: 2000,
+      overtimeRateCents: 3000,
+      overtimeThresholdMinutes: 2400,
+      dailyOvertimeThresholdMinutes: 480,
+      doubleTimeThresholdMinutes: 720,
+      doubleTimeRateCents: null,
+    },
+  };
+  const week = (start: string, end: string) => [new Date(start), new Date(end)] as const;
+
+  it("pays five 10-hour days as 40 regular + 10 overtime", () => {
+    const shifts = weekdays(["2026-10-05", "2026-10-06", "2026-10-07", "2026-10-08", "2026-10-09"], 10);
+    const [from, to] = week("2026-10-05T04:00:00Z", "2026-10-12T04:00:00Z");
+    expect(summarizeRangeByJob(shifts, CA, TZ, MONDAY, from, to).job).toMatchObject({
+      regularMinutes: 2400,
+      overtimeMinutes: 600,
+      doubleTimeMinutes: 0,
+      earningsCents: 80000 + 30000,
+    });
+  });
+
+  it("pays double time at twice the hourly rate when no rate is set", () => {
+    const [from, to] = week("2026-10-05T04:00:00Z", "2026-10-12T04:00:00Z");
+    const totals = summarizeRangeByJob([shift("2026-10-05", 13)], CA, TZ, MONDAY, from, to).job;
+    expect(totals).toMatchObject({ regularMinutes: 480, overtimeMinutes: 300, doubleTimeMinutes: 60 });
+    // 8h x $20 + 4h x $30 + 1h x $40
+    expect(totals.earningsCents).toBe(16000 + 12000 + 4000);
+  });
+
+  it("counts a shift crossing midnight toward the workday it starts", () => {
+    // Mon 20:00 - Tue 04:00 Toronto, then a normal Tue 09:00 - 17:00 shift.
+    const overnight: ShiftSummaryInput = {
+      jobId: "job",
+      start: new Date("2026-10-06T00:00:00Z"),
+      end: new Date("2026-10-06T08:00:00Z"),
+      breaks: [],
+    };
+    const [from, to] = week("2026-10-05T04:00:00Z", "2026-10-12T04:00:00Z");
+    expect(summarizeRangeByJob([overnight, shift("2026-10-06")], CA, TZ, MONDAY, from, to).job).toMatchObject({
+      regularMinutes: 960,
+      overtimeMinutes: 0,
+    });
+  });
+
+  it("leaves weekly-only jobs unchanged", () => {
+    const shifts = weekdays(["2026-10-05", "2026-10-06", "2026-10-07", "2026-10-08", "2026-10-09"], 10);
+    const [from, to] = week("2026-10-05T04:00:00Z", "2026-10-12T04:00:00Z");
+    expect(summarizeRangeByJob(shifts, RATES, TZ, MONDAY, from, to).job).toMatchObject({
+      regularMinutes: 2400,
+      overtimeMinutes: 600,
+      doubleTimeMinutes: 0,
+    });
   });
 });

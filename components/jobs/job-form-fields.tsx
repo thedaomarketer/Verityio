@@ -7,6 +7,7 @@ import { fmt } from "@/lib/i18n/config";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { OvertimeRulesFields } from "./overtime-rules-fields";
 import {
   Select,
   SelectContent,
@@ -39,6 +40,9 @@ export function JobFormFields({
     hourlyRate?: number | null;
     overtimeRate?: number | null;
     overtimeThresholdMinutes?: number | null;
+    dailyOvertimeThresholdMinutes?: number | null;
+    doubleTimeThresholdMinutes?: number | null;
+    doubleTimeRate?: number | null;
     startDate?: string | null;
     endDate?: string | null;
     color?: string;
@@ -94,21 +98,12 @@ export function JobFormFields({
           />
         </div>
       </div>
-      <div className="space-y-2">
-        <Label htmlFor={`${id}-overtimeThresholdHours`}>{f.overtimeAfter}</Label>
-        <Input
-          id={`${id}-overtimeThresholdHours`}
-          name="overtimeThresholdHours"
-          type="number"
-          min={0}
-          step="1"
-          defaultValue={
-            dv.overtimeThresholdMinutes != null ? Math.round(dv.overtimeThresholdMinutes / 60) : ""
-          }
-          placeholder="44"
-        />
-        <p className="text-xs text-muted-foreground">{f.overtimeHint}</p>
-      </div>
+      <OvertimeRulesFields
+        weeklyMinutes={dv.overtimeThresholdMinutes}
+        dailyMinutes={dv.dailyOvertimeThresholdMinutes}
+        doubleTimeMinutes={dv.doubleTimeThresholdMinutes}
+        doubleTimeRate={dv.doubleTimeRate}
+      />
       <div className="grid gap-4 sm:grid-cols-2">
         <div className="space-y-2">
           <Label htmlFor={`${id}-startDate`}>{f.startDate}</Label>

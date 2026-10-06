@@ -4,7 +4,8 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { requireUserContext } from "@/lib/data/context";
 import { getCompletedShiftsInRange } from "@/lib/data/shifts";
-import { dollarsToCents, formatCents, getWorkweekBounds, summarizeShiftsByJob } from "@/lib/calculations";
+import { dollarsToCents, formatCents, getWorkweekBounds, summarizeRangeByJob } from "@/lib/calculations";
+import { jobRatesFrom, shiftInputsFrom } from "@/lib/data/earnings";
 import { formatMinutesAsHours } from "@/lib/format";
 import { fmt } from "@/lib/i18n/config";
 import { getI18n } from "@/lib/i18n/server";
@@ -28,27 +29,14 @@ export default async function JobsPage() {
   const { start, end } = getWorkweekBounds(new Date(), ctx.timezone, ctx.weekStartsOn);
   const shifts = await getCompletedShiftsInRange(ctx.userId, start, end);
 
-  const jobRates = Object.fromEntries(
-    (jobs ?? []).map((job) => [
-      job.id,
-      {
-        hourlyRateCents: job.hourly_rate ? dollarsToCents(job.hourly_rate) : 0,
-        overtimeRateCents: job.overtime_rate ? dollarsToCents(job.overtime_rate) : null,
-        overtimeThresholdMinutes: job.overtime_threshold_minutes,
-      },
-    ])
-  );
-
-  const summaries = summarizeShiftsByJob(
-    shifts
-      .filter((s) => s.actual_start)
-      .map((s) => ({
-        jobId: s.job_id,
-        start: s.actual_start!,
-        end: s.actual_end,
-        breaks: s.breaks.map((b) => ({ startedAt: b.started_at, endedAt: b.ended_at, isPaid: b.is_paid })),
-      })),
-    jobRates
+  // Overtime is weekly (and daily for some jobs): the fetch covers exactly this workweek.
+  const summaries = summarizeRangeByJob(
+    shiftInputsFrom(shifts),
+    jobRatesFrom(jobs ?? []),
+    ctx.timezone,
+    ctx.weekStartsOn,
+    start,
+    end
   );
 
   return (

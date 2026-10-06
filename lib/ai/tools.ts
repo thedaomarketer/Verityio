@@ -7,10 +7,13 @@ import {
   calculateShiftDuration,
   dollarsToCents,
   formatCents,
+  getWorkweekBounds,
   localDateString,
-  summarizeShiftsByJob,
+  summarizeRangeByJob,
   sumJobSummaries,
+  type JobRateConfig,
 } from "@/lib/calculations";
+import { jobRatesFrom, shiftInputsFrom } from "@/lib/data/earnings";
 import { formatMinutesAsHours } from "@/lib/format";
 
 import type { EntryType, ExpenseCategory } from "@/lib/supabase/database.types";
@@ -70,20 +73,12 @@ function periodArgs(input: Record<string, unknown>) {
 async function fetchJobRates(ctx: ToolContext) {
   const { data: jobs } = await ctx.supabase
     .from("jobs")
-    .select("id, name, hourly_rate, overtime_rate, overtime_threshold_minutes")
+    .select(
+      "id, name, hourly_rate, overtime_rate, overtime_threshold_minutes, daily_overtime_threshold_minutes, double_time_threshold_minutes, double_time_rate"
+    )
     .eq("user_id", ctx.userId);
 
-  const jobRates = Object.fromEntries(
-    (jobs ?? []).map((job) => [
-      job.id,
-      {
-        hourlyRateCents: job.hourly_rate ? dollarsToCents(job.hourly_rate) : 0,
-        overtimeRateCents: job.overtime_rate ? dollarsToCents(job.overtime_rate) : null,
-        overtimeThresholdMinutes: job.overtime_threshold_minutes,
-      },
-    ])
-  );
-
+  const jobRates = jobRatesFrom(jobs ?? []);
   const jobNames = Object.fromEntries((jobs ?? []).map((job) => [job.id, job.name]));
 
   return { jobRates, jobNames };
@@ -104,21 +99,22 @@ async function fetchShiftsInRange(ctx: ToolContext, start: Date, end: Date, jobI
   return data ?? [];
 }
 
-function summarize(
+/**
+ * Per-job totals for [start, end), with overtime split per workweek (and
+ * per workday for jobs with daily overtime). Earlier shifts in the first
+ * workweek count toward its thresholds, so they're fetched as context.
+ */
+async function summarize(
+  ctx: ToolContext,
   shifts: Awaited<ReturnType<typeof fetchShiftsInRange>>,
-  jobRates: Record<string, { hourlyRateCents: number; overtimeRateCents: number | null; overtimeThresholdMinutes: number | null }>
+  jobRates: Record<string, JobRateConfig>,
+  start: Date,
+  end: Date,
+  jobId?: string
 ) {
-  return summarizeShiftsByJob(
-    shifts
-      .filter((s) => s.actual_start)
-      .map((s) => ({
-        jobId: s.job_id,
-        start: s.actual_start!,
-        end: s.actual_end,
-        breaks: s.breaks.map((b) => ({ startedAt: b.started_at, endedAt: b.ended_at, isPaid: b.is_paid })),
-      })),
-    jobRates
-  );
+  const contextStart = getWorkweekBounds(start, ctx.timezone, ctx.weekStartsOn).start;
+  const earlier = contextStart < start ? await fetchShiftsInRange(ctx, contextStart, start, jobId) : [];
+  return summarizeRangeByJob(shiftInputsFrom([...earlier, ...shifts]), jobRates, ctx.timezone, ctx.weekStartsOn, start, end);
 }
 
 export function buildTools(): Anthropic.Tool[] {
@@ -220,7 +216,7 @@ export function buildToolHandlers(
       const { start, end, label } = resolvePeriod(period, periodCtx, custom);
       const { jobRates, jobNames } = await fetchJobRates(ctx);
       const shifts = await fetchShiftsInRange(ctx, start, end, jobId);
-      const summary = summarize(shifts, jobRates);
+      const summary = await summarize(ctx, shifts, jobRates, start, end, jobId);
       const totals = sumJobSummaries(summary);
 
       return {
@@ -250,7 +246,7 @@ export function buildToolHandlers(
       const { start, end, label } = resolvePeriod(period, periodCtx, custom);
       const { jobRates, jobNames } = await fetchJobRates(ctx);
       const shifts = await fetchShiftsInRange(ctx, start, end, jobId);
-      const summary = summarize(shifts, jobRates);
+      const summary = await summarize(ctx, shifts, jobRates, start, end, jobId);
 
       const byJob = Object.fromEntries(
         Object.entries(summary)
@@ -271,7 +267,7 @@ export function buildToolHandlers(
       const { start, end, label } = resolvePeriod(period, periodCtx, custom);
       const { jobRates, jobNames } = await fetchJobRates(ctx);
       const shifts = await fetchShiftsInRange(ctx, start, end, jobId);
-      const summary = summarize(shifts, jobRates);
+      const summary = await summarize(ctx, shifts, jobRates, start, end, jobId);
       const totals = sumJobSummaries(summary);
 
       return {
@@ -465,7 +461,7 @@ export function buildToolHandlers(
           .lte("date", dates.last),
       ]);
 
-      const summary = summarize(shifts, jobRates);
+      const summary = await summarize(ctx, shifts, jobRates, start, end, jobId);
       const totals = sumJobSummaries(summary);
       const totalExpensesCents = (expensesRes.data ?? []).reduce((sum, e) => sum + dollarsToCents(e.amount), 0);
       const totalMileageCents = (mileageRes.data ?? []).reduce((sum, m) => sum + dollarsToCents(m.reimbursement), 0);

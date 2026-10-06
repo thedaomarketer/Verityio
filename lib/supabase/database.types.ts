@@ -76,6 +76,9 @@ export interface Database {
           hourly_rate: number | null;
           overtime_rate: number | null;
           overtime_threshold_minutes: number | null;
+          daily_overtime_threshold_minutes: number | null;
+          double_time_threshold_minutes: number | null;
+          double_time_rate: number | null;
           start_date: string | null;
           end_date: string | null;
           is_active: boolean;

@@ -260,9 +260,33 @@ exercise the authenticated app directly.
 - **Dashboard week totals** now include shifts from the start of a workweek
   that began in the previous month (previously only the current month's
   shifts were loaded, undercounting such weeks).
+- **Daily overtime and double time** (migration 25): each job can add a
+  daily overtime threshold, a daily double-time threshold and a double-time
+  rate on top of the weekly threshold, with presets (40 h/week, 44 h/week,
+  California, British Columbia, 8 h/day + 40 h/week, Colorado) that fill
+  the fields. `splitShiftMinutes` in `lib/calculations/range-summary.ts`
+  splits each shift by the job's minutes earlier that workday (the local
+  date the shift starts) and its regular minutes earlier that workweek;
+  hours already paid as daily overtime don't count toward the weekly
+  threshold again. Double time defaults to twice the hourly rate. Every
+  total (dashboard, jobs, pay periods, taxes, reports, budget, assistant)
+  goes through this engine; the pay-period card shows "of which double
+  time". Overtime law varies -- the presets are starting points, not
+  legal advice.
+- **Receipt scanning** (Premium, needs `ANTHROPIC_API_KEY`): "Scan a
+  receipt" at the top of Add expense downsizes the photo in the browser,
+  sends it (or a PDF, up to 3 MB) to `scanReceiptAction`, which asks Claude
+  for structured output (merchant, total, currency, date, category) and
+  re-validates it in `lib/ai/receipt-fields.ts` (amount format, a real date
+  not in the future or over 10 years old, ISO currency). The fields are
+  filled for the user to check -- nothing is saved until they press Save,
+  and the receipt is attached to the expense as before. Images are never
+  logged or stored by the scan itself.
 
 ## What's stubbed or missing
 
+- **Migration 25 (daily overtime) is applied**; the advisors flag nothing
+  new.
 - **Migrations 23 and 24 are applied** (October 6): `subscriptions` and the
   `bank_*` tables exist with RLS on. Verified as an authenticated user:
   inserting a Premium subscription or a bank transaction is rejected
@@ -291,8 +315,11 @@ exercise the authenticated app directly.
   reach `*.supabase.co` to do a real browser pass.
 - **Teams/business features**: not started (Phase 9 in the original spec).
 - **Premium in production**: needs a Verityio Stripe account's
-  `STRIPE_SECRET_KEY` and a webhook endpoint's `STRIPE_WEBHOOK_SECRET` in
+  `STRIPE_SECRET_KEY` (exactly that name -- environment variable names are
+  case-sensitive) and a webhook endpoint's `STRIPE_WEBHOOK_SECRET` in
   Vercel. Prices are USD only.
+- **Rate limiting**: the assistant chat and receipt scanning are
+  Premium-gated but not rate limited yet.
 - **AI Assistant**: non-streaming (shows a "Thinking..." indicator, not
   token-by-token output), no conversation switcher (only the most recent
   conversation is resumed), and no rate limiting on the chat endpoint yet.

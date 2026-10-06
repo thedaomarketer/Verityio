@@ -5,14 +5,13 @@ import { requireUserContext } from "./context";
 import { getActiveShift, getCompletedShiftsInRange, getUpcomingShifts } from "./shifts";
 import { getUpcomingPaydays } from "./tax";
 import { getHolidayRegion, getRegionHolidays } from "./holidays";
+import { jobRatesFrom } from "./earnings";
 import {
-  dollarsToCents,
   getLocalDayBounds,
   getLocalMonthBounds,
   getWorkweekBounds,
   localDateString,
   summarizeRangeByJob,
-  summarizeShiftsByJob,
   sumJobSummaries,
   upcomingHolidays,
 } from "@/lib/calculations";
@@ -72,16 +71,7 @@ export async function getDashboardData() {
         : Promise.resolve([]),
     ]);
 
-  const jobRates = Object.fromEntries(
-    (jobs ?? []).map((job) => [
-      job.id,
-      {
-        hourlyRateCents: job.hourly_rate ? dollarsToCents(job.hourly_rate) : 0,
-        overtimeRateCents: job.overtime_rate ? dollarsToCents(job.overtime_rate) : null,
-        overtimeThresholdMinutes: job.overtime_threshold_minutes,
-      },
-    ])
-  );
+  const jobRates = jobRatesFrom(jobs ?? []);
 
   const within = (bounds: { start: Date; end: Date }) =>
     rangeShifts.filter(
@@ -99,14 +89,13 @@ export async function getDashboardData() {
         breaks: s.breaks.map((b) => ({ startedAt: b.started_at, endedAt: b.ended_at, isPaid: b.is_paid })),
       }));
 
-  const weekShifts = within(week);
 
   // Overtime is weekly, so today's and the month's totals are split per
   // workweek with the earlier days of each week counted (the fetch covers the
   // whole current workweek).
   const allInputs = toShiftInput(rangeShifts);
   const todayTotals = sumJobSummaries(summarizeRangeByJob(allInputs, jobRates, ctx.timezone, ctx.weekStartsOn, day.start, day.end));
-  const weekTotals = sumJobSummaries(summarizeShiftsByJob(toShiftInput(weekShifts), jobRates));
+  const weekTotals = sumJobSummaries(summarizeRangeByJob(allInputs, jobRates, ctx.timezone, ctx.weekStartsOn, week.start, week.end));
   const monthTotals = sumJobSummaries(summarizeRangeByJob(allInputs, jobRates, ctx.timezone, ctx.weekStartsOn, month.start, month.end));
 
   return {

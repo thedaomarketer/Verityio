@@ -1,5 +1,6 @@
-import { getWorkweekBounds, groupByWorkweek } from "./workweek";
-import { summarizeShiftsByJob, sumJobSummaries, type JobRateConfig, type ShiftSummaryInput } from "./summary";
+import { getWorkweekBounds } from "./workweek";
+import { sumJobSummaries, type JobRateConfig, type ShiftSummaryInput } from "./summary";
+import { summarizeRangeByJob } from "./range-summary";
 
 export interface WeeklyTotals {
   weekStart: Date;
@@ -7,6 +8,7 @@ export interface WeeklyTotals {
   paidMinutes: number;
   regularMinutes: number;
   overtimeMinutes: number;
+  doubleTimeMinutes: number;
   earningsCents: number;
 }
 
@@ -29,14 +31,13 @@ export function summarizeByWeek(
   rangeStart: Date,
   rangeEnd: Date
 ): WeeklyTotals[] {
-  const buckets = groupByWorkweek(shifts, timezone, weekStartsOn);
   const weeks: WeeklyTotals[] = [];
 
   let cursor = rangeStart;
   while (cursor < rangeEnd) {
     const { start, end } = getWorkweekBounds(cursor, timezone, weekStartsOn);
-    const weekShifts = buckets.get(start.toISOString()) ?? [];
-    const totals = sumJobSummaries(summarizeShiftsByJob(weekShifts, jobRates));
+    // Same engine as every other total: daily overtime/double time and the weekly threshold.
+    const totals = sumJobSummaries(summarizeRangeByJob(shifts, jobRates, timezone, weekStartsOn, start, end));
 
     weeks.push({ weekStart: start, weekEnd: end, ...totals });
     cursor = end;

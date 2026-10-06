@@ -3,6 +3,8 @@ import { createClient } from "@/lib/supabase/server";
 import { requireUserContext } from "@/lib/data/context";
 import { dollarsToCents, formatCents, localMonthString } from "@/lib/calculations";
 import { getI18n } from "@/lib/i18n/server";
+import { isAssistantConfigured } from "@/lib/ai/env";
+import { getEntitlement } from "@/lib/data/subscription";
 import type { ExpenseCategory } from "@/lib/supabase/database.types";
 import { CreateExpenseDialog } from "@/components/expenses/create-expense-dialog";
 import { ExpensesList } from "@/components/expenses/expenses-list";
@@ -27,6 +29,9 @@ export default async function ExpensesPage() {
     supabase.from("jobs").select("id, name").eq("user_id", ctx.userId).eq("is_active", true),
   ]);
 
+  // Receipt scanning reads photos with Claude: Premium, and only once the AI key is configured.
+  const canScan = isAssistantConfigured() && (await getEntitlement(ctx.userId)).premium;
+
   let monthTotalCents = 0;
   const byCategory = new Map<ExpenseCategory, number>();
   for (const e of expenses ?? []) {
@@ -40,7 +45,7 @@ export default async function ExpensesPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-[28px] leading-tight font-bold tracking-tight md:text-3xl">{m.expenses.title}</h1>
-        <CreateExpenseDialog jobs={jobs ?? []} timezone={ctx.timezone} userId={ctx.userId} />
+        <CreateExpenseDialog jobs={jobs ?? []} timezone={ctx.timezone} userId={ctx.userId} canScan={canScan} />
       </div>
 
       <Card>

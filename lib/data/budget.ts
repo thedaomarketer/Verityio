@@ -55,7 +55,7 @@ export async function getBudgetData(ctx: UserContext) {
   const lastMonthToDateEnd = addDaysToDateString(lastMonthStart, lastMonthComparableDays - 1);
 
   const [{ data: jobs }, { data: shifts }, items, accounts, transactions, { data: expenses }] = await Promise.all([
-    supabase.from("jobs").select("id, hourly_rate, overtime_rate, overtime_threshold_minutes").eq("user_id", ctx.userId),
+    supabase.from("jobs").select("id, hourly_rate, overtime_rate, overtime_threshold_minutes, daily_overtime_threshold_minutes, double_time_threshold_minutes, double_time_rate").eq("user_id", ctx.userId),
     supabase
       .from("shifts")
       .select("job_id, actual_start, actual_end, breaks(started_at, ended_at, is_paid)")

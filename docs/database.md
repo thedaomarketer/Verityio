@@ -63,6 +63,10 @@ advisors report only the intentional "no policy" note on
   `breaks_order_check` / `schedule_entries_order_check`: end must be after
   start wherever both are set.
 - `jobs_dates_check`: `end_date >= start_date` when both are set.
+- `jobs.daily_overtime_threshold_minutes` / `double_time_threshold_minutes`
+  (migration 25): 1–1440 or null, and `jobs_double_time_after_daily_check`
+  requires double time to start after daily overtime when both are set.
+  `double_time_rate` is `numeric(10,2)`.
 
 ## Locale and time zone
 

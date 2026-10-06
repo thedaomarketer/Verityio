@@ -7,7 +7,7 @@ import { getI18n } from "@/lib/i18n/server";
 import { validationMessage } from "@/lib/i18n/validation";
 import { formText } from "@/lib/validation/form";
 import { logAudit } from "@/lib/audit/log";
-import { jobSchema } from "@/lib/validation/jobs";
+import { hoursToThresholdMinutes, jobSchema } from "@/lib/validation/jobs";
 
 export interface ActionResult {
   error?: string;
@@ -22,6 +22,9 @@ function parseJobForm(formData: FormData) {
     hourlyRate: formData.get("hourlyRate") || undefined,
     overtimeRate: formData.get("overtimeRate") || undefined,
     overtimeThresholdHours: formData.get("overtimeThresholdHours") || undefined,
+    dailyOvertimeHours: formData.get("dailyOvertimeHours") || undefined,
+    doubleTimeHours: formData.get("doubleTimeHours") || undefined,
+    doubleTimeRate: formData.get("doubleTimeRate") || undefined,
     startDate: formText(formData, "startDate"),
     endDate: formText(formData, "endDate"),
     color: formData.get("color") || "#2563eb",
@@ -59,6 +62,9 @@ export async function createJobAction(
       overtime_rate: parsed.data.overtimeRate ?? null,
       overtime_threshold_minutes:
         parsed.data.overtimeThresholdHours != null ? Math.round(parsed.data.overtimeThresholdHours * 60) : null,
+      daily_overtime_threshold_minutes: hoursToThresholdMinutes(parsed.data.dailyOvertimeHours),
+      double_time_threshold_minutes: hoursToThresholdMinutes(parsed.data.doubleTimeHours),
+      double_time_rate: parsed.data.doubleTimeRate ?? null,
       start_date: parsed.data.startDate || null,
       end_date: parsed.data.endDate || null,
       color: parsed.data.color,
@@ -121,6 +127,9 @@ export async function updateJobAction(
       overtime_rate: parsed.data.overtimeRate ?? null,
       overtime_threshold_minutes:
         parsed.data.overtimeThresholdHours != null ? Math.round(parsed.data.overtimeThresholdHours * 60) : null,
+      daily_overtime_threshold_minutes: hoursToThresholdMinutes(parsed.data.dailyOvertimeHours),
+      double_time_threshold_minutes: hoursToThresholdMinutes(parsed.data.doubleTimeHours),
+      double_time_rate: parsed.data.doubleTimeRate ?? null,
       start_date: parsed.data.startDate || null,
       end_date: parsed.data.endDate || null,
       color: parsed.data.color,
