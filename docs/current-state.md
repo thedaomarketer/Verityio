@@ -263,14 +263,13 @@ exercise the authenticated app directly.
 
 ## What's stubbed or missing
 
-- **Migrations 23 and 24 are not applied to the live database yet**: the
-  Supabase tools lost write (and then read) permission during this work,
-  so `subscriptions` and the `bank_*` tables exist only in
-  `supabase/migrations/`. Apply both (SQL editor or `supabase db push`),
-  then run the security and performance advisors. Until then the app reads
-  them as empty: everyone is treated as free-but-unlocked (billing is off
-  anyway) and Budget uses recorded expenses.
-
+- **Migrations 23 and 24 are applied** (October 6): `subscriptions` and the
+  `bank_*` tables exist with RLS on. Verified as an authenticated user:
+  inserting a Premium subscription or a bank transaction is rejected
+  (42501), and `bank_item_secrets` / other users' subscriptions return no
+  rows. Advisors: `bank_item_secrets` "RLS enabled, no policy" is
+  intentional (service-role only); "leaked password protection disabled" is
+  an Auth dashboard setting.
 - **Attachments**: receipts on expenses only; journal entries and shifts
   don't take files yet. `expenses.receipt_url` holds the first receipt's
   path as a "has a receipt" marker for lists.
@@ -328,9 +327,9 @@ exercise the authenticated app directly.
   pages there (308, same path) from `proxy.ts`; `/api/` requests are never
   redirected, because the reminder scheduler's pg_net calls don't follow
   redirects.
-- The reminder scheduler's Vault URL (`workledger_app_url`) still points at
-  `verity-work.vercel.app`, which keeps working because of the `/api/`
-  exemption; update it to the new address when convenient.
+- The reminder scheduler's Vault URL (`workledger_app_url`) points at
+  `https://verityio.vercel.app` (updated October 6; the old
+  `verity-work.vercel.app` alias was removed from the project).
 - `NEXT_PUBLIC_SITE_URL` is the production URL (used for email links and
   push notification links). Supabase Auth's **Site URL** and **Redirect
   URLs** must list the same address, or confirmation/reset emails link to
@@ -341,7 +340,9 @@ exercise the authenticated app directly.
   `docs/security.md`).
 - `NEXT_PUBLIC_ONESIGNAL_APP_ID` is set (OneSignal app
   `023dc5b1-…`; the worker in `public/push/onesignal/` matches OneSignal's
-  v16 download). `ANTHROPIC_API_KEY`, `ONESIGNAL_REST_API_KEY`, the Stripe keys and the Plaid keys are **not**
+  v16 download). `ANTHROPIC_API_KEY`, `ONESIGNAL_REST_API_KEY`, the Stripe keys and `BANK_TOKEN_ENCRYPTION_KEY`
+  are **not** (the Plaid sandbox keys `PLAID_CLIENT_ID`/`PLAID_SECRET`/`PLAID_ENV`
+  are set; bank connections stay off until the encryption key is added too)
   yet set: the AI Assistant, push notifications, Premium checkout and bank
   connections show "not switched on yet" until they are.
 

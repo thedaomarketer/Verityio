@@ -47,9 +47,9 @@ encrypted with an app key that never touches the database. Money columns
 are `numeric(14,2)`; Plaid amounts keep Plaid's sign (positive = money
 out). Everything cascades from `auth.users`.
 
-**Status:** migrations 23 and 24 are written but not yet applied to the
-live project (the Supabase tools lost permission mid-session). Apply them,
-then run `get_advisors` (security + performance).
+**Status:** migrations 23 and 24 are applied to the live project; the
+advisors report only the intentional "no policy" note on
+`bank_item_secrets`.
 
 ## Key constraints
 
