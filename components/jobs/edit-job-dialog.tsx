@@ -16,6 +16,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { JobFormFields } from "./job-form-fields";
+import { addDaysToDateString } from "@/lib/calculations/local-time";
 
 const initialState: ActionResult = {};
 
@@ -67,6 +68,10 @@ export function EditJobDialog({ job }: { job: Job }) {
                 notes: job.notes,
                 payFrequency: job.pay_frequency,
                 payAnchorDate: job.pay_anchor_date,
+                payPeriodEndDate:
+                  job.pay_anchor_date && job.pay_lag_days != null
+                    ? addDaysToDateString(job.pay_anchor_date, -job.pay_lag_days)
+                    : null,
               }}
             />
           </div>

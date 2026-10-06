@@ -33,7 +33,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
             />
           <TimeZonePrompt savedTimeZone={safeTimeZone(profile?.timezone)} />
           <InstallPrompt />
-          <main className="flex-1 pb-[calc(7rem+env(safe-area-inset-bottom))] md:pb-0">
+          <main className="min-w-0 flex-1 overflow-x-clip pb-[calc(7rem+env(safe-area-inset-bottom))] md:pb-0">
             <div className="mx-auto w-full max-w-6xl p-4 md:p-6">{children}</div>
           </main>
         </div>

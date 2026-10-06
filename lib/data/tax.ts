@@ -3,8 +3,10 @@ import "server-only";
 import { createClient } from "@/lib/supabase/server";
 import { getCompletedShiftsInRange } from "./shifts";
 import {
+  DEFAULT_PAY_LAG_DAYS,
+  getCurrentPayPeriod,
+  getNextPaycheque,
   getNextPayday,
-  getPayPeriod,
   getWorkweekBounds,
   payPeriodsPerYear,
   summarizeRangeByJob,
@@ -91,14 +93,11 @@ export async function getUpcomingPaydays(userId: string, timezone: string): Prom
   return paydays.sort((a, b) => a.nextPayday.getTime() - b.nextPayday.getTime());
 }
 
-export interface PayPeriodStatement {
-  jobId: string;
-  jobName: string;
-  color: string;
-  frequency: PayFrequency;
-  periodsPerYear: number;
-  periodStart: Date;
-  periodEnd: Date;
+export interface PeriodFigures {
+  /** Local midnight of the period's first day. */
+  start: Date;
+  /** Exclusive: local midnight after the period's last day. */
+  end: Date;
   payDate: Date;
   paidMinutes: number;
   regularMinutes: number;
@@ -108,9 +107,22 @@ export interface PayPeriodStatement {
   grossEarningsCents: number;
 }
 
+export interface PayPeriodStatement {
+  jobId: string;
+  jobName: string;
+  color: string;
+  frequency: PayFrequency;
+  periodsPerYear: number;
+  /** The next paycheque (today's, on payday) and the period it pays for. */
+  paycheque: PeriodFigures;
+  /** The period being worked now, when it isn't the one the next paycheque covers. */
+  current: PeriodFigures | null;
+}
+
 /**
- * A pay-stub-style statement for the current pay period of every active job
- * with a pay schedule configured -- hours and gross pay are always the
+ * Pay-stub-style figures for every active job with a pay schedule: the next
+ * paycheque and, when the employer pays a few days after a period closes,
+ * the period being worked now. Hours and gross pay are always the
  * recorded/calculated figures from lib/calculations, never fabricated.
  */
 export async function getPayPeriodStatements(
@@ -121,34 +133,45 @@ export async function getPayPeriodStatements(
   const supabase = await createClient();
   const { data: jobs } = await supabase
     .from("jobs")
-    .select("id, name, color, hourly_rate, overtime_rate, overtime_threshold_minutes, daily_overtime_threshold_minutes, double_time_threshold_minutes, double_time_rate, pay_frequency, pay_anchor_date")
+    .select("id, name, color, hourly_rate, overtime_rate, overtime_threshold_minutes, daily_overtime_threshold_minutes, double_time_threshold_minutes, double_time_rate, pay_frequency, pay_anchor_date, pay_lag_days")
     .eq("user_id", userId)
     .eq("is_active", true)
     .not("pay_frequency", "is", null)
     .not("pay_anchor_date", "is", null);
 
   const scheduledJobs = (jobs ?? []).filter((job) => job.pay_frequency && job.pay_anchor_date);
-  // Measured from tomorrow, so on payday itself "current" is the period now
-  // being worked (which includes today), not the one that was just paid.
-  const tomorrow = new Date(Date.now() + 86_400_000);
+  const now = new Date();
 
   const statements = await Promise.all(
     scheduledJobs.map(async (job) => {
       const frequency = job.pay_frequency as PayFrequency;
-      const { start, end } = getPayPeriod(job.pay_anchor_date!, frequency, timezone, tomorrow);
+      const lag = job.pay_lag_days ?? DEFAULT_PAY_LAG_DAYS;
+      const next = getNextPaycheque(job.pay_anchor_date!, frequency, timezone, lag, now);
+      const working = getCurrentPayPeriod(job.pay_anchor_date!, frequency, timezone, lag, now);
+      const periods = working.start.getTime() === next.start.getTime() ? [next] : [next, working];
 
-      // Overtime is weekly: fetch from the start of the workweek the period
-      // begins in, so hours just before the period count toward its threshold.
-      const contextStart = getWorkweekBounds(start, timezone, weekStartsOn).start;
-      const shifts = start.getTime() === end.getTime() ? [] : await getCompletedShiftsInRange(userId, contextStart, end);
-      const summary = summarizeRangeByJob(
-        shiftInputsFrom(shifts.filter((s) => s.job_id === job.id)),
-        jobRatesFrom([job]),
-        timezone,
-        weekStartsOn,
-        start,
-        end
-      )[job.id] ?? { paidMinutes: 0, regularMinutes: 0, overtimeMinutes: 0, doubleTimeMinutes: 0, earningsCents: 0, shiftCount: 0 };
+      // One fetch for both periods. Overtime is weekly: start at the workweek
+      // the first period begins in, so hours just before it count toward its threshold.
+      const contextStart = getWorkweekBounds(periods[0].start, timezone, weekStartsOn).start;
+      const fetchEnd = periods[periods.length - 1].end;
+      const hasRange = periods.some((period) => period.start.getTime() !== period.end.getTime());
+      const shifts = hasRange ? await getCompletedShiftsInRange(userId, contextStart, fetchEnd) : [];
+      const inputs = shiftInputsFrom(shifts.filter((s) => s.job_id === job.id));
+      const rates = jobRatesFrom([job]);
+
+      const figures = (period: { start: Date; end: Date; payday: Date }): PeriodFigures => {
+        const summary = summarizeRangeByJob(inputs, rates, timezone, weekStartsOn, period.start, period.end)[job.id];
+        return {
+          start: period.start,
+          end: period.end,
+          payDate: period.payday,
+          paidMinutes: summary?.paidMinutes ?? 0,
+          regularMinutes: summary?.regularMinutes ?? 0,
+          overtimeMinutes: summary?.overtimeMinutes ?? 0,
+          doubleTimeMinutes: summary?.doubleTimeMinutes ?? 0,
+          grossEarningsCents: summary?.earningsCents ?? 0,
+        };
+      };
 
       return {
         jobId: job.id,
@@ -156,17 +179,11 @@ export async function getPayPeriodStatements(
         color: job.color,
         frequency,
         periodsPerYear: payPeriodsPerYear(frequency),
-        periodStart: start,
-        periodEnd: end,
-        payDate: end,
-        paidMinutes: summary.paidMinutes,
-        regularMinutes: summary.regularMinutes,
-        overtimeMinutes: summary.overtimeMinutes,
-        doubleTimeMinutes: summary.doubleTimeMinutes,
-        grossEarningsCents: summary.earningsCents,
+        paycheque: figures(next),
+        current: periods.length > 1 ? figures(working) : null,
       };
     })
   );
 
-  return statements.sort((a, b) => a.payDate.getTime() - b.payDate.getTime());
+  return statements.sort((a, b) => a.paycheque.payDate.getTime() - b.paycheque.payDate.getTime());
 }

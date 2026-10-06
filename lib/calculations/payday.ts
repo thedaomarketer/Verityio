@@ -145,6 +145,69 @@ export function getPayPeriod(
   return { start, end };
 }
 
+/**
+ * Days from a pay period's last day to its payday when the job doesn't say
+ * otherwise: the period ends the day before payday.
+ */
+export const DEFAULT_PAY_LAG_DAYS = 1;
+
+export interface PaidPeriod {
+  /** Local midnight of the period's first day. */
+  start: Date;
+  /** Exclusive: local midnight after the period's last day. */
+  end: Date;
+  /** Local midnight of the day this period is paid. */
+  payday: Date;
+}
+
+/**
+ * Moves the period ending at a payday (`getPayPeriod`) back so its last day
+ * is `lagDays` before payday -- e.g. a two-week period Sunday to Saturday,
+ * paid the following Thursday, has a lag of 5. Exact for weekly and
+ * biweekly pay; for semi-monthly and monthly the period keeps its length
+ * and moves by the same number of days.
+ */
+function withLag(period: { start: Date; end: Date }, lagDays: number, timezone: string): PaidPeriod {
+  const shift = DEFAULT_PAY_LAG_DAYS - lagDays;
+  return { start: addDays(period.start, shift, timezone), end: addDays(period.end, shift, timezone), payday: period.end };
+}
+
+/**
+ * The next paycheque at or after `from`: its payday and the period it pays
+ * for. On payday itself, that's the paycheque arriving today.
+ */
+export function getNextPaycheque(
+  anchorDate: Date | string,
+  frequency: PayFrequency,
+  timezone: string,
+  lagDays: number = DEFAULT_PAY_LAG_DAYS,
+  from: Date = new Date()
+): PaidPeriod {
+  return withLag(getPayPeriod(anchorDate, frequency, timezone, from), lagDays, timezone);
+}
+
+/**
+ * The pay period being worked on `from` (the one containing that day) and
+ * the payday it will be paid on. With a lag of more than a day this is a
+ * later period than the next paycheque's.
+ */
+export function getCurrentPayPeriod(
+  anchorDate: Date | string,
+  frequency: PayFrequency,
+  timezone: string,
+  lagDays: number = DEFAULT_PAY_LAG_DAYS,
+  from: Date = new Date()
+): PaidPeriod {
+  // The period containing `from` is paid on the first payday more than `lagDays - 1` days later.
+  const payFrom = addDays(localMidnight(from, timezone), lagDays, timezone);
+  return withLag(getPayPeriod(anchorDate, frequency, timezone, payFrom), lagDays, timezone);
+}
+
+/** Days between a known pay period's last day and its payday, from two calendar dates (YYYY-MM-DD). */
+export function payLagDaysFrom(payday: string, periodLastDay: string): number {
+  return Math.round((Date.parse(`${payday}T00:00:00Z`) - Date.parse(`${periodLastDay}T00:00:00Z`)) / 86_400_000);
+}
+
 /** Number of pay periods per year for a given frequency (average, for semi-monthly/monthly). */
 export function payPeriodsPerYear(frequency: PayFrequency): number {
   switch (frequency) {

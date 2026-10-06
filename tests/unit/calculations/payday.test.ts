@@ -1,5 +1,13 @@
 import { describe, expect, it } from "vitest";
-import { getNextPayday, getPayPeriod, payPeriodsPerYear } from "@/lib/calculations/payday";
+import {
+  getCurrentPayPeriod,
+  getNextPaycheque,
+  getNextPayday,
+  getPayPeriod,
+  payLagDaysFrom,
+  payPeriodsPerYear,
+} from "@/lib/calculations/payday";
+import { localDateString } from "@/lib/calculations/local-time";
 
 const TZ = "America/New_York";
 
@@ -110,5 +118,57 @@ describe("payPeriodsPerYear", () => {
     expect(payPeriodsPerYear("biweekly")).toBe(26);
     expect(payPeriodsPerYear("semi_monthly")).toBe(24);
     expect(payPeriodsPerYear("monthly")).toBe(12);
+  });
+});
+
+describe("paycheques with a lag between period end and payday", () => {
+  const TORONTO = "America/Toronto";
+  // Biweekly, paid Thursday Sep 24 2026 for the period that ended Saturday Sep 20 (a 4-day lag).
+  const ANCHOR = "2026-09-24";
+  const day = (date: Date) => localDateString(date, TORONTO);
+  const lastDay = (end: Date) => day(new Date(end.getTime() - 1));
+
+  it("derives the lag from a known payday and its period's last day", () => {
+    expect(payLagDaysFrom("2026-09-24", "2026-09-20")).toBe(4);
+    expect(payLagDaysFrom("2026-09-24", "2026-09-23")).toBe(1);
+    expect(payLagDaysFrom("2026-01-02", "2025-12-27")).toBe(6);
+  });
+
+  it("pays the Sunday-Saturday period on the following Thursday", () => {
+    const tuesday = new Date("2026-10-06T16:48:00-04:00");
+    const next = getNextPaycheque(ANCHOR, "biweekly", TORONTO, 4, tuesday);
+    expect([day(next.start), lastDay(next.end), day(next.payday)]).toEqual(["2026-09-21", "2026-10-04", "2026-10-08"]);
+
+    const current = getCurrentPayPeriod(ANCHOR, "biweekly", TORONTO, 4, tuesday);
+    expect([day(current.start), lastDay(current.end), day(current.payday)]).toEqual(["2026-10-05", "2026-10-18", "2026-10-22"]);
+  });
+
+  it("on payday, the next paycheque is today's and the current period is the one being worked", () => {
+    const payday = new Date("2026-10-08T09:00:00-04:00");
+    expect(day(getNextPaycheque(ANCHOR, "biweekly", TORONTO, 4, payday).payday)).toBe("2026-10-08");
+    expect(day(getCurrentPayPeriod(ANCHOR, "biweekly", TORONTO, 4, payday).start)).toBe("2026-10-05");
+  });
+
+  it("moves to the next period the day after the last one closes", () => {
+    const saturday = new Date("2026-10-17T23:30:00-04:00");
+    const sunday = new Date("2026-10-18T00:30:00-04:00");
+    expect(day(getCurrentPayPeriod(ANCHOR, "biweekly", TORONTO, 4, saturday).start)).toBe("2026-10-05");
+    expect(day(getCurrentPayPeriod(ANCHOR, "biweekly", TORONTO, 4, sunday).start)).toBe("2026-10-05");
+    const nextSunday = new Date("2026-10-19T00:30:00-04:00");
+    expect(day(getCurrentPayPeriod(ANCHOR, "biweekly", TORONTO, 4, nextSunday).start)).toBe("2026-10-19");
+  });
+
+  it("keeps the old behaviour by default: the period ends the day before payday", () => {
+    const tuesday = new Date("2026-10-06T16:48:00-04:00");
+    const current = getCurrentPayPeriod(ANCHOR, "biweekly", TORONTO, undefined, tuesday);
+    const legacy = getPayPeriod(ANCHOR, "biweekly", TORONTO, new Date(tuesday.getTime() + 86_400_000));
+    expect(current.start.getTime()).toBe(legacy.start.getTime());
+    expect(current.end.getTime()).toBe(legacy.end.getTime());
+    expect([day(current.start), lastDay(current.end)]).toEqual(["2026-09-24", "2026-10-07"]);
+  });
+
+  it("handles a weekly schedule paid the same day the period ends (lag 0)", () => {
+    const next = getNextPaycheque("2026-10-02", "weekly", TORONTO, 0, new Date("2026-10-06T12:00:00-04:00"));
+    expect([day(next.start), lastDay(next.end), day(next.payday)]).toEqual(["2026-10-03", "2026-10-09", "2026-10-09"]);
   });
 });

@@ -62,6 +62,20 @@ describe("summarizeRangeByJob", () => {
     expect(totals.job).toMatchObject({ paidMinutes: 480, shiftCount: 1 });
   });
 
+  it("rounds pay once per job, not once per week (70 h at $25 is exactly $1,750.00)", () => {
+    // A pay period touching three workweeks: 16h40m + 16h40m + 36h40m. Each
+    // week's pay ends in 2/3 of a cent, so rounding per week came to $1,750.01.
+    const rates: Record<string, JobRateConfig> = { job: { hourlyRateCents: 2500, overtimeRateCents: null, overtimeThresholdMinutes: null } };
+    const minutesShift = (date: string, minutes: number): ShiftSummaryInput => {
+      const start = new Date(`${date}T13:00:00Z`);
+      return { jobId: "job", start, end: new Date(start.getTime() + minutes * 60_000), breaks: [] };
+    };
+    const shifts = [minutesShift("2026-10-05", 1000), minutesShift("2026-10-12", 1000), minutesShift("2026-10-19", 2200)];
+    const totals = summarizeRangeByJob(shifts, rates, TZ, MONDAY, new Date("2026-10-05T04:00:00Z"), new Date("2026-10-26T04:00:00Z")).job;
+    expect(totals.paidMinutes).toBe(4200);
+    expect(totals.earningsCents).toBe(175000);
+  });
+
   it("returns nothing for an empty range", () => {
     expect(summarizeRangeByJob([], RATES, TZ, MONDAY, new Date(), new Date())).toEqual({});
   });

@@ -21,6 +21,7 @@ import type { ExpenseCategory } from "@/lib/supabase/database.types";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { TimeSeriesBarChart } from "@/components/charts/time-series-bar-chart";
+import { makeAxisFormatter } from "@/lib/charts/value-format";
 import { CategoryBarChart } from "@/components/charts/category-bar-chart";
 import { GranularityTabs } from "@/components/reports/granularity-tabs";
 import { cn } from "@/lib/utils";
@@ -138,6 +139,7 @@ export default async function ReportBreakdownPage({
                   data={buckets.map((bucket) => ({ label: label(bucket), values: { value: chartValue(bucket) } }))}
                   series={[{ key: "value", label: titles[metric], colorClassName: "bg-chart-1" }]}
                   formatValue={chartFormat}
+                  formatAxisTick={chartFormat === money ? makeAxisFormatter({ kind: "money", currency: ctx.currency, intl }) : chartFormat}
                   emptyMessage={m.reports.noShifts}
                 />
               )}

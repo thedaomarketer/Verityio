@@ -67,6 +67,9 @@ advisors report only the intentional "no policy" note on
   (migration 25): 1–1440 or null, and `jobs_double_time_after_daily_check`
   requires double time to start after daily overtime when both are set.
   `double_time_rate` is `numeric(10,2)`.
+- `jobs.pay_lag_days` (migration 27): 0–31 or null -- days from a pay
+  period's last day to its payday (null means 1: the period ends the day
+  before payday).
 
 ## Locale and time zone
 

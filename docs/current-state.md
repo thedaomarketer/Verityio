@@ -282,6 +282,21 @@ exercise the authenticated app directly.
   goes through this engine; the pay-period card shows "of which double
   time". Overtime law varies -- the presets are starting points, not
   legal advice.
+- **Pay periods with a payday lag** (migration 27, `jobs.pay_lag_days`):
+  a job can say which day its known pay date's period ended (e.g. paid
+  Thursday Oct 8 for Sunday Sep 21 – Saturday Oct 4, a lag of 4); blank
+  keeps "the day before payday". Pay & taxes now shows the **next
+  paycheque** (its period, hours, gross, estimated deductions and net) and,
+  when the lag means a later period is already being worked, **this pay
+  period so far** (`getNextPaycheque` / `getCurrentPayPeriod` in
+  `lib/calculations/payday.ts`).
+- **Pay rounding**: `summarizeRangeByJob` now works out pay once per job
+  from its total minutes at each rate, like payroll -- rounding each
+  workweek separately could be a cent off (70 h at $25 showed $1,750.01).
+- **Phone layout**: report bar charts scroll sideways inside their card
+  (with whole-dollar labels) instead of widening the page, and the app's
+  main area clips any horizontal overflow; the calendar's month name has
+  its own line so the toolbar can't cover it.
 - **Calendar** no longer flashes Compact before switching to the saved
   view (the choice is a cookie the server reads, `wl-calendar-view`), the
   arrows prefetch the neighbouring months so switching is instant, and a
@@ -304,7 +319,7 @@ exercise the authenticated app directly.
 
 ## What's stubbed or missing
 
-- **Migrations 25 (daily overtime) and 26 (plan tiers) are applied**; the
+- **Migrations 25 (daily overtime), 26 (plan tiers) and 27 (pay lag) are applied**; the
   advisors flag nothing new.
 - **Migrations 23 and 24 are applied** (October 6): `subscriptions` and the
   `bank_*` tables exist with RLS on. Verified as an authenticated user:

@@ -81,9 +81,10 @@ export function splitShiftMinutes(
  * its thresholds -- so pass shifts from the start of the workweek containing
  * `rangeStart`.
  *
- * Earnings are computed per (workweek, job) in integer cents: regular at the
- * hourly rate, overtime at the overtime rate (or the hourly rate when none
- * is set), double time at the double-time rate (or twice the hourly rate).
+ * Earnings are computed per job in integer cents from its total minutes at
+ * each rate: regular at the hourly rate, overtime at the overtime rate (or
+ * the hourly rate when none is set), double time at the double-time rate
+ * (or twice the hourly rate).
  */
 export function summarizeRangeByJob(
   shifts: ShiftSummaryInput[],
@@ -134,11 +135,6 @@ export function summarizeRangeByJob(
       }
 
       if (count === 0) continue;
-      const earnings =
-        earningsCentsForMinutes(regular, rate.hourlyRateCents) +
-        earningsCentsForMinutes(overtime, rate.overtimeRateCents ?? rate.hourlyRateCents) +
-        earningsCentsForMinutes(doubleTime, rate.doubleTimeRateCents ?? rate.hourlyRateCents * 2);
-
       const total = (result[jobId] ??= {
         paidMinutes: 0,
         regularMinutes: 0,
@@ -151,9 +147,20 @@ export function summarizeRangeByJob(
       total.regularMinutes += regular;
       total.overtimeMinutes += overtime + doubleTime;
       total.doubleTimeMinutes += doubleTime;
-      total.earningsCents += earnings;
       total.shiftCount += count;
     }
+  }
+
+  // Pay is worked out once per job from its total minutes at each rate, the
+  // way payroll does -- rounding every workweek separately could leave the
+  // total a cent off (70 hours at $25 must be exactly $1,750.00).
+  for (const [jobId, total] of Object.entries(result)) {
+    const rate = jobRates[jobId] ?? { hourlyRateCents: 0, overtimeRateCents: null, overtimeThresholdMinutes: null };
+    const overtimeOnly = total.overtimeMinutes - total.doubleTimeMinutes;
+    total.earningsCents =
+      earningsCentsForMinutes(total.regularMinutes, rate.hourlyRateCents) +
+      earningsCentsForMinutes(overtimeOnly, rate.overtimeRateCents ?? rate.hourlyRateCents) +
+      earningsCentsForMinutes(total.doubleTimeMinutes, rate.doubleTimeRateCents ?? rate.hourlyRateCents * 2);
   }
 
   return result;

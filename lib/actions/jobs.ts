@@ -7,7 +7,7 @@ import { getI18n } from "@/lib/i18n/server";
 import { validationMessage } from "@/lib/i18n/validation";
 import { formText } from "@/lib/validation/form";
 import { logAudit } from "@/lib/audit/log";
-import { hoursToThresholdMinutes, jobSchema } from "@/lib/validation/jobs";
+import { hoursToThresholdMinutes, jobSchema, payLagFromJob } from "@/lib/validation/jobs";
 
 export interface ActionResult {
   error?: string;
@@ -31,6 +31,7 @@ function parseJobForm(formData: FormData) {
     notes: formText(formData, "notes"),
     payFrequency: formData.get("payFrequency") || undefined,
     payAnchorDate: formText(formData, "payAnchorDate"),
+    payPeriodEndDate: formText(formData, "payPeriodEndDate"),
   });
 }
 
@@ -71,6 +72,7 @@ export async function createJobAction(
       notes: parsed.data.notes || null,
       pay_frequency: parsed.data.payFrequency || null,
       pay_anchor_date: parsed.data.payAnchorDate || null,
+      pay_lag_days: payLagFromJob(parsed.data),
     })
     .select("id")
     .single();
@@ -136,6 +138,7 @@ export async function updateJobAction(
       notes: parsed.data.notes || null,
       pay_frequency: parsed.data.payFrequency || null,
       pay_anchor_date: parsed.data.payAnchorDate || null,
+      pay_lag_days: payLagFromJob(parsed.data),
     })
     .eq("id", jobId)
     .eq("user_id", user.id);

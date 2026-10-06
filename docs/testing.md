@@ -118,6 +118,12 @@ Also covered (added with Premium, Budget and the new charts):
   in one workday, a shift crossing midnight counting toward the day it
   starts, daily overtime not double-counted toward the weekly threshold,
   the double-time rate and its 2x default).
+- `calculations/payday.test.ts` also covers paycheques with a lag (Sunday–
+  Saturday periods paid the next Thursday, payday itself, the day a period
+  rolls over, the default lag matching the old behaviour, lag 0), and
+  `validation/pay-lag.test.ts` the job form's period-end field.
+- `calculations/range-summary.test.ts` checks pay is rounded once per job
+  (a three-workweek period that used to come out a cent high).
 - `receipt-fields.test.ts`: receipt-scan output normalisation (amount
   formats, future/ancient/impossible dates, currency codes, not-a-receipt).
 - `calculations/buckets.test.ts`: day/week/month/year buckets clipped to the

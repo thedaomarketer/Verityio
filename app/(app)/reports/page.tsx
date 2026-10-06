@@ -24,6 +24,7 @@ import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { MetricCard } from "@/components/dashboard/metric-card";
 import { TimeSeriesBarChart } from "@/components/charts/time-series-bar-chart";
+import { makeAxisFormatter } from "@/lib/charts/value-format";
 import { CategoryBarChart } from "@/components/charts/category-bar-chart";
 import { DonutChart } from "@/components/charts/donut-chart";
 import { LineChart } from "@/components/charts/line-chart";
@@ -214,6 +215,7 @@ export default async function ReportsPage({ searchParams }: { searchParams: Prom
               data={earningsSeries}
               series={[{ key: "earnings", label: m.common.earnings, colorClassName: "bg-chart-1" }]}
               formatValue={fmtCents}
+              formatAxisTick={makeAxisFormatter(moneyFormat)}
               emptyMessage={m.reports.noShifts}
             />
           ) : (

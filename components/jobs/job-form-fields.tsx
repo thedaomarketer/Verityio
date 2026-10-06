@@ -49,6 +49,7 @@ export function JobFormFields({
     notes?: string | null;
     payFrequency?: string | null;
     payAnchorDate?: string | null;
+    payPeriodEndDate?: string | null;
   };
 }) {
   const id = useId();
@@ -166,6 +167,19 @@ export function JobFormFields({
               type="date"
               defaultValue={dv.payAnchorDate ?? ""}
             />
+          </div>
+          <div className="space-y-2 sm:col-span-2">
+            <Label htmlFor={`${id}-payPeriodEndDate`}>{f.payPeriodEnd}</Label>
+            <Input
+              id={`${id}-payPeriodEndDate`}
+              name="payPeriodEndDate"
+              type="date"
+              defaultValue={dv.payPeriodEndDate ?? ""}
+              aria-describedby={`${id}-payPeriodEndHint`}
+            />
+            <p id={`${id}-payPeriodEndHint`} className="text-xs text-muted-foreground">
+              {f.payPeriodEndHint}
+            </p>
           </div>
         </div>
       </div>

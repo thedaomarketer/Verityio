@@ -86,6 +86,7 @@ export interface Database {
           notes: string | null;
           pay_frequency: "weekly" | "biweekly" | "semi_monthly" | "monthly" | null;
           pay_anchor_date: string | null;
+          pay_lag_days: number | null;
           created_at: string;
           updated_at: string;
         };

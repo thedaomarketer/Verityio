@@ -104,56 +104,56 @@ export function MonthCalendar({
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between gap-2">
-        <div className="min-w-0">
-          <p className="text-sm font-medium text-primary">{yearTitle}</p>
-          <h1 className="text-[32px] leading-tight font-bold tracking-tight">{monthTitle}</h1>
-        </div>
-        <div className="flex items-center gap-1">
-          <button
-            type="button"
-            onClick={goToday}
-            className="flex min-h-11 items-center rounded-full bg-card px-4 text-[15px] font-medium shadow-[0_1px_3px_rgb(0_0_0/0.08)] transition-transform active:scale-95"
-          >
-            {m.calendar.today}
-          </button>
-          <DropdownMenu modal={false}>
-            <DropdownMenuTrigger
-              aria-label={m.calendar.viewOptions}
-              className="flex size-11 items-center justify-center rounded-full bg-card shadow-[0_1px_3px_rgb(0_0_0/0.08)] outline-none focus-visible:ring-[3px] focus-visible:ring-ring/40"
+      <div className="space-y-1">
+        <div className="flex items-center justify-between gap-2">
+          <p className="text-[17px] font-medium text-primary">{yearTitle}</p>
+          <div className="flex items-center gap-1">
+            <button
+              type="button"
+              onClick={goToday}
+              className="flex min-h-11 items-center rounded-full bg-card px-4 text-[15px] font-medium shadow-[0_1px_3px_rgb(0_0_0/0.08)] transition-transform active:scale-95"
             >
-              {(() => {
-                const Icon = views.find((v) => v.id === view)!.icon;
-                return <Icon className="size-[18px]" />;
-              })()}
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-48">
-              {views.map((v) => (
-                <DropdownMenuItem key={v.id} onSelect={() => chooseView(v.id)} className="min-h-11 gap-3 text-[15px]">
-                  <span className="w-4">{view === v.id && <Check className="size-4" />}</span>
-                  <v.icon className="size-4" />
-                  {v.label}
-                </DropdownMenuItem>
-              ))}
-            </DropdownMenuContent>
-          </DropdownMenu>
-          <Link
-            href={prevHref}
-            prefetch
-            aria-label={m.calendar.previousMonth}
-            className="flex size-11 items-center justify-center rounded-full text-primary hover:bg-accent"
-          >
-            <ChevronLeft className="size-5" />
-          </Link>
-          <Link
-            href={nextHref}
-            prefetch
-            aria-label={m.calendar.nextMonth}
-            className="flex size-11 items-center justify-center rounded-full text-primary hover:bg-accent"
-          >
-            <ChevronRight className="size-5" />
-          </Link>
+              {m.calendar.today}
+            </button>
+            <DropdownMenu modal={false}>
+              <DropdownMenuTrigger
+                aria-label={m.calendar.viewOptions}
+                className="flex size-11 items-center justify-center rounded-full bg-card shadow-[0_1px_3px_rgb(0_0_0/0.08)] outline-none focus-visible:ring-[3px] focus-visible:ring-ring/40"
+              >
+                {(() => {
+                  const Icon = views.find((v) => v.id === view)!.icon;
+                  return <Icon className="size-[18px]" />;
+                })()}
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-48">
+                {views.map((v) => (
+                  <DropdownMenuItem key={v.id} onSelect={() => chooseView(v.id)} className="min-h-11 gap-3 text-[15px]">
+                    <span className="w-4">{view === v.id && <Check className="size-4" />}</span>
+                    <v.icon className="size-4" />
+                    {v.label}
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+            <Link
+              href={prevHref}
+              prefetch
+              aria-label={m.calendar.previousMonth}
+              className="flex size-11 items-center justify-center rounded-full text-primary hover:bg-accent"
+            >
+              <ChevronLeft className="size-5" />
+            </Link>
+            <Link
+              href={nextHref}
+              prefetch
+              aria-label={m.calendar.nextMonth}
+              className="flex size-11 items-center justify-center rounded-full text-primary hover:bg-accent"
+            >
+              <ChevronRight className="size-5" />
+            </Link>
+          </div>
         </div>
+        <h1 className="truncate text-[32px] leading-tight font-bold tracking-tight">{monthTitle}</h1>
       </div>
 
       {view === "list" ? (
@@ -188,7 +188,7 @@ export function MonthCalendar({
             </div>
             <div className="grid grid-cols-7" role="grid" aria-label={`${monthTitle} ${yearTitle}`}>
               {Array.from({ length: leadingBlanks }, (_, i) => (
-                <span key={`blank-${i}`} className="border-b border-black/[0.06]" aria-hidden="true" />
+                <span key={`blank-${i}`} aria-hidden="true" />
               ))}
               {dates.map((date, i) => {
                 const column = (leadingBlanks + i) % 7;
@@ -206,7 +206,8 @@ export function MonthCalendar({
                     aria-label={`${dayLabels[date]}${day?.items.length ? `, ${day.items.length}` : ""}`}
                     onClick={() => setSelected(date)}
                     className={cn(
-                      "flex flex-col items-center gap-1 border-b border-black/[0.06] pt-1.5 pb-1 outline-none focus-visible:bg-accent",
+                      "flex flex-col items-center gap-1 pt-1.5 pb-1 outline-none focus-visible:bg-accent",
+                      leadingBlanks + i >= 7 && "border-t border-black/[0.06]",
                       view === "details" ? "min-h-[4.75rem]" : "min-h-14"
                     )}
                   >
