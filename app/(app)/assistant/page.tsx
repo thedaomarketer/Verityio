@@ -4,7 +4,7 @@ import { requireUserContext } from "@/lib/data/context";
 import { getI18n } from "@/lib/i18n/server";
 import { AssistantChat, type ChatMessage } from "@/components/assistant/chat";
 import { isAssistantConfigured } from "@/lib/ai/env";
-import { getEntitlement } from "@/lib/data/subscription";
+import { hasFeature } from "@/lib/data/subscription";
 import { PremiumUpsell } from "@/components/premium/premium-upsell";
 import { Card, CardContent } from "@/components/ui/card";
 import { Sparkles } from "lucide-react";
@@ -27,8 +27,7 @@ export default async function AssistantPage() {
     );
   }
 
-  const { premium } = await getEntitlement(ctx.userId);
-  if (!premium) {
+  if (!(await hasFeature(ctx.userId, "assistant"))) {
     return (
       <div className="space-y-4">
         <h1 className="text-[28px] leading-tight font-bold tracking-tight md:text-3xl">{m.assistant.title}</h1>

@@ -22,7 +22,7 @@ this build.
 | `user_settings` | Per-user preferences | `user_id` |
 | `ai_conversations` / `ai_messages` | AI assistant chat history | `user_id` |
 | `push_subscriptions` / `notification_deliveries` | Push devices and sent-reminder log | `user_id` |
-| `subscriptions` | Verityio Premium (Stripe) state, one row per user | `user_id` |
+| `subscriptions` | Plus/Pro subscription state from Stripe (`plan_tier`, migration 26), one row per user | `user_id` |
 | `bank_items` / `bank_accounts` / `bank_transactions` | Linked banks (Plaid) and their data | `user_id` |
 | `bank_item_secrets` | Encrypted Plaid access token + sync cursor per bank | `user_id` |
 
@@ -39,7 +39,7 @@ user's own session.
 written only by trusted server code with the service-role client: the
 Stripe webhook after verifying Stripe's signature, and the bank actions /
 scheduler with data straight from Plaid's API. Users get `select` policies
-only -- an insert/update policy would let anyone grant themselves Premium
+only -- an insert/update policy would let anyone grant themselves a paid plan
 or fabricate bank transactions from the browser. `bank_item_secrets` has
 RLS enabled and **no policies at all**, so no user (not even the owner) can
 read an access token through the API; the tokens are also AES-256-GCM

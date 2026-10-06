@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useSyncExternalStore } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Check, ChevronLeft, ChevronRight, Flag, LayoutGrid, List, Rows3 } from "lucide-react";
@@ -9,6 +9,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { useI18n } from "@/lib/i18n/client";
 import { fmt } from "@/lib/i18n/config";
 import { cn } from "@/lib/utils";
+import { CALENDAR_VIEW_COOKIE, type CalendarView } from "@/lib/privacy";
 
 export interface CalendarItem {
   id: string;
@@ -27,28 +28,11 @@ export interface CalendarDay {
   worked?: string;
 }
 
-type View = "compact" | "details" | "list";
-const VIEW_KEY = "workledger:calendar-view";
-const VIEW_EVENT = "workledger:calendar-view";
+type View = CalendarView;
 
-/** The saved view, a per-device display preference (falls back to Compact without storage). */
-function readView(): View {
-  try {
-    const saved = window.localStorage.getItem(VIEW_KEY);
-    if (saved === "compact" || saved === "details" || saved === "list") return saved;
-  } catch {
-    // Storage unavailable (private mode).
-  }
-  return "compact";
-}
-
-function subscribeView(onChange: () => void) {
-  window.addEventListener(VIEW_EVENT, onChange);
-  window.addEventListener("storage", onChange);
-  return () => {
-    window.removeEventListener(VIEW_EVENT, onChange);
-    window.removeEventListener("storage", onChange);
-  };
+/** Remembers the view for this device (a cookie, so the server renders it next time). */
+function saveView(view: View) {
+  document.cookie = `${CALENDAR_VIEW_COOKIE}=${view}; path=/; max-age=31536000; samesite=lax`;
 }
 
 /**
@@ -56,7 +40,8 @@ function subscribeView(onChange: () => void) {
  * job on each day, today in a red circle, the selected day's shifts listed
  * underneath, and a List view for the whole month. Selecting a day is
  * instant (client state); months change through links so the server loads
- * that month's data.
+ * that month's data, and the neighbouring months are prefetched so the
+ * arrows switch without a loading screen.
  */
 export function MonthCalendar({
   monthTitle,
@@ -69,6 +54,7 @@ export function MonthCalendar({
   days,
   today,
   initialSelected,
+  initialView,
   prevHref,
   nextHref,
   todayHref,
@@ -86,6 +72,8 @@ export function MonthCalendar({
   days: Record<string, CalendarDay>;
   today: string;
   initialSelected: string;
+  /** The saved view, read from its cookie on the server so the first paint is already right. */
+  initialView: View;
   prevHref: string;
   nextHref: string;
   todayHref: string;
@@ -94,15 +82,11 @@ export function MonthCalendar({
   const router = useRouter();
   // Remounted per month (see the page's `key`), so the initial selection always matches the month shown.
   const [selected, setSelected] = useState(initialSelected);
-  const view = useSyncExternalStore(subscribeView, readView, () => "compact" as View);
+  const [view, setView] = useState<View>(initialView);
 
   function chooseView(next: View) {
-    try {
-      window.localStorage.setItem(VIEW_KEY, next);
-    } catch {
-      // Ignore: the choice just won't be remembered.
-    }
-    window.dispatchEvent(new Event(VIEW_EVENT));
+    setView(next);
+    saveView(next);
   }
 
   function goToday() {
@@ -133,7 +117,7 @@ export function MonthCalendar({
           >
             {m.calendar.today}
           </button>
-          <DropdownMenu>
+          <DropdownMenu modal={false}>
             <DropdownMenuTrigger
               aria-label={m.calendar.viewOptions}
               className="flex size-11 items-center justify-center rounded-full bg-card shadow-[0_1px_3px_rgb(0_0_0/0.08)] outline-none focus-visible:ring-[3px] focus-visible:ring-ring/40"
@@ -155,6 +139,7 @@ export function MonthCalendar({
           </DropdownMenu>
           <Link
             href={prevHref}
+            prefetch
             aria-label={m.calendar.previousMonth}
             className="flex size-11 items-center justify-center rounded-full text-primary hover:bg-accent"
           >
@@ -162,6 +147,7 @@ export function MonthCalendar({
           </Link>
           <Link
             href={nextHref}
+            prefetch
             aria-label={m.calendar.nextMonth}
             className="flex size-11 items-center justify-center rounded-full text-primary hover:bg-accent"
           >

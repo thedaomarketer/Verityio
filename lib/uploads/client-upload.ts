@@ -1,6 +1,5 @@
 "use client";
 
-import { createClient } from "@/lib/supabase/client";
 import { ATTACHMENTS_BUCKET, MAX_UPLOAD_BYTES } from "./paths";
 
 /**
@@ -34,6 +33,9 @@ export async function prepareImage(file: File, maxDimension: number, quality = 0
 /** Uploads to the user's own folder in the private bucket (RLS-enforced). Returns an error key or null. */
 export async function uploadToStorage(path: string, blob: Blob): Promise<"tooLarge" | "failed" | null> {
   if (blob.size > MAX_UPLOAD_BYTES) return "tooLarge";
+  // Loaded on first upload: the Supabase browser client is the largest
+  // dependency these pages have, and most visits never upload anything.
+  const { createClient } = await import("@/lib/supabase/client");
   const { error } = await createClient()
     .storage.from(ATTACHMENTS_BUCKET)
     .upload(path, blob, { contentType: blob.type || "application/octet-stream", upsert: false, cacheControl: "3600" });

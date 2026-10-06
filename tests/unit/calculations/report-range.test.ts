@@ -31,16 +31,40 @@ describe("resolveReportRange", () => {
     expect(resolveReportRange({}, free)).toMatchObject({ start: "2026-10-01", preset: "month", locked: false });
   });
 
-  it("lets free plans use the short presets", () => {
+  it("lets free plans use the presets up to three months", () => {
     expect(resolveReportRange({ range: "lastMonth" }, free)).toMatchObject({ preset: "lastMonth", locked: false });
+    expect(resolveReportRange({ range: "last3Months" }, free)).toMatchObject({ preset: "last3Months", locked: false });
   });
 
-  it("falls back to this month, flagged as locked, for Premium ranges on a free plan", () => {
-    expect(resolveReportRange({ range: "year" }, free)).toMatchObject({ preset: "month", locked: true });
-    expect(resolveReportRange({ start: "2026-01-01", end: "2026-03-31" }, free)).toMatchObject({ preset: "month", locked: true });
+  it("gives free plans the last three months, flagged as locked, for the year preset", () => {
+    expect(resolveReportRange({ range: "year" }, free)).toMatchObject({
+      start: "2026-08-01",
+      end: "2026-10-31",
+      preset: "last3Months",
+      locked: true,
+    });
   });
 
-  it("gives Premium custom ranges, swapping reversed dates", () => {
+  it("lets free plans pick any dates up to three months apart", () => {
+    // Any pay period, month or quarter, however long ago.
+    expect(resolveReportRange({ start: "2025-07-01", end: "2025-09-30" }, free)).toEqual({
+      start: "2025-07-01",
+      end: "2025-09-30",
+      preset: "custom",
+      locked: false,
+    });
+  });
+
+  it("shortens longer free ranges to three months from the start, flagged as locked", () => {
+    expect(resolveReportRange({ start: "2026-01-01", end: "2026-12-31" }, free)).toEqual({
+      start: "2026-01-01",
+      end: "2026-04-02",
+      preset: "custom",
+      locked: true,
+    });
+  });
+
+  it("gives Plus custom ranges, swapping reversed dates", () => {
     expect(resolveReportRange({ start: "2026-03-31", end: "2026-01-01" }, premium)).toEqual({
       start: "2026-01-01",
       end: "2026-03-31",
@@ -49,8 +73,8 @@ describe("resolveReportRange", () => {
     });
   });
 
-  it("caps very long custom ranges", () => {
-    expect(resolveReportRange({ start: "2010-01-01", end: "2026-01-01" }, premium).end).toBe("2012-01-02");
+  it("caps very long custom ranges without flagging them as locked", () => {
+    expect(resolveReportRange({ start: "2010-01-01", end: "2026-01-01" }, premium)).toMatchObject({ end: "2012-01-02", locked: false });
   });
 
   it("ignores malformed dates and unknown presets", () => {

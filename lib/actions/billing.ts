@@ -5,7 +5,8 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getI18n } from "@/lib/i18n/server";
-import { isPlanId } from "@/lib/billing/plans";
+import { isBillingInterval, isPaidTier } from "@/lib/billing/plans";
+import { isProAvailable } from "@/lib/billing/availability";
 import { createCheckoutSession, createPortalSession, isBillingConfigured } from "@/lib/billing/stripe";
 
 function siteUrl(): string {
@@ -13,14 +14,18 @@ function siteUrl(): string {
 }
 
 /**
- * Starts Stripe Checkout for the chosen plan. The price comes from
- * lib/billing/plans.ts on the server -- the form only says "monthly" or
- * "yearly", so the amount can't be tampered with. Premium is granted later,
- * by the signed webhook, never by returning to the success URL.
+ * Starts Stripe Checkout for the chosen tier and interval. The price comes
+ * from lib/billing/plans.ts on the server -- the form only names a tier and
+ * an interval, so the amount can't be tampered with. A first subscription
+ * starts with a free trial. The tier is granted later, by the signed
+ * webhook, never by returning to the success URL.
  */
 export async function startCheckoutAction(formData: FormData): Promise<void> {
-  const plan = formData.get("plan");
-  if (!isPlanId(plan) || !isBillingConfigured()) redirect("/premium?error=checkout");
+  const tier = formData.get("tier");
+  const interval = formData.get("interval");
+  if (!isPaidTier(tier) || !isBillingInterval(interval) || !isBillingConfigured()) redirect("/premium?error=checkout");
+  // Pro can't be bought until one of its features works for real.
+  if (tier === "pro" && !isProAvailable()) redirect("/premium?error=checkout");
 
   const supabase = await createClient();
   const {
@@ -30,7 +35,11 @@ export async function startCheckoutAction(formData: FormData): Promise<void> {
 
   const [{ locale }, { data: subscription }] = await Promise.all([
     getI18n(),
-    supabase.from("subscriptions").select("stripe_customer_id, status").eq("user_id", user.id).maybeSingle(),
+    supabase
+      .from("subscriptions")
+      .select("stripe_customer_id, stripe_subscription_id, status")
+      .eq("user_id", user.id)
+      .maybeSingle(),
   ]);
   // Already subscribed: manage it instead of opening a second subscription.
   if (subscription && ["active", "trialing", "past_due"].includes(subscription.status)) redirect("/premium");
@@ -38,10 +47,12 @@ export async function startCheckoutAction(formData: FormData): Promise<void> {
   let url: string;
   try {
     url = await createCheckoutSession({
-      planId: plan,
+      tier,
+      interval,
       userId: user.id,
       email: user.email ?? null,
       customerId: subscription?.stripe_customer_id ?? null,
+      trial: !subscription?.stripe_subscription_id,
       successUrl: `${siteUrl()}/premium?checkout=success`,
       cancelUrl: `${siteUrl()}/premium?checkout=cancelled`,
       locale,
@@ -53,7 +64,7 @@ export async function startCheckoutAction(formData: FormData): Promise<void> {
   redirect(url);
 }
 
-/** Opens Stripe's billing portal to change plan, update a card, or cancel. */
+/** Opens Stripe's billing portal: payment method, invoices, billing details, or cancel. */
 export async function openBillingPortalAction(): Promise<void> {
   if (!isBillingConfigured()) redirect("/premium?error=portal");
 
@@ -74,7 +85,12 @@ export async function openBillingPortalAction(): Promise<void> {
   const { locale } = await getI18n();
   let url: string;
   try {
-    url = await createPortalSession(data.stripe_customer_id, `${siteUrl()}/premium`, locale);
+    url = await createPortalSession({
+      customerId: data.stripe_customer_id,
+      returnUrl: `${siteUrl()}/premium`,
+      locale,
+      tiers: isProAvailable() ? ["plus", "pro"] : ["plus"],
+    });
   } catch (error) {
     console.error("Stripe portal failed", error instanceof Error ? error.message : error);
     redirect("/premium?error=portal");

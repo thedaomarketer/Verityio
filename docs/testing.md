@@ -96,11 +96,13 @@ Also covered (added with Premium, Budget and the new charts):
   like-for-like month comparison with minimum thresholds, no pace in the
   first days, at most five).
 - `calculations/report-range.test.ts`: presets across month and year
-  boundaries and leap years, free vs. Premium ranges, swapped and capped
+  boundaries and leap years, the free plan's 3-month limit (any dates up
+  to 3 months apart, longer ones shortened and flagged), swapped and capped
   custom ranges.
-- `billing/billing.test.ts`: prices in cents and the yearly saving, plan id
-  validation, which statuses grant Premium, gating off until billing is
-  configured, Stripe form encoding, and webhook signatures (valid, rotated
+- `billing/billing.test.ts`: Plus/Pro prices in cents and the yearly
+  savings, unique lookup keys, lookup key to tier (legacy Premium maps to
+  Pro), tier/interval validation, which tier includes which feature, which
+  statuses grant a tier, gating off until billing is configured, Stripe form encoding, and webhook signatures (valid, rotated
   secrets, tampered body, wrong secret, missing header, replay window).
 - `bank/token-crypto.test.ts`: encryption round trip, fresh IVs, tamper and
   wrong-key rejection, key validation.

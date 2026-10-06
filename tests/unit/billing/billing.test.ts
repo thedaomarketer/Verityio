@@ -1,41 +1,71 @@
 import { describe, expect, it } from "vitest";
 
-import { hasPremiumAccess, isSubscriptionStatus, statusGrantsPremium } from "@/lib/billing/entitlements";
+import { effectiveTier, isSubscriptionStatus, statusGrantsPremium } from "@/lib/billing/entitlements";
 import { stripeFormEncode } from "@/lib/billing/form-encode";
-import { PLANS, isPlanId, yearlyMonthlyEquivalentCents, yearlySavingsPercent } from "@/lib/billing/plans";
+import {
+  PRICES,
+  isBillingInterval,
+  isPaidTier,
+  tierForLookupKey,
+  tierIncludes,
+  yearlyMonthlyEquivalentCents,
+  yearlySavingsPercent,
+} from "@/lib/billing/plans";
 import { signStripePayload, verifyStripeSignature } from "@/lib/billing/stripe-signature";
 
 describe("plans", () => {
-  it("prices Premium at $2.99/month and $29.99/year, in cents", () => {
-    expect(PLANS.monthly.amountCents).toBe(299);
-    expect(PLANS.yearly.amountCents).toBe(2999);
+  it("prices Plus at $4.99/$39.99 and Pro at $9.99/$79.99, in cents", () => {
+    expect(PRICES.plus.month.amountCents).toBe(499);
+    expect(PRICES.plus.year.amountCents).toBe(3999);
+    expect(PRICES.pro.month.amountCents).toBe(999);
+    expect(PRICES.pro.year.amountCents).toBe(7999);
   });
 
-  it("makes the yearly plan cheaper than twelve monthly payments", () => {
-    expect(PLANS.yearly.amountCents).toBeLessThan(PLANS.monthly.amountCents * 12);
-    expect(yearlySavingsPercent()).toBe(16);
-    expect(yearlyMonthlyEquivalentCents()).toBe(250);
+  it("makes each yearly price cheaper than twelve monthly payments", () => {
+    for (const tier of ["plus", "pro"] as const) {
+      expect(PRICES[tier].year.amountCents).toBeLessThan(PRICES[tier].month.amountCents * 12);
+    }
+    expect(yearlySavingsPercent("plus")).toBe(33);
+    expect(yearlySavingsPercent("pro")).toBe(33);
+    expect(yearlyMonthlyEquivalentCents("plus")).toBe(333);
+    expect(yearlyMonthlyEquivalentCents("pro")).toBe(667);
   });
 
-  it("never reports a negative saving", () => {
-    expect(
-      yearlySavingsPercent({
-        monthly: { ...PLANS.monthly, amountCents: 100 },
-        yearly: { ...PLANS.yearly, amountCents: 5000 },
-      })
-    ).toBe(0);
+  it("gives every price its own lookup key", () => {
+    const keys = Object.values(PRICES).flatMap((byInterval) => Object.values(byInterval).map((p) => p.lookupKey));
+    expect(new Set(keys).size).toBe(keys.length);
   });
 
-  it("only accepts known plan ids from forms", () => {
-    expect(isPlanId("monthly")).toBe(true);
-    expect(isPlanId("yearly")).toBe(true);
-    expect(isPlanId("lifetime")).toBe(false);
-    expect(isPlanId(null)).toBe(false);
+  it("maps Stripe lookup keys back to tiers, legacy Premium to Pro", () => {
+    expect(tierForLookupKey(PRICES.plus.year.lookupKey)).toBe("plus");
+    expect(tierForLookupKey(PRICES.pro.month.lookupKey)).toBe("pro");
+    expect(tierForLookupKey("verityio_premium_monthly_299")).toBe("pro");
+    expect(tierForLookupKey("someone_elses_price")).toBeNull();
+    expect(tierForLookupKey(null)).toBeNull();
+  });
+
+  it("only accepts known tiers and intervals from forms", () => {
+    expect(isPaidTier("plus")).toBe(true);
+    expect(isPaidTier("pro")).toBe(true);
+    expect(isPaidTier("free")).toBe(false);
+    expect(isPaidTier("lifetime")).toBe(false);
+    expect(isBillingInterval("year")).toBe(true);
+    expect(isBillingInterval("week")).toBe(false);
+  });
+
+  it("puts each feature in the right tier", () => {
+    expect(tierIncludes("free", "reports")).toBe(false);
+    expect(tierIncludes("plus", "reports")).toBe(true);
+    expect(tierIncludes("plus", "budget")).toBe(true);
+    expect(tierIncludes("plus", "bank")).toBe(false);
+    expect(tierIncludes("plus", "assistant")).toBe(false);
+    expect(tierIncludes("pro", "bank")).toBe(true);
+    expect(tierIncludes("pro", "reports")).toBe(true);
   });
 });
 
 describe("entitlements", () => {
-  it("grants Premium for active, trialing and past-due subscriptions only", () => {
+  it("grants a paid tier for active, trialing and past-due subscriptions only", () => {
     expect(statusGrantsPremium("active")).toBe(true);
     expect(statusGrantsPremium("trialing")).toBe(true);
     expect(statusGrantsPremium("past_due")).toBe(true);
@@ -46,9 +76,16 @@ describe("entitlements", () => {
   });
 
   it("keeps every feature open until billing is switched on", () => {
-    expect(hasPremiumAccess(false, "none")).toBe(true);
-    expect(hasPremiumAccess(true, "none")).toBe(false);
-    expect(hasPremiumAccess(true, "active")).toBe(true);
+    expect(effectiveTier(false, "none", null)).toBe("pro");
+  });
+
+  it("uses the subscribed tier while the subscription is good, free otherwise", () => {
+    expect(effectiveTier(true, "none", null)).toBe("free");
+    expect(effectiveTier(true, "active", "plus")).toBe("plus");
+    expect(effectiveTier(true, "trialing", "pro")).toBe("pro");
+    expect(effectiveTier(true, "canceled", "pro")).toBe("free");
+    // An active subscription to a price Verityio doesn't sell grants nothing.
+    expect(effectiveTier(true, "active", null)).toBe("free");
   });
 
   it("recognises Stripe's statuses and nothing else", () => {

@@ -3,7 +3,7 @@ import { z } from "zod";
 
 import { createClient } from "@/lib/supabase/server";
 import { requireUserContext } from "@/lib/data/context";
-import { getEntitlement } from "@/lib/data/subscription";
+import { hasFeature } from "@/lib/data/subscription";
 import { runAssistantTurn } from "@/lib/ai/chat";
 import { getI18n } from "@/lib/i18n/server";
 import { v, validationMessage } from "@/lib/i18n/validation";
@@ -18,7 +18,7 @@ export async function POST(request: Request) {
   if (!ctx) {
     return NextResponse.json({ error: m.errors.mustSignIn }, { status: 401 });
   }
-  if (!(await getEntitlement(ctx.userId)).premium) {
+  if (!(await hasFeature(ctx.userId, "assistant"))) {
     return NextResponse.json({ error: m.errors.premiumRequired }, { status: 403 });
   }
 

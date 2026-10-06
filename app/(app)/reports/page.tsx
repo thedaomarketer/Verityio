@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 import { Download, Lock } from "lucide-react";
 
 import { requireUserContext } from "@/lib/data/context";
-import { getEntitlement } from "@/lib/data/subscription";
+import { hasFeature } from "@/lib/data/subscription";
 import { getReportData, type ReportSearchParams } from "@/lib/data/reports";
 import {
   dollarsToCents,
@@ -45,7 +45,7 @@ const EXPENSE_CATEGORY_COLORS: Record<ExpenseCategory, string> = {
 export default async function ReportsPage({ searchParams }: { searchParams: Promise<ReportSearchParams> }) {
   const [params, ctx, { locale, intl, m }] = await Promise.all([searchParams, requireUserContext(), getI18n()]);
   if (!ctx) redirect("/login");
-  const { premium } = await getEntitlement(ctx.userId);
+  const premium = await hasFeature(ctx.userId, "reports");
 
   const fmtHours = (minutes: number) => formatMinutesAsHours(minutes, locale);
   const fmtCents = (cents: number) => formatCents(cents, ctx.currency, intl);
@@ -141,45 +141,42 @@ export default async function ReportsPage({ searchParams }: { searchParams: Prom
           })}
         </div>
 
-        {premium ? (
-          <form className="flex flex-wrap items-end gap-2" action="/reports">
-            <div className="space-y-1">
-              <label className="text-xs text-muted-foreground" htmlFor="start">
-                {m.reports.from}
-              </label>
-              <input
-                id="start"
-                name="start"
-                type="date"
-                defaultValue={startDate}
-                className="flex h-10 rounded-xl bg-card px-3 text-base shadow-[0_1px_2px_rgb(0_0_0/0.05)] outline-none focus-visible:ring-[3px] focus-visible:ring-ring/25 md:text-sm"
-              />
-            </div>
-            <div className="space-y-1">
-              <label className="text-xs text-muted-foreground" htmlFor="end">
-                {m.reports.to}
-              </label>
-              <input
-                id="end"
-                name="end"
-                type="date"
-                defaultValue={endDate}
-                className="flex h-10 rounded-xl bg-card px-3 text-base shadow-[0_1px_2px_rgb(0_0_0/0.05)] outline-none focus-visible:ring-[3px] focus-visible:ring-ring/25 md:text-sm"
-              />
-            </div>
-            <Button type="submit" variant="outline">
-              {m.reports.apply}
-            </Button>
-          </form>
-        ) : (
-          range.locked && (
-            <p className="rounded-2xl bg-secondary px-4 py-3 text-sm text-muted-foreground">
-              {m.reports.rangeLocked}{" "}
-              <Link href="/premium" className="font-semibold text-primary">
-                {m.premium.seePremium}
-              </Link>
-            </p>
-          )
+        <form className="grid grid-cols-2 items-end gap-2 sm:flex" action="/reports">
+          <div className="min-w-0 space-y-1">
+            <label className="text-xs text-muted-foreground" htmlFor="start">
+              {m.reports.from}
+            </label>
+            <input
+              id="start"
+              name="start"
+              type="date"
+              defaultValue={startDate}
+              className="flex h-11 w-full min-w-0 appearance-none rounded-xl bg-card px-3 text-base shadow-[0_1px_2px_rgb(0_0_0/0.05)] outline-none focus-visible:ring-[3px] focus-visible:ring-ring/25 sm:w-44 md:text-sm"
+            />
+          </div>
+          <div className="min-w-0 space-y-1">
+            <label className="text-xs text-muted-foreground" htmlFor="end">
+              {m.reports.to}
+            </label>
+            <input
+              id="end"
+              name="end"
+              type="date"
+              defaultValue={endDate}
+              className="flex h-11 w-full min-w-0 appearance-none rounded-xl bg-card px-3 text-base shadow-[0_1px_2px_rgb(0_0_0/0.05)] outline-none focus-visible:ring-[3px] focus-visible:ring-ring/25 sm:w-44 md:text-sm"
+            />
+          </div>
+          <Button type="submit" variant="outline" className="col-span-2 h-11">
+            {m.reports.apply}
+          </Button>
+        </form>
+        {range.locked && (
+          <p className="rounded-2xl bg-secondary px-4 py-3 text-sm text-muted-foreground">
+            {m.reports.rangeLocked}{" "}
+            <Link href="/premium" className="font-semibold text-primary">
+              {m.premium.seePlans}
+            </Link>
+          </p>
         )}
       </div>
 

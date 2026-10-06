@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
 import { createClient } from "@/lib/supabase/server";
@@ -18,9 +19,15 @@ import { getHolidayRegion, getRegionHolidays } from "@/lib/data/holidays";
 import { getI18n } from "@/lib/i18n/server";
 import { formatMinutesAsHours, formatTime } from "@/lib/format";
 import { MonthCalendar, type CalendarDay, type CalendarItem } from "@/components/calendar/month-calendar";
+import { CALENDAR_VIEW_COOKIE, parseCalendarView } from "@/lib/privacy";
 
 export default async function CalendarPage({ searchParams }: { searchParams: Promise<{ month?: string; day?: string }> }) {
-  const [params, ctx, { locale, intl, m }] = await Promise.all([searchParams, requireUserContext(), getI18n()]);
+  const [params, ctx, { locale, intl, m }, cookieStore] = await Promise.all([
+    searchParams,
+    requireUserContext(),
+    getI18n(),
+    cookies(),
+  ]);
   if (!ctx) redirect("/login");
 
   // `month` is a local "yyyy-mm"; its bounds are midnight on the 1st in the
@@ -171,6 +178,7 @@ export default async function CalendarPage({ searchParams }: { searchParams: Pro
         days={days}
         today={today}
         initialSelected={initialSelected}
+        initialView={parseCalendarView(cookieStore.get(CALENDAR_VIEW_COOKIE)?.value)}
         prevHref={`/calendar?month=${prevMonth}`}
         nextHref={`/calendar?month=${nextMonth}`}
         todayHref="/calendar"

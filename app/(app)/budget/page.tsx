@@ -2,7 +2,7 @@ import { redirect } from "next/navigation";
 import { CircleAlert, Info, Landmark, Lightbulb, ShieldCheck, TrendingDown, TrendingUp } from "lucide-react";
 
 import { requireUserContext } from "@/lib/data/context";
-import { getEntitlement } from "@/lib/data/subscription";
+import { hasFeature } from "@/lib/data/subscription";
 import { getBudgetData } from "@/lib/data/budget";
 import { isPlaidConfigured } from "@/lib/bank/plaid";
 import { getI18n } from "@/lib/i18n/server";
@@ -99,8 +99,7 @@ export default async function BudgetPage() {
     </div>
   );
 
-  const { premium } = await getEntitlement(ctx.userId);
-  if (!premium) {
+  if (!(await hasFeature(ctx.userId, "budget"))) {
     return (
       <div className="space-y-6">
         {heading}

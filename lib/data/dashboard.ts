@@ -1,7 +1,7 @@
 import "server-only";
 
 import { createClient } from "@/lib/supabase/server";
-import { requireUserContext } from "./context";
+import { getShellProfile, requireUserContext } from "./context";
 import { getActiveShift, getCompletedShiftsInRange, getUpcomingShifts } from "./shifts";
 import { getUpcomingPaydays } from "./tax";
 import { getHolidayRegion, getRegionHolidays } from "./holidays";
@@ -28,17 +28,11 @@ export async function getDashboardData() {
   const month = getLocalMonthBounds(now, ctx.timezone);
 
   const today = localDateString(now, ctx.timezone);
-  const [holidayRegion, { data: overtimeSettings }] = await Promise.all([
-    getHolidayRegion(supabase, ctx.userId),
-    supabase
-      .from("user_settings")
-      .select("overtime_enabled, overtime_threshold_minutes")
-      .eq("user_id", ctx.userId)
-      .maybeSingle(),
-  ]);
-
+  // Everything in one parallel round: the holidays chain off the region lookup
+  // inside the batch instead of holding up every other query.
   const [
-    { data: profile },
+    { data: overtimeSettings },
+    profile,
     { data: jobs },
     activeShift,
     rangeShifts,
@@ -47,7 +41,13 @@ export async function getDashboardData() {
     paydays,
     regionHolidays,
   ] = await Promise.all([
-      supabase.from("profiles").select("full_name").eq("id", ctx.userId).maybeSingle(),
+      supabase
+        .from("user_settings")
+        .select("overtime_enabled, overtime_threshold_minutes")
+        .eq("user_id", ctx.userId)
+        .maybeSingle(),
+      // Already loaded by the app layout in this request (cached).
+      getShellProfile(ctx.userId),
       supabase.from("jobs").select("*").eq("user_id", ctx.userId).eq("is_active", true),
       getActiveShift(ctx.userId),
       // One fetch covering both the month and the workweek -- a week can start in the previous month.
@@ -66,9 +66,9 @@ export async function getDashboardData() {
         .limit(5),
       getUpcomingPaydays(ctx.userId, ctx.timezone),
       // This year and next, so a window crossing New Year still works.
-      holidayRegion
-        ? getRegionHolidays(holidayRegion, [Number(today.slice(0, 4)), Number(today.slice(0, 4)) + 1])
-        : Promise.resolve([]),
+      getHolidayRegion(supabase, ctx.userId).then((holidayRegion) =>
+        holidayRegion ? getRegionHolidays(holidayRegion, [Number(today.slice(0, 4)), Number(today.slice(0, 4)) + 1]) : []
+      ),
     ]);
 
   const jobRates = jobRatesFrom(jobs ?? []);

@@ -5,7 +5,7 @@ import type { Database } from "./database.types";
 import { getSupabaseAnonKey, getSupabaseUrl } from "./env";
 
 // /api/cron authenticates itself with CRON_SECRET (it's called by the scheduler, never a browser).
-const PUBLIC_PATHS = ["/login", "/register", "/reset-password", "/update-password", "/auth", "/offline", "/api/cron", "/api/stripe/webhook"];
+const PUBLIC_PATHS = ["/login", "/register", "/pricing", "/reset-password", "/update-password", "/auth", "/offline", "/api/cron", "/api/stripe/webhook"];
 
 function isPublicPath(pathname: string): boolean {
   return PUBLIC_PATHS.some((path) => pathname === path || pathname.startsWith(`${path}/`));
@@ -36,9 +36,11 @@ export async function updateSession(request: NextRequest) {
     },
   });
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  // getClaims() refreshes an expiring session (writing the new cookies above)
+  // and verifies the JWT locally against the project's signing keys, so a
+  // navigation doesn't wait on an Auth server round trip like getUser() did.
+  const { data } = await supabase.auth.getClaims();
+  const user = data?.claims?.sub ? data.claims : null;
 
   const { pathname } = request.nextUrl;
 

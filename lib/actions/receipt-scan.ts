@@ -5,7 +5,7 @@ import { betaZodOutputFormat } from "@anthropic-ai/sdk/helpers/beta/zod";
 
 import { createClient } from "@/lib/supabase/server";
 import { getI18n } from "@/lib/i18n/server";
-import { getEntitlement } from "@/lib/data/subscription";
+import { hasFeature } from "@/lib/data/subscription";
 import { requireUserContext } from "@/lib/data/context";
 import { getAnthropicClient } from "@/lib/ai/client";
 import { isAssistantConfigured } from "@/lib/ai/env";
@@ -46,7 +46,7 @@ export async function scanReceiptAction(formData: FormData): Promise<ReceiptScan
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) return { error: m.errors.mustSignIn };
-  if (!(await getEntitlement(user.id)).premium) return { error: m.errors.premiumRequired };
+  if (!(await hasFeature(user.id, "receiptScan"))) return { error: m.errors.premiumRequired };
 
   const file = formData.get("file");
   if (!(file instanceof File) || file.size === 0 || file.size > MAX_SCAN_BYTES) return { error: m.uploads.scanFailed };

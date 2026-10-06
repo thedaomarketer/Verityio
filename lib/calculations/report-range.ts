@@ -1,12 +1,17 @@
 import { addDaysToDateString, addMonthsToMonthString, isDateString } from "./local-time";
 
 /**
- * The Reports page's date range, as inclusive local calendar dates. Free
- * plans get the short presets; longer presets and custom ranges are Premium.
+ * The Reports page's date range, as inclusive local calendar dates. Every
+ * plan can pick any dates; the free plan covers up to three months at a
+ * time (longer ranges are Plus) so anyone can still pull up any pay period,
+ * month or quarter of their own records.
  */
 export const REPORT_PRESETS = ["week", "month", "lastMonth", "last3Months", "year"] as const;
 export type ReportPreset = (typeof REPORT_PRESETS)[number];
-export const FREE_REPORT_PRESETS: readonly ReportPreset[] = ["week", "month", "lastMonth"];
+export const FREE_REPORT_PRESETS: readonly ReportPreset[] = ["week", "month", "lastMonth", "last3Months"];
+
+/** Longest free range: three calendar months is at most 92 days, i.e. 91 days after the start. */
+export const FREE_RANGE_MAX_DAYS = 91;
 
 /** Longest custom range, so one request can't ask for decades of shifts. */
 export const MAX_CUSTOM_RANGE_DAYS = 731;
@@ -15,7 +20,7 @@ export interface ReportRange {
   start: string;
   end: string;
   preset: ReportPreset | "custom";
-  /** True when the request asked for a Premium range and got the default instead. */
+  /** True when the request asked for a longer range than the plan includes and got a shorter one. */
   locked: boolean;
 }
 
@@ -57,14 +62,22 @@ export function resolveReportRange(
   const fallback = (locked: boolean): ReportRange => ({ ...presetRange("month", today, weekStart), preset: "month", locked });
 
   if (params.start && params.end && isDateString(params.start) && isDateString(params.end)) {
-    if (!premium) return fallback(true);
     const [start, end] = params.start <= params.end ? [params.start, params.end] : [params.end, params.start];
-    const cappedEnd = daysBetween(start, end) > MAX_CUSTOM_RANGE_DAYS ? addDaysToDateString(start, MAX_CUSTOM_RANGE_DAYS) : end;
-    return { start, end: cappedEnd, preset: "custom", locked: false };
+    const maxDays = premium ? MAX_CUSTOM_RANGE_DAYS : FREE_RANGE_MAX_DAYS;
+    const tooLong = daysBetween(start, end) > maxDays;
+    return {
+      start,
+      end: tooLong ? addDaysToDateString(start, maxDays) : end,
+      preset: "custom",
+      // Only the free plan's limit is an upsell; Plus's cap just guards the server.
+      locked: tooLong && !premium,
+    };
   }
 
   if (isReportPreset(params.range)) {
-    if (!premium && !FREE_REPORT_PRESETS.includes(params.range)) return fallback(true);
+    if (!premium && !FREE_REPORT_PRESETS.includes(params.range)) {
+      return { ...presetRange("last3Months", today, weekStart), preset: "last3Months", locked: true };
+    }
     return { ...presetRange(params.range, today, weekStart), preset: params.range, locked: false };
   }
 

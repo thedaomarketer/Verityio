@@ -3,7 +3,7 @@ import { notFound, redirect } from "next/navigation";
 import { ChevronLeft, Paperclip } from "lucide-react";
 
 import { requireUserContext } from "@/lib/data/context";
-import { getEntitlement } from "@/lib/data/subscription";
+import { hasFeature } from "@/lib/data/subscription";
 import { getReportData, type ReportSearchParams } from "@/lib/data/reports";
 import {
   calculateShiftDuration,
@@ -56,7 +56,7 @@ export default async function ReportBreakdownPage({
   const [{ metric }, query, ctx, { locale, intl, m }] = await Promise.all([params, searchParams, requireUserContext(), getI18n()]);
   if (!ctx) redirect("/login");
   if (!isMetric(metric)) notFound();
-  const { premium } = await getEntitlement(ctx.userId);
+  const premium = await hasFeature(ctx.userId, "reports");
   const data = await getReportData(ctx, query, premium);
 
   const hours = (minutes: number) => formatMinutesAsHours(minutes, locale);

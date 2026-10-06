@@ -4,7 +4,7 @@ import { requireUserContext } from "@/lib/data/context";
 import { dollarsToCents, formatCents, localMonthString } from "@/lib/calculations";
 import { getI18n } from "@/lib/i18n/server";
 import { isAssistantConfigured } from "@/lib/ai/env";
-import { getEntitlement } from "@/lib/data/subscription";
+import { hasFeature } from "@/lib/data/subscription";
 import type { ExpenseCategory } from "@/lib/supabase/database.types";
 import { CreateExpenseDialog } from "@/components/expenses/create-expense-dialog";
 import { ExpensesList } from "@/components/expenses/expenses-list";
@@ -30,7 +30,7 @@ export default async function ExpensesPage() {
   ]);
 
   // Receipt scanning reads photos with Claude: Premium, and only once the AI key is configured.
-  const canScan = isAssistantConfigured() && (await getEntitlement(ctx.userId)).premium;
+  const canScan = isAssistantConfigured() && (await hasFeature(ctx.userId, "receiptScan"));
 
   let monthTotalCents = 0;
   const byCategory = new Map<ExpenseCategory, number>();

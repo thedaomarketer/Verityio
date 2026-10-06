@@ -41,9 +41,10 @@ Status as of this build. See `docs/current-state.md` for the detailed
   No push notifications yet.
 - **Deployed**: live on Vercel at https://verityio.vercel.app.
 
-- **Premium**: Stripe subscriptions ($2.99/month, $29.99/year) gating bank
-  connections, budget insights, the AI assistant and advanced reports --
-  dormant until a Verityio Stripe account's keys are added.
+- **Plans**: Free, Plus ($4.99/month, $39.99/year) and Pro ($9.99/month,
+  $79.99/year) on Stripe, with a 7-day first-time trial, a public pricing
+  page and a billing portal. Pro opens once bank linking or the AI
+  assistant is live. Rationale in `docs/pricing.md`.
 - **Budget and bank connections**: Plaid-linked accounts, spending by
   category and over time, insights tied to hours worked, 50/30/20 plan.
 - **Reports**: presets, pie and line charts, Save as PDF.
@@ -76,8 +77,9 @@ for polish):
    entries), wired to the existing private bucket + signed URLs.
 5. **P0** — Apply migrations 23 (subscriptions) and 24 (bank connections)
    to the live database and run the advisors.
-6. **P1** — Switch on Premium (Stripe keys + webhook) and bank connections
-   (Plaid keys, encryption key, Plaid production approval).
+6. **P1** — Open Pro: bank connections (encryption key, Plaid production
+   approval) and/or the AI assistant (`ANTHROPIC_API_KEY` plus a fair-use
+   cap). Stripe billing is live.
 7. **P2** — Plaid webhooks and update-mode re-login; a yearly tax summary.
 7. **P3** — Push notifications (shift/clock-in/clock-out/break reminders,
    weekly summary, payday reminders) — `user_settings.notifications_enabled`

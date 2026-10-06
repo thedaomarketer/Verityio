@@ -176,36 +176,45 @@ exercise the authenticated app directly.
   opened on another device reports "email confirmed, sign in" instead of an
   error.
 
-- **Verityio Premium** (`/premium`, Stripe): $2.99/month or $29.99/year
-  (16% off; prices in `lib/billing/plans.ts`, integer cents). Checkout and
-  the billing portal are Stripe-hosted; Premium is granted only by the
-  signed webhook (`app/api/stripe/webhook`), which re-reads the
-  subscription from Stripe and writes `subscriptions` with the service-role
-  client. The product and prices are created on the first checkout by
-  lookup key, so setup is just the keys. Premium covers bank connections,
-  budget insights, the AI assistant, and advanced reports (pie/line charts,
-  longer and custom ranges, PDF/CSV export). **Until Stripe is configured,
-  gating is off and every feature is open** (`hasPremiumAccess`); everything
-  else -- tracking, pay/tax estimates, expenses, mileage, journal, the full
-  data export -- is always free.
-- **Budget** (`/budget`, Premium): spending this month vs. last month at the
+- **Plans: Free, Plus and Pro** (`/pricing` public, `/premium` in the app,
+  Stripe; see `docs/pricing.md` for the research and unit economics).
+  Plus is $4.99/month or $39.99/year; Pro is $9.99/month or $79.99/year
+  (prices in `lib/billing/plans.ts`, integer cents). Plus: reports over
+  3 months (up to 2 years), pie/line charts, PDF/CSV exports, budget
+  insights, receipt scanning. Pro adds bank connections and the AI
+  assistant, and **can't be bought until one of those is live**
+  (`isProAvailable()`); until then its card says "Coming soon". A first
+  subscription gets a 7-day free trial (card collected by Checkout).
+  Checkout and the billing portal are Stripe-hosted; the portal (payment
+  method, invoices, billing details, switching tier, cancel at period end)
+  uses a configuration Verityio creates through the API. Tiers are granted
+  only by the signed webhook, which re-reads the subscription from Stripe
+  and stores the tier from the price's lookup key (`plan_tier`). Products,
+  prices and the portal configuration are created on first use, so setup
+  is just the keys. **Until Stripe is configured, gating is off and every
+  feature is open** (`effectiveTier`); tracking, pay/tax estimates,
+  expenses, mileage, the journal, reports up to 3 months and the full data
+  export are always free. Settings has a "Plan and billing" card with the
+  current plan and Manage billing.
+- **Budget** (`/budget`, Plus): spending this month vs. last month at the
   same point, by category (pie) and over time (line), measured against the
   user's own earnings and hours: what they kept, how many hours of work
   their spending equals, the biggest and fastest-changing categories, the
   month-end pace, and a 50/30/20 suggested budget from estimated earnings.
   All derived in `lib/calculations/budget.ts` (pure, integer cents). Uses
   linked bank transactions when there are any, otherwise recorded expenses.
-- **Bank connections** (Plaid Link, Premium): read-only; US and Canadian
+- **Bank connections** (Plaid Link, Pro): read-only; US and Canadian
   banks. Access tokens are AES-256-GCM encrypted with
   `BANK_TOKEN_ENCRYPTION_KEY` and stored in a table no user can read.
   Transactions sync on connect, on "Refresh", and every six hours via the
   existing 15-minute scheduler. Disconnecting (or deleting the account)
   revokes the item at Plaid.
-- **Reports**: range presets (this week/month, last month; last 3 months,
-  this year and custom ranges with Premium), six summary tiles (adds average
-  per hour), an earnings-by-week line chart, pie charts for hours by job and
-  expenses by category (bar charts on the free plan), Save as PDF (print
-  stylesheet) and CSV exports for Premium.
+- **Reports**: range presets (this week/month, last month, last 3 months;
+  this year with Plus) and a From/To date picker on every plan -- the free
+  plan covers any dates up to 3 months apart, Plus up to 2 years. Six
+  summary tiles (adds average per hour), an earnings-by-week line chart,
+  pie charts for hours by job and expenses by category (bar charts on the
+  free plan), Save as PDF (print stylesheet) and CSV exports with Plus.
 - **Look and feel**: a dark "hero" card leads the dashboard (this week's
   estimated earnings, hours, overtime, today), glossy app icon, softer
   layered card shadows, a faint blue page wash. The AI assistant is a
@@ -273,7 +282,17 @@ exercise the authenticated app directly.
   goes through this engine; the pay-period card shows "of which double
   time". Overtime law varies -- the presets are starting points, not
   legal advice.
-- **Receipt scanning** (Premium, needs `ANTHROPIC_API_KEY`): "Scan a
+- **Calendar** no longer flashes Compact before switching to the saved
+  view (the choice is a cookie the server reads, `wl-calendar-view`), the
+  arrows prefetch the neighbouring months so switching is instant, and a
+  calendar-shaped loading screen replaced the dashboard-shaped one.
+- **Speed**: the proxy verifies sessions with `getClaims()` (local JWT
+  check against the project's keys) instead of an Auth round trip per
+  request; the layout and page share one cached auth check and profile
+  read per request (`lib/data/context.ts`); the dashboard runs all its
+  queries in one parallel batch; the Supabase browser client is loaded
+  only when a photo is uploaded.
+- **Receipt scanning** (Plus, needs `ANTHROPIC_API_KEY`): "Scan a
   receipt" at the top of Add expense downsizes the photo in the browser,
   sends it (or a PDF, up to 3 MB) to `scanReceiptAction`, which asks Claude
   for structured output (merchant, total, currency, date, category) and
@@ -285,11 +304,11 @@ exercise the authenticated app directly.
 
 ## What's stubbed or missing
 
-- **Migration 25 (daily overtime) is applied**; the advisors flag nothing
-  new.
+- **Migrations 25 (daily overtime) and 26 (plan tiers) are applied**; the
+  advisors flag nothing new.
 - **Migrations 23 and 24 are applied** (October 6): `subscriptions` and the
   `bank_*` tables exist with RLS on. Verified as an authenticated user:
-  inserting a Premium subscription or a bank transaction is rejected
+  inserting a paid subscription or a bank transaction is rejected
   (42501), and `bank_item_secrets` / other users' subscriptions return no
   rows. Advisors: `bank_item_secrets` "RLS enabled, no policy" is
   intentional (service-role only); "leaked password protection disabled" is
@@ -314,12 +333,12 @@ exercise the authenticated app directly.
   Run `npm run dev` with `.env.local` filled in from a network that can
   reach `*.supabase.co` to do a real browser pass.
 - **Teams/business features**: not started (Phase 9 in the original spec).
-- **Premium in production**: needs a Verityio Stripe account's
-  `STRIPE_SECRET_KEY` (exactly that name -- environment variable names are
-  case-sensitive) and a webhook endpoint's `STRIPE_WEBHOOK_SECRET` in
-  Vercel. Prices are USD only.
+- **Billing in production**: `STRIPE_SECRET_KEY` and
+  `STRIPE_WEBHOOK_SECRET` are set in Vercel (October 6), so paid tiers are
+  enforced. Prices are USD only; no Stripe Tax yet.
 - **Rate limiting**: the assistant chat and receipt scanning are
-  Premium-gated but not rate limited yet.
+  plan-gated but not rate limited yet (the AI needs a fair-use cap before
+  Pro opens; see `docs/pricing.md`).
 - **AI Assistant**: non-streaming (shows a "Thinking..." indicator, not
   token-by-token output), no conversation switcher (only the most recent
   conversation is resumed), and no rate limiting on the chat endpoint yet.
@@ -367,11 +386,11 @@ exercise the authenticated app directly.
   `docs/security.md`).
 - `NEXT_PUBLIC_ONESIGNAL_APP_ID` is set (OneSignal app
   `023dc5b1-…`; the worker in `public/push/onesignal/` matches OneSignal's
-  v16 download). `ANTHROPIC_API_KEY`, `ONESIGNAL_REST_API_KEY`, the Stripe keys and `BANK_TOKEN_ENCRYPTION_KEY`
-  are **not** (the Plaid sandbox keys `PLAID_CLIENT_ID`/`PLAID_SECRET`/`PLAID_ENV`
-  are set; bank connections stay off until the encryption key is added too)
-  yet set: the AI Assistant, push notifications, Premium checkout and bank
-  connections show "not switched on yet" until they are.
+  v16 download), and so are `ONESIGNAL_REST_API_KEY` and the Stripe keys.
+  `ANTHROPIC_API_KEY` and `BANK_TOKEN_ENCRYPTION_KEY` are **not** yet set
+  (the Plaid sandbox keys `PLAID_CLIENT_ID`/`PLAID_SECRET`/`PLAID_ENV` are),
+  so the AI assistant, receipt scanning and bank connections show "not
+  switched on yet", and Pro shows "Coming soon".
 
 ## Name
 

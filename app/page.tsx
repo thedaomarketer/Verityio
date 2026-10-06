@@ -21,14 +21,12 @@ import { createClient } from "@/lib/supabase/server";
 import { getI18n } from "@/lib/i18n/server";
 import type { Messages } from "@/lib/i18n/messages/en";
 import { Button } from "@/components/ui/button";
-import { LanguageSwitcher } from "@/components/language-switcher";
 import { LiveDemo } from "@/components/landing/live-demo";
 import { PayEstimator } from "@/components/landing/pay-estimator";
 import { Reveal } from "@/components/landing/reveal";
 import { safeRedirectPath } from "@/lib/safe-redirect";
-import { APP_NAME } from "@/lib/brand";
 import { BrandMark } from "@/components/brand-mark";
-import { BrandCredit } from "@/components/brand-credit";
+import { SiteFooter, SiteHeader } from "@/components/landing/site-chrome";
 
 export async function generateMetadata(): Promise<Metadata> {
   const { m } = await getI18n();
@@ -78,23 +76,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ n
         className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-[640px] bg-[radial-gradient(60%_50%_at_20%_0%,rgb(0_113_227/0.14),transparent),radial-gradient(50%_45%_at_85%_10%,rgb(137_68_171/0.12),transparent)]"
       />
 
-      <header className="glass sticky top-0 z-30 border-b border-black/[0.06] pt-[env(safe-area-inset-top)]">
-        <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-4 sm:px-6">
-          <Link href="/" className="flex items-center gap-2 text-[17px] font-semibold tracking-tight">
-            <BrandMark className="size-7" />
-            {APP_NAME}
-          </Link>
-          <nav className="flex items-center gap-1 sm:gap-2">
-            <LanguageSwitcher className="max-sm:hidden" />
-            <Button asChild variant="ghost" size="sm">
-              <Link href={signInHref}>{t.signIn}</Link>
-            </Button>
-            <Button asChild size="sm">
-              <Link href="/register">{t.getStarted}</Link>
-            </Button>
-          </nav>
-        </div>
-      </header>
+      <SiteHeader signInHref={signInHref} />
 
       <main className="flex-1">
         <section className="mx-auto grid max-w-6xl items-center gap-14 px-4 pt-12 pb-16 sm:px-6 md:pt-20 lg:grid-cols-[1.1fr_1fr] lg:gap-8 lg:pb-24">
@@ -188,23 +170,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ n
         </section>
       </main>
 
-      <footer className="border-t border-black/[0.06] pb-[env(safe-area-inset-bottom)]">
-        <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-3 px-4 py-6 text-sm text-muted-foreground sm:flex-row sm:px-6">
-          <div className="space-y-1 text-center sm:text-left">
-            <p>&copy; {new Date().getFullYear()} {APP_NAME}</p>
-            <BrandCredit />
-          </div>
-          <div className="flex items-center gap-5">
-            <LanguageSwitcher className="sm:hidden" />
-            <Link href="/login" className="hover:text-foreground">
-              {t.signIn}
-            </Link>
-            <Link href="/register" className="hover:text-foreground">
-              {t.createAccountLink}
-            </Link>
-          </div>
-        </div>
-      </footer>
+      <SiteFooter />
     </div>
   );
 }

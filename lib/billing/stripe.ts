@@ -3,7 +3,7 @@ import "server-only";
 import { z } from "zod";
 
 import { stripeFormEncode, type FormValue } from "./form-encode";
-import { PLANS, PREMIUM_CURRENCY, PREMIUM_PRODUCT_ID, type PlanId } from "./plans";
+import { PRICES, PREMIUM_CURRENCY, TIER_PRODUCTS, TRIAL_DAYS, tierForLookupKey, type BillingInterval, type PaidTier } from "./plans";
 import { isSubscriptionStatus, type SubscriptionStatus } from "./entitlements";
 
 /**
@@ -11,7 +11,7 @@ import { isSubscriptionStatus, type SubscriptionStatus } from "./entitlements";
  * - STRIPE_SECRET_KEY: the account's secret (or restricted) key. Server-only.
  * - STRIPE_WEBHOOK_SECRET: the webhook endpoint's signing secret (whsec_...).
  * Without both, billing is "not switched on": the Premium page says so and
- * every Premium feature stays open (see `hasPremiumAccess`).
+ * every paid feature stays open (see `effectiveTier`).
  */
 
 const STRIPE_API = "https://api.stripe.com/v1";
@@ -86,7 +86,10 @@ const subscriptionSchema = z.object({
     data: z.array(
       z.object({
         current_period_end: z.number().nullish(),
-        price: z.object({ recurring: z.object({ interval: z.string() }).nullish() }),
+        price: z.object({
+          lookup_key: z.string().nullish(),
+          recurring: z.object({ interval: z.string() }).nullish(),
+        }),
       })
     ),
   }),
@@ -96,7 +99,9 @@ export interface StripeSubscription {
   id: string;
   customerId: string;
   status: SubscriptionStatus;
-  interval: "month" | "year" | null;
+  interval: BillingInterval | null;
+  /** The Verityio tier of the subscribed price; null for a price Verityio doesn't sell. */
+  tier: PaidTier | null;
   currentPeriodEnd: Date | null;
   cancelAtPeriodEnd: boolean;
   userId: string | null;
@@ -111,6 +116,7 @@ function toSubscription(raw: z.infer<typeof subscriptionSchema>): StripeSubscrip
     customerId: typeof raw.customer === "string" ? raw.customer : raw.customer.id,
     status: isSubscriptionStatus(raw.status) ? raw.status : "none",
     interval: interval === "month" || interval === "year" ? interval : null,
+    tier: tierForLookupKey(item?.price.lookup_key),
     currentPeriodEnd: periodEnd ? new Date(periodEnd * 1000) : null,
     cancelAtPeriodEnd: raw.cancel_at_period_end,
     userId: raw.metadata.user_id ?? null,
@@ -131,20 +137,21 @@ export function parseSubscription(raw: unknown): StripeSubscription | null {
   return parsed.success ? toSubscription(parsed.data) : null;
 }
 
-const priceCache = new Map<PlanId, string>();
+const priceCache = new Map<string, string>();
 
 /**
- * The Stripe price for a plan, found by lookup key -- or, on a brand-new
- * Stripe account, created along with the "Verityio Premium" product, so the
+ * The Stripe price for a tier and interval, found by lookup key -- or, on a
+ * brand-new Stripe account, created along with the tier's product, so the
  * only setup is adding the keys.
  */
-async function getPriceId(planId: PlanId): Promise<string> {
-  const cached = priceCache.get(planId);
+async function getPriceId(tier: PaidTier, interval: BillingInterval): Promise<string> {
+  const price = PRICES[tier][interval];
+  const cached = priceCache.get(price.lookupKey);
   if (cached) return cached;
-  const plan = PLANS[planId];
+  const product = TIER_PRODUCTS[tier];
 
   const existing = await stripeRequest("GET", "/prices", priceListSchema, {
-    lookup_keys: [plan.lookupKey],
+    lookup_keys: [price.lookupKey],
     active: true,
     limit: 1,
   });
@@ -152,15 +159,15 @@ async function getPriceId(planId: PlanId): Promise<string> {
 
   if (!priceId) {
     try {
-      await stripeRequest("GET", `/products/${PREMIUM_PRODUCT_ID}`, idSchema);
+      await stripeRequest("GET", `/products/${product.productId}`, idSchema);
     } catch (error) {
       if (!(error instanceof StripeError) || error.status !== 404) throw error;
       await stripeRequest(
         "POST",
         "/products",
         idSchema,
-        { id: PREMIUM_PRODUCT_ID, name: "Verityio Premium" },
-        `product-${PREMIUM_PRODUCT_ID}`
+        { id: product.productId, name: product.name },
+        `product-${product.productId}`
       );
     }
     const created = await stripeRequest(
@@ -168,31 +175,34 @@ async function getPriceId(planId: PlanId): Promise<string> {
       "/prices",
       idSchema,
       {
-        product: PREMIUM_PRODUCT_ID,
+        product: product.productId,
         currency: PREMIUM_CURRENCY,
-        unit_amount: plan.amountCents,
-        recurring: { interval: plan.interval },
-        lookup_key: plan.lookupKey,
+        unit_amount: price.amountCents,
+        recurring: { interval: price.interval },
+        lookup_key: price.lookupKey,
       },
-      `price-${plan.lookupKey}`
+      `price-${price.lookupKey}`
     );
     priceId = created.id;
   }
 
-  priceCache.set(planId, priceId);
+  priceCache.set(price.lookupKey, priceId);
   return priceId;
 }
 
 export async function createCheckoutSession(input: {
-  planId: PlanId;
+  tier: PaidTier;
+  interval: BillingInterval;
   userId: string;
   email: string | null;
   customerId: string | null;
+  /** First subscription only: starts with a free trial. */
+  trial: boolean;
   successUrl: string;
   cancelUrl: string;
   locale: string;
 }): Promise<string> {
-  const price = await getPriceId(input.planId);
+  const price = await getPriceId(input.tier, input.interval);
   const session = await stripeRequest("POST", "/checkout/sessions", urlSchema, {
     mode: "subscription",
     line_items: [{ price, quantity: 1 }],
@@ -201,18 +211,90 @@ export async function createCheckoutSession(input: {
     client_reference_id: input.userId,
     customer: input.customerId ?? undefined,
     customer_email: input.customerId ? undefined : (input.email ?? undefined),
-    subscription_data: { metadata: { user_id: input.userId } },
+    // Always save a payment method, even during a free trial, so the plan simply continues afterwards.
+    payment_method_collection: "always",
+    subscription_data: {
+      metadata: { user_id: input.userId },
+      trial_period_days: input.trial ? TRIAL_DAYS : undefined,
+    },
     allow_promotion_codes: true,
     locale: input.locale,
   });
   return session.url;
 }
 
-export async function createPortalSession(customerId: string, returnUrl: string, locale: string): Promise<string> {
+const portalConfigListSchema = z.object({
+  data: z.array(z.object({ id: z.string(), active: z.boolean(), metadata: z.record(z.string(), z.string()).nullish() })),
+});
+const portalConfigIds = new Map<string, string>();
+
+/**
+ * Verityio's own billing-portal configuration: update the payment method,
+ * see and download invoices, update billing details, switch between the
+ * tiers on sale (prorated), and cancel at the end of the paid period.
+ * Created through the API the first time, so the portal works without
+ * anyone setting it up in the Stripe dashboard (Stripe refuses portal
+ * sessions in live mode until a configuration exists). One configuration
+ * per set of tiers on sale, so Pro joins the switcher once it opens.
+ */
+async function getPortalConfigurationId(tiers: readonly PaidTier[]): Promise<string> {
+  const key = tiers.join(",");
+  const cached = portalConfigIds.get(key);
+  if (cached) return cached;
+
+  const existing = await stripeRequest("GET", "/billing_portal/configurations", portalConfigListSchema, {
+    active: true,
+    limit: 100,
+  });
+  let id = existing.data.find((config) => config.metadata?.app === "verityio" && config.metadata?.tiers === key)?.id;
+  if (!id) {
+    const products = await Promise.all(
+      tiers.map(async (tier) => ({
+        product: TIER_PRODUCTS[tier].productId,
+        prices: await Promise.all([getPriceId(tier, "month"), getPriceId(tier, "year")]),
+      }))
+    );
+    id = (
+      await stripeRequest(
+        "POST",
+        "/billing_portal/configurations",
+        idSchema,
+        {
+          business_profile: { headline: "Manage your Verityio plan and payment method" },
+          features: {
+            payment_method_update: { enabled: true },
+            invoice_history: { enabled: true },
+            customer_update: { enabled: true, allowed_updates: ["email", "address"] },
+            subscription_cancel: { enabled: true, mode: "at_period_end" },
+            subscription_update: {
+              enabled: true,
+              default_allowed_updates: ["price"],
+              proration_behavior: "create_prorations",
+              products,
+            },
+          },
+          metadata: { app: "verityio", tiers: key },
+        },
+        `portal-config-verityio-v1-${key}`
+      )
+    ).id;
+  }
+  portalConfigIds.set(key, id);
+  return id;
+}
+
+export async function createPortalSession(input: {
+  customerId: string;
+  returnUrl: string;
+  locale: string;
+  /** Tiers a subscriber may switch between in the portal. */
+  tiers: readonly PaidTier[];
+}): Promise<string> {
   const session = await stripeRequest("POST", "/billing_portal/sessions", urlSchema, {
-    customer: customerId,
-    return_url: returnUrl,
-    locale,
+    customer: input.customerId,
+    configuration: await getPortalConfigurationId(input.tiers),
+    return_url: input.returnUrl,
+    locale: input.locale,
   });
   return session.url;
 }

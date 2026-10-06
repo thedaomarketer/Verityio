@@ -1,7 +1,7 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
-import { createClient } from "@/lib/supabase/server";
+import { getAuthUser, getShellProfile } from "@/lib/data/context";
 import { SidebarNav } from "@/components/app-shell/sidebar-nav";
 import { MobileNav } from "@/components/app-shell/mobile-nav";
 import { Header } from "@/components/app-shell/header";
@@ -12,22 +12,14 @@ import { HIDE_AMOUNTS_COOKIE, parseHideAmounts } from "@/lib/privacy";
 import { AmountsVisibilityProvider } from "@/components/privacy/amounts-visibility";
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
+  // Shared with the page through React's per-request cache: one auth check and one profile read per request.
+  const user = await getAuthUser();
   if (!user) {
     redirect("/login");
   }
 
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("full_name, email, timezone, avatar_url")
-    .eq("id", user.id)
-    .maybeSingle();
-
-  const hideAmounts = parseHideAmounts((await cookies()).get(HIDE_AMOUNTS_COOKIE)?.value);
+  const [profile, cookieStore] = await Promise.all([getShellProfile(user.id), cookies()]);
+  const hideAmounts = parseHideAmounts(cookieStore.get(HIDE_AMOUNTS_COOKIE)?.value);
 
   return (
     <AmountsVisibilityProvider initialHidden={hideAmounts}>

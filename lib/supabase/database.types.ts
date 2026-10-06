@@ -328,6 +328,7 @@ export interface Database {
           stripe_subscription_id: string | null;
           status: string;
           plan_interval: "month" | "year" | null;
+          plan_tier: "plus" | "pro" | null;
           current_period_end: string | null;
           cancel_at_period_end: boolean;
           created_at: string;

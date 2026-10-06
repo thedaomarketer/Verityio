@@ -92,19 +92,27 @@ once the upload UI exists.
 - `STRIPE_SECRET_KEY` and `STRIPE_WEBHOOK_SECRET` are server-only and read
   only in `lib/billing/stripe.ts` (`server-only`). No Stripe SDK; plain
   `fetch` with a 10s timeout.
-- Premium is granted **only** by the webhook. It verifies the
+- Paid tiers are granted **only** by the webhook. It verifies the
   `Stripe-Signature` header (HMAC-SHA256 over the raw body, constant-time
   compare, 5-minute replay window -- `lib/billing/stripe-signature.ts`,
   unit-tested with valid, tampered, wrong-secret and stale cases) before
   parsing anything, then re-reads the subscription from Stripe rather than
   trusting the event snapshot. Returning to the success URL grants nothing.
-- The checkout form only says "monthly" or "yearly"; amounts come from the
-  server's `PLANS`. `subscriptions` has no user write policies.
+- The checkout form only names a tier and an interval; amounts come from
+  the server's `PRICES`, Pro is refused server-side until it's available,
+  and the tier is read back from the subscribed price's lookup key (a price
+  Verityio doesn't sell grants nothing). `subscriptions` has no user write
+  policies.
 - Billing is off until both keys are set, and while it's off nothing is
-  locked (`hasPremiumAccess`), so a misconfiguration can't strand users.
+  locked (`effectiveTier`), so a misconfiguration can't strand users.
   Once on, an unreadable subscription row fails closed (free).
-- Premium checks run server-side on every gated surface: the assistant API,
-  the CSV export routes, the bank actions, and the pages themselves.
+- Plan checks (`hasFeature`) run server-side on every gated surface: the
+  assistant API, receipt scanning, the CSV export routes, the bank actions,
+  and the pages themselves.
+- Sessions are verified with Supabase `getClaims()` (JWT signature checked
+  against the project's published keys, or by the Auth server for a
+  legacy shared-secret project); every query still runs under RLS with the
+  same token.
 
 ## Bank connections (Plaid)
 
@@ -116,9 +124,9 @@ once the upload UI exists.
   (32 random bytes, env only), stored in `bank_item_secrets`, which has RLS
   enabled and no policies. Decrypted only in server code, never logged.
   Rotating the key makes stored tokens unreadable (banks must reconnect).
-- Every bank action verifies the session, Premium and configuration;
+- Every bank action verifies the session, the Pro plan and configuration;
   disconnect proves ownership by reading the item through RLS and is
-  allowed even after Premium ends.
+  allowed even after the plan ends.
 - Disconnecting, and account deletion, call Plaid `/item/remove` so access
   is revoked at the source, then delete the rows (cascade).
 

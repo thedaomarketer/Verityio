@@ -5,7 +5,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { isDateString } from "@/lib/calculations";
 import { getI18n } from "@/lib/i18n/server";
-import { getEntitlement } from "@/lib/data/subscription";
+import { hasFeature } from "@/lib/data/subscription";
 
 export async function GET(request: NextRequest) {
   const { m } = await getI18n();
@@ -14,7 +14,7 @@ export async function GET(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: m.errors.mustSignIn }, { status: 401 });
-  if (!(await getEntitlement(user.id)).premium) {
+  if (!(await hasFeature(user.id, "reports"))) {
     return NextResponse.json({ error: m.errors.premiumRequired }, { status: 403 });
   }
 

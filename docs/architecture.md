@@ -246,14 +246,28 @@ dataviz rules: one y-axis, 2px lines, 10% area wash for a single series,
 crosshair tooltip listing every series, legends with values and percents,
 and a screen-reader table.
 
-## Premium and billing
+## Plans and billing
 
-`lib/billing/` holds the plan prices (`plans.ts`), the entitlement rules
-(`entitlements.ts`), Stripe's form encoding and webhook signature check
-(pure, tested), and a small fetch-based Stripe client (`stripe.ts`).
-`lib/data/subscription.ts#getEntitlement` (cached per request) is what
-pages, API routes and actions ask. Gated UI renders
-`components/premium/premium-upsell.tsx`.
+`lib/billing/` holds the tiers, prices and which tier each feature needs
+(`plans.ts`), the entitlement rules (`entitlements.ts#effectiveTier`),
+whether Pro can be sold yet (`availability.ts`), Stripe's form encoding
+and webhook signature check (pure, tested), and a small fetch-based Stripe
+client (`stripe.ts`: prices by lookup key, Checkout with the first-time
+trial, and the billing-portal configuration). Pages, API routes and
+actions ask `lib/data/subscription.ts#hasFeature(userId, feature)` (backed
+by `getEntitlement`, cached per request). Gated UI renders
+`components/premium/premium-upsell.tsx`; the pricing cards, comparison and
+FAQ are `components/pricing/`, shared by the public `/pricing` page and
+the in-app `/premium` page. Pricing rationale: `docs/pricing.md`.
+
+## Request path and caching
+
+Each request runs the proxy (`proxy.ts` → `lib/supabase/middleware.ts`),
+which refreshes the session cookie and verifies it with `getClaims()`.
+Server components then call `getAuthUser()` / `requireUserContext()` /
+`getShellProfile()` from `lib/data/context.ts`, all wrapped in React
+`cache`, so the layout and page share one auth check and one profile read.
+Data loaders batch independent queries in a single `Promise.all`.
 
 ## Bank connections and budget
 

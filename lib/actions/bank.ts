@@ -6,7 +6,7 @@ import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getI18n } from "@/lib/i18n/server";
-import { getEntitlement } from "@/lib/data/subscription";
+import { hasFeature } from "@/lib/data/subscription";
 import { createLinkToken, exchangePublicToken, getBankEncryptionKey, isPlaidConfigured } from "@/lib/bank/plaid";
 import { encryptToken } from "@/lib/bank/token-crypto";
 import { syncBankItem } from "@/lib/bank/sync";
@@ -27,7 +27,7 @@ async function authorize(): Promise<{ userId: string } | { error: string }> {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) return { error: m.errors.mustSignIn };
-  if (!(await getEntitlement(user.id)).premium) return { error: m.errors.premiumRequired };
+  if (!(await hasFeature(user.id, "bank"))) return { error: m.errors.premiumRequired };
   return { userId: user.id };
 }
 

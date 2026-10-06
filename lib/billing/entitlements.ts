@@ -1,3 +1,5 @@
+import type { PaidTier, Tier } from "./plans";
+
 /**
  * Who gets Premium, as pure rules. A subscription counts while Stripe says
  * it's active or trialing; `past_due` keeps access through Stripe's retry
@@ -32,10 +34,17 @@ export function statusGrantsPremium(status: SubscriptionStatus | null | undefine
 }
 
 /**
- * Premium gating only applies once billing is switched on. Before that
- * (no Stripe keys), every feature stays open -- the app must never lock
- * people out of something they can't pay for.
+ * The tier whose features a user can use right now. Gating only applies
+ * once billing is switched on: before that (no Stripe keys) everything is
+ * open -- the app must never lock people out of something they can't pay
+ * for. A subscription that has lapsed, or whose price Verityio doesn't
+ * recognise, counts as free.
  */
-export function hasPremiumAccess(billingEnabled: boolean, status: SubscriptionStatus | null | undefined): boolean {
-  return !billingEnabled || statusGrantsPremium(status);
+export function effectiveTier(
+  billingEnabled: boolean,
+  status: SubscriptionStatus | null | undefined,
+  tier: PaidTier | null | undefined
+): Tier {
+  if (!billingEnabled) return "pro";
+  return statusGrantsPremium(status) && tier ? tier : "free";
 }

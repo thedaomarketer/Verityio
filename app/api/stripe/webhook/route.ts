@@ -47,6 +47,7 @@ async function saveSubscription(subscription: StripeSubscription, fallbackUserId
       stripe_subscription_id: subscription.id,
       status: subscription.status,
       plan_interval: subscription.interval,
+      plan_tier: subscription.tier,
       current_period_end: subscription.currentPeriodEnd?.toISOString() ?? null,
       cancel_at_period_end: subscription.cancelAtPeriodEnd,
     },
@@ -56,7 +57,7 @@ async function saveSubscription(subscription: StripeSubscription, fallbackUserId
 }
 
 /**
- * Stripe webhook: the only way Premium is ever granted. The signature is
+ * Stripe webhook: the only way a paid tier is ever granted. The signature is
  * checked against the raw body before anything is parsed; subscription
  * state is then re-read from Stripe (never trusted from the event
  * snapshot, which can arrive out of order) and written with the service-role client.

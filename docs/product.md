@@ -34,14 +34,18 @@ complete, working product.
 - Calendar (month view of worked + scheduled time)
 - Settings (profile, preferences, data export, account deletion)
 
-## Premium ($2.99/month or $29.99/year)
+## Plans (see `docs/pricing.md`)
 
-- Bank connections (Plaid, read-only) and the Budget page: spending by
-  category and over time, measured against hours worked, with insights and
-  a suggested 50/30/20 budget
-- AI assistant
-- Advanced reports: pie and line charts, longer and custom ranges, PDF and
-  CSV exports
+- **Free**: everything needed to record work, plus reports for any period
+  up to 3 months.
+- **Plus** ($4.99/month or $39.99/year): reports up to 2 years, pie and
+  line charts, PDF and CSV exports, the Budget page (spending by category
+  and over time, measured against hours worked, with insights and a
+  suggested 50/30/20 budget), and receipt scanning.
+- **Pro** ($9.99/month or $79.99/year): everything in Plus, bank
+  connections (Plaid, read-only) and the AI assistant. Shown as "Coming
+  soon" until one of those is live.
+- First subscription: 7-day free trial.
 
 Always free: time tracking, breaks, jobs, pay and tax estimates, expenses,
 mileage, the journal, and a full export of your data. Every estimate is
@@ -66,7 +70,7 @@ for exactly what's implemented today.
 Mobile bottom nav: Dashboard, Time, **+** (create carousel), Reports, More.
 
 Desktop sidebar: Dashboard, Time, Calendar, Jobs, Journal, Expenses,
-Mileage, Budget, Reports, Pay & Taxes, Resources — then Premium, Settings,
+Mileage, Budget, Reports, Pay & Taxes, Resources — then Plans, Settings,
 Help. The AI assistant is the sparkle icon in the header on every screen.
 
 See `components/app-shell/nav-items.ts` for the single source of truth
