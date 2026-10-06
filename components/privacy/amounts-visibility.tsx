@@ -35,6 +35,11 @@ function useAmountsVisibility(): AmountsVisibility {
   return useContext(AmountsVisibilityContext) ?? { hidden: false, toggle: () => {} };
 }
 
+/** Whether "Hide balances" is on -- for inputs and other places `Amount` can't wrap. */
+export function useAmountsHidden(): boolean {
+  return useAmountsVisibility().hidden;
+}
+
 /** A money figure that respects "Hide balances". Pass the already-formatted string. */
 export function Amount({ value, className }: { value: string; className?: string }) {
   const { hidden } = useAmountsVisibility();

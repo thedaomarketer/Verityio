@@ -12,6 +12,7 @@ import { TaxSettingsForm } from "@/components/taxes/tax-settings-form";
 import { PaydayCard } from "@/components/taxes/payday-card";
 import { PayStatementCard } from "@/components/taxes/pay-statement-card";
 import { TaxBreakdownCard } from "@/components/taxes/tax-breakdown-card";
+import { AmountsToggle } from "@/components/privacy/amounts-visibility";
 
 export default async function TaxesPage() {
   const [ctx, { m }] = await Promise.all([requireUserContext(), getI18n()]);
@@ -37,9 +38,13 @@ export default async function TaxesPage() {
 
   return (
     <div className="max-w-2xl space-y-6">
-      <div>
-        <h1 className="text-[28px] leading-tight font-bold tracking-tight md:text-3xl">{m.taxes.title}</h1>
-        <p className="text-sm text-muted-foreground">{m.taxes.subtitle}</p>
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <h1 className="text-[28px] leading-tight font-bold tracking-tight md:text-3xl">{m.taxes.title}</h1>
+          <p className="text-sm text-muted-foreground">{m.taxes.subtitle}</p>
+        </div>
+        {/* Hides every pay and tax amount on this page (and everywhere else balances are masked). */}
+        <AmountsToggle className="-mr-2 shrink-0" />
       </div>
 
       <PaydayCard paydays={paydays} timezone={ctx.timezone} holidays={paydayHolidays} />

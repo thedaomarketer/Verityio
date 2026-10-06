@@ -12,6 +12,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
+import { Amount, useAmountsHidden } from "@/components/privacy/amounts-visibility";
 
 export function TaxBreakdownCard({
   jurisdiction,
@@ -26,6 +27,7 @@ export function TaxBreakdownCard({
 }) {
   const { intl, m } = useI18n();
   const money = (cents: number) => formatCents(cents, currency, intl);
+  const amountsHidden = useAmountsHidden();
   const [annualIncomeDollars, setAnnualIncomeDollars] = useState(() =>
     centsToDollars(estimatedAnnualIncomeCents).toFixed(0)
   );
@@ -47,7 +49,10 @@ export function TaxBreakdownCard({
           <Label htmlFor="annualIncome">{m.taxes.annualIncome}</Label>
           <Input
             id="annualIncome"
-            type="number"
+            // Masked like a password while balances are hidden; still editable.
+            type={amountsHidden ? "password" : "number"}
+            inputMode="numeric"
+            autoComplete="off"
             min={0}
             step="1"
             value={annualIncomeDollars}
@@ -64,7 +69,7 @@ export function TaxBreakdownCard({
           {[...result.incomeTaxLines, ...result.payrollDeductionLines].map((line) => (
             <div key={line.kind} className="flex justify-between">
               <span className="text-muted-foreground">{taxLineLabel(line, m)}</span>
-              <span>{money(line.amountCents)}</span>
+              <Amount value={money(line.amountCents)} />
             </div>
           ))}
         </div>
@@ -74,11 +79,11 @@ export function TaxBreakdownCard({
         <div className="space-y-1.5">
           <div className="flex justify-between text-sm font-medium">
             <span>{m.taxes.totalDeductions}</span>
-            <span>{money(result.totalDeductionsCents)}</span>
+            <Amount value={money(result.totalDeductionsCents)} />
           </div>
           <div className="flex justify-between text-sm font-medium">
             <span>{m.taxes.netIncome}</span>
-            <span>{money(result.netAnnualIncomeCents)}</span>
+            <Amount value={money(result.netAnnualIncomeCents)} />
           </div>
           <div className="flex justify-between text-xs text-muted-foreground">
             <span>{m.taxes.effectiveRate}</span>

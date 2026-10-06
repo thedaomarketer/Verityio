@@ -9,6 +9,7 @@ import { fmt } from "@/lib/i18n/config";
 import { getI18n } from "@/lib/i18n/server";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+import { Amount } from "@/components/privacy/amounts-visibility";
 
 export async function PayStatementCard({
   statements,
@@ -128,17 +129,17 @@ async function PeriodBlock({
           )}
           <div className="flex justify-between font-medium">
             <span>{m.taxes.grossPay}{suffix}</span>
-            <span>{money(figures.grossEarningsCents)}</span>
+            <Amount value={money(figures.grossEarningsCents)} />
           </div>
           {estimate ? (
             <>
               <div className="flex justify-between">
                 <span className="text-muted-foreground">{m.taxes.estDeductions}</span>
-                <span>−{money(estimate.periodDeductionsCents)}</span>
+                <Amount value={`−${money(estimate.periodDeductionsCents)}`} />
               </div>
               <div className="flex justify-between font-medium">
                 <span>{m.taxes.estNetPay}</span>
-                <span>{money(estimate.periodNetCents)}</span>
+                <Amount value={money(estimate.periodNetCents)} />
               </div>
             </>
           ) : (

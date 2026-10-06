@@ -261,8 +261,10 @@ exercise the authenticated app directly.
 - **Expenses list** is now a phone-friendly list (with receipt and delete
   buttons per row) instead of a six-column table.
 - **Hide balances**: an eye button on the dashboard's week card, the
-  Budget page and the bank accounts card masks money figures (week
-  earnings, spent/earned/kept, bank balances, transaction amounts) as
+  Budget page, the bank accounts card and the Pay & taxes header masks
+  money figures (week earnings, spent/earned/kept, bank balances,
+  transaction amounts, gross/deductions/net pay, the tax breakdown, and
+  the annual income box, which turns into a masked field) as
   "••••••". Remembered per device in the `wl-hide-amounts` cookie
   (`lib/privacy.ts`), read by the app layout so pages render already
   masked. A screen-privacy convenience, not a security control.
