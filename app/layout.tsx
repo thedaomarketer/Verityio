@@ -7,6 +7,7 @@ import { RegisterServiceWorker } from "@/components/pwa/register-sw";
 import { getI18n } from "@/lib/i18n/server";
 import { I18nProvider } from "@/lib/i18n/client";
 import { APP_NAME } from "@/lib/brand";
+import { Analytics } from "@vercel/analytics/next";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -60,6 +61,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           <Toaster position="top-center" />
           <RegisterServiceWorker />
         </I18nProvider>
+        <Analytics />
       </body>
     </html>
   );
