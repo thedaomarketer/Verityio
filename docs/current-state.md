@@ -299,6 +299,12 @@ exercise the authenticated app directly.
   (with whole-dollar labels) instead of widening the page, and the app's
   main area clips any horizontal overflow; the calendar's month name has
   its own line so the toolbar can't cover it.
+- **Photo uploads fixed**: profile photos and receipt photos never reached
+  storage in production. The browser's Supabase client read its URL and key
+  with a dynamic `process.env[name]` lookup, which Next.js can't inline into
+  browser code, so it threw before uploading -- silently. `lib/supabase/env.ts`
+  now reads each `NEXT_PUBLIC_` variable by name (guarded by a test), and
+  upload failures always show an error.
 - **Calendar** no longer flashes Compact before switching to the saved
   view (the choice is a cookie the server reads, `wl-calendar-view`), the
   arrows prefetch the neighbouring months so switching is instant, and a

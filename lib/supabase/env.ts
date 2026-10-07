@@ -1,5 +1,4 @@
-function requireEnv(name: string): string {
-  const value = process.env[name];
+function required(name: string, value: string | undefined): string {
   if (!value) {
     throw new Error(
       `Missing required environment variable: ${name}. Copy .env.example to .env.local and fill in your Supabase project's values.`
@@ -8,12 +7,18 @@ function requireEnv(name: string): string {
   return value;
 }
 
+// Each NEXT_PUBLIC_ variable is read by its literal name: Next.js only
+// inlines `process.env.NEXT_PUBLIC_X` into browser code when it's written out
+// like this. A dynamic lookup (`process.env[name]`) is undefined in the
+// browser, which silently broke every browser-side Supabase call (photo and
+// receipt uploads) while the server side kept working.
+
 export function getSupabaseUrl(): string {
-  return requireEnv("NEXT_PUBLIC_SUPABASE_URL");
+  return required("NEXT_PUBLIC_SUPABASE_URL", process.env.NEXT_PUBLIC_SUPABASE_URL);
 }
 
 export function getSupabaseAnonKey(): string {
-  return requireEnv("NEXT_PUBLIC_SUPABASE_ANON_KEY");
+  return required("NEXT_PUBLIC_SUPABASE_ANON_KEY", process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY);
 }
 
 /**

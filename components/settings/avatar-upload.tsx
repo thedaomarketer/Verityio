@@ -65,6 +65,9 @@ export function AvatarUpload({
       setPreview(URL.createObjectURL(blob));
       toast.success(m.uploads.photoUpdated);
       startTransition(() => router.refresh());
+    } catch {
+      // Never fail silently (a dropped connection, an unreadable photo).
+      toast.error(m.errors.uploadFailed);
     } finally {
       setBusy(false);
       if (input.current) input.current.value = "";
