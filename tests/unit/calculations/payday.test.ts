@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   getCurrentPayPeriod,
+  getLastPaycheque,
   getNextPaycheque,
   getNextPayday,
   getPayPeriod,
@@ -170,5 +171,34 @@ describe("paycheques with a lag between period end and payday", () => {
   it("handles a weekly schedule paid the same day the period ends (lag 0)", () => {
     const next = getNextPaycheque("2026-10-02", "weekly", TORONTO, 0, new Date("2026-10-06T12:00:00-04:00"));
     expect([day(next.start), lastDay(next.end), day(next.payday)]).toEqual(["2026-10-03", "2026-10-09", "2026-10-09"]);
+  });
+});
+
+describe("getLastPaycheque", () => {
+  const TORONTO = "America/Toronto";
+  const ANCHOR = "2026-09-24"; // biweekly, period ends 4 days before payday
+  const day = (date: Date) => localDateString(date, TORONTO);
+  const lastDay = (end: Date) => day(new Date(end.getTime() - 1));
+
+  it("returns the paycheque just received, for checking against the pay stub", () => {
+    const friday = new Date("2026-11-20T12:00:00-05:00");
+    const last = getLastPaycheque(ANCHOR, "biweekly", TORONTO, 4, friday)!;
+    expect([day(last.start), lastDay(last.end), day(last.payday)]).toEqual(["2026-11-02", "2026-11-15", "2026-11-19"]);
+    // ...while the next paycheque covers the period still being worked.
+    const next = getNextPaycheque(ANCHOR, "biweekly", TORONTO, 4, friday);
+    expect([day(next.start), day(next.payday)]).toEqual(["2026-11-16", "2026-12-03"]);
+  });
+
+  it("is null on payday itself, when the next paycheque is today's", () => {
+    expect(getLastPaycheque(ANCHOR, "biweekly", TORONTO, 4, new Date("2026-11-19T09:00:00-05:00"))).toBeNull();
+  });
+
+  it("is null before the schedule's first payday", () => {
+    expect(getLastPaycheque(ANCHOR, "biweekly", TORONTO, 4, new Date("2026-09-20T12:00:00-04:00"))).toBeNull();
+  });
+
+  it("works with the default lag", () => {
+    const last = getLastPaycheque(ANCHOR, "biweekly", TORONTO, undefined, new Date("2026-10-10T12:00:00-04:00"))!;
+    expect([day(last.start), lastDay(last.end), day(last.payday)]).toEqual(["2026-09-24", "2026-10-07", "2026-10-08"]);
   });
 });

@@ -390,6 +390,8 @@ export const es: Messages = {
     noPaydays: "Agrega una frecuencia de pago y una fecha de pago conocida a un trabajo para ver aquí tu próximo pago.",
     currentPayPeriod: "Periodos de pago",
     nextPaycheque: "Próximo pago",
+    lastPaycheque: "Último pago",
+    stubNote: "El pago bruto son tus horas registradas × tu tarifa. Tu recibo de pago también puede incluir pago de vacaciones, días festivos, propinas u otros ajustes.",
     thisPeriod: "Periodo de pago actual",
     paidOn: "Se paga el {date}",
     soFar: "hasta ahora",

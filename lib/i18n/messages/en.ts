@@ -392,6 +392,8 @@ export const en = {
     noPaydays: "Add a pay frequency and a known pay date to a job to see your next payday here.",
     currentPayPeriod: "Pay periods",
     nextPaycheque: "Next paycheque",
+    lastPaycheque: "Last paycheque",
+    stubNote: "Gross pay is your recorded hours × your rate. Your pay stub may also include vacation pay, holiday pay, tips or other adjustments.",
     thisPeriod: "This pay period",
     paidOn: "Paid {date}",
     soFar: "so far",

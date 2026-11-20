@@ -389,6 +389,8 @@ export const fr: Messages = {
     noPaydays: "Ajoutez une fréquence de paie et une date de paie connue à un emploi pour voir votre prochaine paie ici.",
     currentPayPeriod: "Périodes de paie",
     nextPaycheque: "Prochaine paie",
+    lastPaycheque: "Dernière paie",
+    stubNote: "La paie brute correspond à vos heures enregistrées × votre taux. Votre talon de paie peut aussi inclure la paie de vacances, les jours fériés, les pourboires ou d'autres ajustements.",
     thisPeriod: "Période de paie en cours",
     paidOn: "Payée le {date}",
     soFar: "jusqu\u2019ici",

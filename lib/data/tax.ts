@@ -6,8 +6,10 @@ import {
   DEFAULT_PAY_LAG_DAYS,
   getCurrentPayPeriod,
   getNextPaycheque,
+  getLastPaycheque,
   getNextPayday,
   getWorkweekBounds,
+  type PaidPeriod,
   payPeriodsPerYear,
   summarizeRangeByJob,
   sumJobSummaries,
@@ -105,6 +107,8 @@ export interface PeriodFigures {
   /** The part of overtimeMinutes paid at the double-time rate. */
   doubleTimeMinutes: number;
   grossEarningsCents: number;
+  /** The period hasn't ended yet: its figures are "so far". */
+  inProgress: boolean;
 }
 
 export interface PayPeriodStatement {
@@ -113,6 +117,8 @@ export interface PayPeriodStatement {
   color: string;
   frequency: PayFrequency;
   periodsPerYear: number;
+  /** The most recent paycheque already paid (null on payday itself, or before the first one). */
+  last: PeriodFigures | null;
   /** The next paycheque (today's, on payday) and the period it pays for. */
   paycheque: PeriodFigures;
   /** The period being worked now, when it isn't the one the next paycheque covers. */
@@ -120,9 +126,9 @@ export interface PayPeriodStatement {
 }
 
 /**
- * Pay-stub-style figures for every active job with a pay schedule: the next
- * paycheque and, when the employer pays a few days after a period closes,
- * the period being worked now. Hours and gross pay are always the
+ * Pay-stub-style figures for every active job with a pay schedule: the last
+ * paycheque (to check against the pay stub), the next one, and -- when the
+ * employer pays a few days after a period closes -- the period being worked now. Hours and gross pay are always the
  * recorded/calculated figures from lib/calculations, never fabricated.
  */
 export async function getPayPeriodStatements(
@@ -148,9 +154,13 @@ export async function getPayPeriodStatements(
       const lag = job.pay_lag_days ?? DEFAULT_PAY_LAG_DAYS;
       const next = getNextPaycheque(job.pay_anchor_date!, frequency, timezone, lag, now);
       const working = getCurrentPayPeriod(job.pay_anchor_date!, frequency, timezone, lag, now);
-      const periods = working.start.getTime() === next.start.getTime() ? [next] : [next, working];
+      const previous = getLastPaycheque(job.pay_anchor_date!, frequency, timezone, lag, now);
 
-      // One fetch for both periods. Overtime is weekly: start at the workweek
+      const periods = [previous, next, working.start.getTime() === next.start.getTime() ? null : working].filter(
+        (period): period is PaidPeriod => period !== null
+      );
+
+      // One fetch for every period. Overtime is weekly: start at the workweek
       // the first period begins in, so hours just before it count toward its threshold.
       const contextStart = getWorkweekBounds(periods[0].start, timezone, weekStartsOn).start;
       const fetchEnd = periods[periods.length - 1].end;
@@ -170,6 +180,7 @@ export async function getPayPeriodStatements(
           overtimeMinutes: summary?.overtimeMinutes ?? 0,
           doubleTimeMinutes: summary?.doubleTimeMinutes ?? 0,
           grossEarningsCents: summary?.earningsCents ?? 0,
+          inProgress: period.end > now,
         };
       };
 
@@ -179,8 +190,9 @@ export async function getPayPeriodStatements(
         color: job.color,
         frequency,
         periodsPerYear: payPeriodsPerYear(frequency),
+        last: previous ? figures(previous) : null,
         paycheque: figures(next),
-        current: periods.length > 1 ? figures(working) : null,
+        current: working.start.getTime() === next.start.getTime() ? null : figures(working),
       };
     })
   );

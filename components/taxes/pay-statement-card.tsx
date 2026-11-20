@@ -42,27 +42,42 @@ export async function PayStatementCard({
                   <span className="size-2.5 shrink-0 rounded-full" style={{ backgroundColor: statement.color }} />
                   <span className="truncate text-sm font-medium">{statement.jobName}</span>
                 </div>
-                <PeriodBlock
-                  title={m.taxes.nextPaycheque}
-                  figures={statement.paycheque}
-                  estimateFor={jurisdiction ? { jurisdiction, periodsPerYear: statement.periodsPerYear } : null}
-                  timezone={timezone}
-                  currency={currency}
-                />
-                {statement.current && (
-                  <div className="mt-4 rounded-2xl bg-secondary/60 p-3">
+                <div className="space-y-4">
+                  {statement.last && (
                     <PeriodBlock
-                      title={m.taxes.thisPeriod}
-                      figures={statement.current}
-                      estimateFor={null}
-                      soFar
+                      title={m.taxes.lastPaycheque}
+                      figures={statement.last}
+                      estimateFor={jurisdiction ? { jurisdiction, periodsPerYear: statement.periodsPerYear } : null}
+                      timezone={timezone}
+                      currency={currency}
+                    />
+                  )}
+                  <div className={statement.last ? "rounded-2xl bg-secondary/60 p-3" : undefined}>
+                    <PeriodBlock
+                      title={m.taxes.nextPaycheque}
+                      figures={statement.paycheque}
+                      estimateFor={jurisdiction ? { jurisdiction, periodsPerYear: statement.periodsPerYear } : null}
+                      soFar={statement.paycheque.inProgress}
                       timezone={timezone}
                       currency={currency}
                     />
                   </div>
-                )}
+                  {statement.current && (
+                    <div className="rounded-2xl bg-secondary/60 p-3">
+                      <PeriodBlock
+                        title={m.taxes.thisPeriod}
+                        figures={statement.current}
+                        estimateFor={null}
+                        soFar
+                        timezone={timezone}
+                        currency={currency}
+                      />
+                    </div>
+                  )}
+                </div>
               </div>
             ))}
+            <p className="text-xs text-muted-foreground">{m.taxes.stubNote}</p>
           </div>
         )}
       </CardContent>
@@ -91,7 +106,7 @@ async function PeriodBlock({
   const date = (value: Date) => formatShortDate(value, timezone, intl);
   const money = (cents: number) => formatCents(cents, currency, intl);
   const isEmpty = figures.start.getTime() === figures.end.getTime();
-  const estimate = estimateFor && !isEmpty
+  const estimate = estimateFor && !isEmpty && !soFar
     ? estimateTaxForPeriod(figures.grossEarningsCents, estimateFor.periodsPerYear, estimateFor.jurisdiction)
     : null;
   const suffix = soFar ? ` (${m.taxes.soFar})` : "";

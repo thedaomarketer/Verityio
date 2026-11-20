@@ -73,7 +73,12 @@ export function PushCard({
         toast.success(t.enabled);
       } catch (error) {
         console.error(error);
-        toast.error(m.errors.pushSaveFailed);
+        // Show the underlying reason (e.g. OneSignal's "Can only be used on ..."
+        // when its Site URL doesn't match this site) so it can be fixed.
+        toast.error(m.errors.pushSaveFailed, {
+          description: error instanceof Error ? error.message : String(error),
+          duration: 10000,
+        });
       }
     });
   }

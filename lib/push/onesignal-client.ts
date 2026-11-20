@@ -47,8 +47,9 @@ export function loadOneSignal(appId: string): Promise<OneSignalApi> {
       try {
         await oneSignal.init({
           appId,
-          serviceWorkerPath: "push/onesignal/OneSignalSDKWorker.js",
-          serviceWorkerParam: { scope: "/push/onesignal/" },
+          // The same root worker the app registers for offline use (it imports sw.js).
+          serviceWorkerPath: "OneSignalSDKWorker.js",
+          serviceWorkerParam: { scope: "/" },
           allowLocalhostAsSecureOrigin: true,
           // Verityio shows its own "turn on" button; no OneSignal prompts.
           promptOptions: { slidedown: { prompts: [] } },

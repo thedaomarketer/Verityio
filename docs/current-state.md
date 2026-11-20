@@ -299,6 +299,20 @@ exercise the authenticated app directly.
   (with whole-dollar labels) instead of widening the page, and the app's
   main area clips any horizontal overflow; the calendar's month name has
   its own line so the toolbar can't cover it.
+- **Pay & taxes shows the last paycheque** (`getLastPaycheque`): the
+  paycheque just received, with its period, hours, gross and estimated net,
+  to check against the pay stub; the next paycheque below it is labelled
+  "so far" (no net estimate) while its period is still being worked. A note
+  explains that a stub may also include vacation pay, holiday pay or tips.
+- **Notifications**: the app now has a single root service worker,
+  `public/OneSignalSDKWorker.js`, which imports OneSignal's worker and the
+  offline shell (`sw.js`). OneSignal's dashboard ("Typical Site") setup looks
+  for that file at the root, which previously 404'd, so no device could
+  subscribe; one worker at `/` also suits iPhone home-screen apps. A failed
+  "turn on" now shows the underlying reason. OneSignal's Site URL must be
+  `https://verityio.vercel.app`.
+- **Avatar** is served from `/api/avatar` with a year-long private cache
+  keyed by its storage path, instead of a fresh signed URL on every page.
 - **Photo uploads fixed**: profile photos and receipt photos never reached
   storage in production. The browser's Supabase client read its URL and key
   with a dynamic `process.env[name]` lookup, which Next.js can't inline into

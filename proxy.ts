@@ -45,6 +45,6 @@ export const config = {
      *   worker files the browser fetches unauthenticated, and which must
      *   never redirect to /login)
      */
-    "/((?!_next/static|_next/image|favicon.ico|manifest.webmanifest|sw.js|push/|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
+    "/((?!_next/static|_next/image|favicon.ico|manifest.webmanifest|sw.js|OneSignalSDKWorker.js|push/|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
   ],
 };

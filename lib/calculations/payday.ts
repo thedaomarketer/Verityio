@@ -203,6 +203,26 @@ export function getCurrentPayPeriod(
   return withLag(getPayPeriod(anchorDate, frequency, timezone, payFrom), lagDays, timezone);
 }
 
+/**
+ * The most recent paycheque already paid before `from` -- what a pay stub in
+ * hand covers. Null on payday itself (the next paycheque is today's) and
+ * before the schedule's first payday.
+ */
+export function getLastPaycheque(
+  anchorDate: Date | string,
+  frequency: PayFrequency,
+  timezone: string,
+  lagDays: number = DEFAULT_PAY_LAG_DAYS,
+  from: Date = new Date()
+): PaidPeriod | null {
+  const next = getNextPaycheque(anchorDate, frequency, timezone, lagDays, from);
+  if (next.payday.getTime() === localMidnight(from, timezone).getTime()) return null;
+  // The previous period ends where next's starts, so it's paid `lagDays - 1` days after next's start.
+  const previousPayday = addDays(next.start, lagDays - DEFAULT_PAY_LAG_DAYS, timezone);
+  const previous = getNextPaycheque(anchorDate, frequency, timezone, lagDays, previousPayday);
+  return previous.payday < next.payday && previous.start < previous.end ? previous : null;
+}
+
 /** Days between a known pay period's last day and its payday, from two calendar dates (YYYY-MM-DD). */
 export function payLagDaysFrom(payday: string, periodLastDay: string): number {
   return Math.round((Date.parse(`${payday}T00:00:00Z`) - Date.parse(`${periodLastDay}T00:00:00Z`)) / 86_400_000);
